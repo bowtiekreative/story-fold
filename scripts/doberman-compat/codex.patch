@@ -1,0 +1,16 @@
+--- a/src/doberman/hosthooks/codex.py
++++ b/src/doberman/hosthooks/codex.py
+@@ -99,7 +99,12 @@
+     if tool_name == "Bash":
+         return "bash", args
+     if tool_name == "apply_patch":
+-        paths = _apply_patch_paths(args.get("command"))
++        patch = args.pop("command", None)
++        # The host calls this field command, but it contains file edit data.
++        # Keep it available to secret scanning without treating it as a shell.
++        # Preserve any additional content supplied by the host as scan data.
++        args["content"] = {"patch": patch, "extra": args.get("content")}
++        paths = _apply_patch_paths(patch)
+         if paths:
+             # A list under "path" makes ProtectedPathRule evaluate EVERY touched
+             # file and take the worst verdict (a multi-file patch touching one

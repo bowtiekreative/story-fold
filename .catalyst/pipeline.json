@@ -1,8 +1,8 @@
 {
   "name": "Storyfold",
   "milestone": "Production hardening - Doberman repair required",
-  "updatedAt": "2026-10-15T17:20:51Z",
-  "message": "Durable project saves and the Catalyst review lock are improved; typecheck, lint and 17 tests pass. Five browser flows and media smoke passed before these fixes. Doberman is rejecting the hosted-access and compiled-runtime patches; a compatibility repair needs human review. Production is unfinished.",
+  "updatedAt": "2026-10-15T17:54:13Z",
+  "message": "Doberman compatibility patch prepared as requested: 19 isolated checks and a zero-fuzz dry run passed. Review docs/DOBERMAN.md for the one terminal command to apply it. The installed guard remains unchanged, and production edits await the repair. Storage and Catalyst reliability fixes are committed.",
   "tasks": [
     {
       "id": "foundation",
@@ -78,14 +78,16 @@
     },
     {
       "id": "doberman-hooks",
-      "title": "Trust Doberman in a new Codex session",
-      "acceptance": "User-wide scope is authorized and installed; configuration and supported IDE Codex checks pass. In a new supported Codex session, review/trust doberman hook codex-pre via /hooks, then confirm a harmless allow/deny fixture in the host. No trust bypass.",
-      "lane": "Next",
+      "title": "Apply the verified Doberman compatibility repair",
+      "acceptance": "Review the prepared patch and 19 isolated checks; apply it from a regular terminal, then verify a harmless edit through the actual host hook. Security policy and hook trust remain enabled. Preparation is complete; installation and host verification are pending.",
+      "lane": "Now",
       "status": "review",
       "evidence": [
         "docs/DOBERMAN.md",
         "docs/validation/doberman-smoke.json",
-        "docs/validation/doberman-configuration.json"
+        "docs/validation/doberman-configuration.json",
+        "scripts/doberman-compat/codex.patch",
+        "docs/validation/doberman-compatibility.json"
       ]
     },
     {

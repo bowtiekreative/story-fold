@@ -1,0 +1,127 @@
+{
+  "version": "0.18.7",
+  "at": "2026-10-15T17:52:50.619179+00:00",
+  "passed": true,
+  "checks": [
+    {
+      "check": "reproduce original false positive",
+      "verdict": "AUTH",
+      "reasons": [
+        "opaque_command"
+      ]
+    },
+    {
+      "check": "same source comment / light",
+      "verdict": "PASS",
+      "reasons": []
+    },
+    {
+      "check": "same source comment / balanced",
+      "verdict": "PASS",
+      "reasons": []
+    },
+    {
+      "check": "same source comment / strict",
+      "verdict": "PASS",
+      "reasons": []
+    },
+    {
+      "check": "same source comment / paranoid",
+      "verdict": "PASS",
+      "reasons": []
+    },
+    {
+      "check": "lossless translation and unmodified input",
+      "verdict": "PASS"
+    },
+    {
+      "check": "protected path",
+      "verdict": "BLOCK",
+      "reasons": [
+        "sensitive_secret_access",
+        "protected_path_blocked"
+      ]
+    },
+    {
+      "check": "repository escape",
+      "verdict": "BLOCK",
+      "reasons": [
+        "protected_path_blocked"
+      ]
+    },
+    {
+      "check": "symlink escape",
+      "verdict": "BLOCK",
+      "reasons": [
+        "protected_path_blocked"
+      ]
+    },
+    {
+      "check": "sensitive pipeline",
+      "verdict": "AUTH",
+      "reasons": [
+        "sensitive_path_access"
+      ]
+    },
+    {
+      "check": "all batch paths",
+      "verdict": "BLOCK",
+      "reasons": [
+        "protected_path_blocked"
+      ]
+    },
+    {
+      "check": "move destination",
+      "verdict": "BLOCK",
+      "reasons": [
+        "protected_path_blocked"
+      ]
+    },
+    {
+      "check": "secret patch content",
+      "verdict": "AUTH",
+      "reasons": [
+        "sensitive_secret_access"
+      ]
+    },
+    {
+      "check": "additional secret content",
+      "verdict": "AUTH",
+      "reasons": [
+        "sensitive_secret_access"
+      ]
+    },
+    {
+      "check": "additional command field",
+      "verdict": "BLOCK",
+      "reasons": [
+        "destructive_command"
+      ]
+    },
+    {
+      "check": "ordinary shell unchanged",
+      "verdict": "PASS",
+      "reasons": []
+    },
+    {
+      "check": "destructive shell unchanged",
+      "verdict": "BLOCK",
+      "reasons": [
+        "destructive_command"
+      ]
+    },
+    {
+      "check": "missing and malformed targets still fail closed",
+      "verdict": "PASS"
+    },
+    {
+      "check": "other tools unchanged",
+      "verdict": "PASS"
+    }
+  ],
+  "original_sha256": "ccf75369f686332a5a2598425c3133255b2b48383e27bf3bcffa794baa2f4127",
+  "candidate_sha256": "8da5673c5533d742aaee1cac46540739bf047869687c12ffa40d95c0148be595",
+  "live_guard_changed": false,
+  "fixture_commands_executed": false,
+  "scope": "In-memory adapter candidate and built-in objective rules. Live policy, correlator, approval and hook execution paths are unchanged and not mocked as verified."
+}
