@@ -112,6 +112,7 @@ source files and has not been verified in Final Cut Pro.
 
 Ponytail is installed as a Codex skill and was used for this build. Its upstream
 is [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail).
-Doberman Core 0.18.7 is installed in an isolated user Python environment; hook
-activation and host compatibility are separate from package installation. See
+Doberman Core 0.18.7 and its user-wide Codex hook are installed. Configuration
+checks pass with the IDE's bundled Codex; review/trust the hook through `/hooks`
+in a new supported session before relying on it. See
 [the installation record](docs/DOBERMAN.md).

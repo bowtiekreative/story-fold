@@ -24,5 +24,7 @@
 - The first renderer uses 5ms fades at audio cut edges. A 10ms crossfade that
   preserves the exact shared story duration remains a later refinement.
 - Doberman Core was added at Ryan's request. Package installation is verified;
-  hook activation awaits an explicit scope choice after global auto-review
-  rejection, and the installed Codex snap is outside upstream's tested range.
+  Ryan then explicitly authorized all Codex projects and future sessions. The
+  user-wide hook is installed and default policy/configuration checks pass.
+  The IDE's bundled Codex 0.162 is supported; the separate snap 0.114 is not.
+  Host trust in a new session remains a required user action.

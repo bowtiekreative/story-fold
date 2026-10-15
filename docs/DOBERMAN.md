@@ -17,19 +17,36 @@ The Codex installer merges one `PreToolUse` hook invoking
 Codex hook trust before execution. A package installation alone does not put
 the guard on this conversation's tool execution path.
 
-The attempted user-wide hook install was rejected by automatic approval review:
-the installation request did not explicitly authorize changing all future
-Codex sessions. No hook was written. Ryan was asked whether to enable it only
-for Storyfold, for all projects, or leave the installed package without hooks.
+Ryan explicitly selected **All Codex projects and future sessions** after the
+initial global installation attempt was rejected for missing scope approval.
+The authorized retry succeeded with `doberman install-hooks --host codex
+--global`. The user-wide `~/.codex/hooks.json` contains one Doberman PreToolUse
+entry. The installer merges existing hooks rather than replacing them.
 
-`doberman doctor --json` confirms the CLI resolves, with enforcement defaults of
-`enforce` / `balanced`. It reports no configured hooks or policy yet, so it does
-**not** report a healthy active guard. Its tested Codex CLI range is
-`>=0.146.0,<1.0.0`; the installed snap CLI is `0.114.0`, outside that range.
-The desktop runtime's hook behavior is unverified. Do not bypass hook trust or
-claim protection without a supported-host verification.
+The recommended nine-item policy is saved privately in the ignored
+`.doberman/policies.yaml` for Storyfold, using `enforce` / `balanced` defaults.
+`doberman doctor --json` now reports configuration healthy, an intact hook
+manifest and no critical failures. This verifies installation, not host trust.
 
-Upstream setup: `doberman install-hooks --host codex` is project-scoped;
-adding `--global` changes the user-wide hooks file. Apply only the scope Ryan
-chooses, then trust it in Codex and check `doberman doctor` in a new session.
-Do not use the upstream trust-bypass flag.
+The IDE process runs its bundled **Codex 0.162.0-alpha.17.2**, within Doberman's
+tested range `>=0.146.0,<1.0.0`. A diagnostic with that binary first on its
+temporary PATH passes the Codex compatibility check. The separate snap CLI
+on the normal shell PATH is still 0.114.0 and remains outside that range;
+it was not upgraded or replaced. Evidence:
+`docs/validation/doberman-configuration.json`.
+
+**Remaining host step:** open a new supported Codex session, run `/hooks`, and
+review/trust the `doberman hook codex-pre` definition. Codex skips new or changed
+non-managed hooks until that review. See the
+[official hook trust documentation](https://learn.chatgpt.com/docs/hooks#review-and-trust-hooks).
+No active-session protection or trust bypass is claimed. After trust, verify a
+decision in a disposable fixture before relying on enforcement.
+
+To open the verified supported CLI without using the older snap command, run:
+
+```sh
+/home/digitalstemcell/.vscode/extensions/openai.chatgpt-26.1007.21434-linux-x64/bin/linux-x86_64/codex
+```
+
+Then enter `/hooks` and review/trust the Doberman entry. This path belongs to
+the currently installed IDE extension and may change after an extension update.

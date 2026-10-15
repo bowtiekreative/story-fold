@@ -1,0 +1,41 @@
+{
+  "installedVersion": "0.18.7",
+  "scope": "user-wide",
+  "authorizedBy": "Ryan explicitly selected All Codex projects and future sessions on 2026-10-15",
+  "hookFile": "~/.codex/hooks.json",
+  "configurationHealthy": true,
+  "checks": [
+    {
+      "detail": "installed (codex:user)",
+      "name": "Host hooks",
+      "status": "ok"
+    },
+    {
+      "detail": "`doberman` resolves to /home/digitalstemcell/.local/bin/doberman",
+      "name": "Hook command",
+      "status": "ok"
+    },
+    {
+      "detail": "intact (codex user)",
+      "name": "Hook integrity",
+      "status": "ok"
+    },
+    {
+      "detail": "policy loaded (9/9 items enabled)",
+      "name": "Config",
+      "status": "ok"
+    },
+    {
+      "detail": "enforcement=enforce, mode=balanced",
+      "name": "Enforcement",
+      "status": "ok"
+    },
+    {
+      "detail": "0.162.0 (supported)",
+      "name": "Codex CLI",
+      "status": "ok"
+    }
+  ],
+  "hostTrust": "Pending user review in Codex /hooks; active-session enforcement not claimed",
+  "separateSnapCLI": "0.114.0 remains on the default shell PATH; IDE-bundled Codex is 0.162.0-alpha.17.2"
+}

@@ -1,8 +1,8 @@
 {
   "name": "Storyfold",
   "milestone": "First local release \u2014 ready to try",
-  "updatedAt": "2026-10-15T16:32:38.449347+00:00",
-  "message": "The editor and Catalyst panel are ready locally. Strict typecheck, lint, 17 core tests, five browser flows and the ffmpeg L-cut/caption/chapter checks passed. Review/apply/undo created real Git commits and restored the practice file. Next: validate your interview and choose Doberman hook scope.",
+  "updatedAt": "2026-10-15T16:51:36.848223+00:00",
+  "message": "The local release is ready. Ryan authorized Doberman for all Codex projects: user-wide hook installed, default policy saved, configuration checks pass with the IDE Codex 0.162. Next: trust the hook in a new session and validate your interview.",
   "tasks": [
     {
       "id": "foundation",
@@ -78,13 +78,14 @@
     },
     {
       "id": "doberman-hooks",
-      "title": "Choose and verify Doberman hook scope",
-      "acceptance": "Ryan chooses project-only, user-wide, or package-only. If enabled, verify a supported Codex host, save policy, trust the hook and confirm real decisions in a new session. Installed package and isolated adapter check already pass.",
+      "title": "Trust Doberman in a new Codex session",
+      "acceptance": "User-wide scope is authorized and installed; configuration and supported IDE Codex checks pass. In a new supported Codex session, review/trust doberman hook codex-pre via /hooks, then confirm a harmless allow/deny fixture in the host. No trust bypass.",
       "lane": "Next",
-      "status": "todo",
+      "status": "review",
       "evidence": [
         "docs/DOBERMAN.md",
-        "docs/validation/doberman-smoke.json"
+        "docs/validation/doberman-smoke.json",
+        "docs/validation/doberman-configuration.json"
       ]
     }
   ]
