@@ -1,8 +1,8 @@
 {
   "name": "Storyfold",
-  "milestone": "First local release \u2014 ready to try",
-  "updatedAt": "2026-10-15T16:51:36.848223+00:00",
-  "message": "The local release is ready. Ryan authorized Doberman for all Codex projects: user-wide hook installed, default policy saved, configuration checks pass with the IDE Codex 0.162. Next: trust the hook in a new session and validate your interview.",
+  "milestone": "Production hardening - Doberman repair required",
+  "updatedAt": "2026-10-15T17:20:51Z",
+  "message": "Durable project saves and the Catalyst review lock are improved; typecheck, lint and 17 tests pass. Five browser flows and media smoke passed before these fixes. Doberman is rejecting the hosted-access and compiled-runtime patches; a compatibility repair needs human review. Production is unfinished.",
   "tasks": [
     {
       "id": "foundation",
@@ -64,8 +64,8 @@
       "id": "desktop",
       "title": "Package the desktop app",
       "acceptance": "Windows and Ubuntu installers and CI; native folder picker and keychain support.",
-      "lane": "Later",
-      "status": "todo",
+      "lane": "Now",
+      "status": "doing",
       "evidence": []
     },
     {
@@ -87,6 +87,30 @@
         "docs/validation/doberman-smoke.json",
         "docs/validation/doberman-configuration.json"
       ]
+    },
+    {
+      "id": "production-core",
+      "title": "Harden the production runtime",
+      "acceptance": "Compiled server, authenticated hosted mode, durable jobs, bounded media resources, project backup/restore and security regression tests.",
+      "lane": "Now",
+      "status": "doing",
+      "evidence": []
+    },
+    {
+      "id": "production-media",
+      "title": "Finish media and export correctness",
+      "acceptance": "Long interviews batch correctly, sync uncertainty is explicit, crossfades preserve timing and interchange exports have structural validation.",
+      "lane": "Now",
+      "status": "doing",
+      "evidence": []
+    },
+    {
+      "id": "production-playback",
+      "title": "Make preview follow the actual media clock",
+      "acceptance": "Buffering pauses the story clock; cuts seek accurately and cached video slots preload the following clip; 20-edit undo and trim preview verified.",
+      "lane": "Now",
+      "status": "doing",
+      "evidence": []
     }
   ]
 }

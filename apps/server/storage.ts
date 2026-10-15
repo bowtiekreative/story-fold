@@ -13,8 +13,26 @@ export const dataRoot = path.resolve(
 export async function writeJson(file: string, data: unknown) {
   await fs.mkdir(path.dirname(file), { recursive: true });
   const temp = `${file}.${randomUUID()}.tmp`;
-  await fs.writeFile(temp, JSON.stringify(data, null, 2), { mode: 0o600 });
-  await fs.rename(temp, file);
+  try {
+    const handle = await fs.open(temp, "wx", 0o600);
+    try {
+      await handle.writeFile(JSON.stringify(data, null, 2));
+      await handle.sync();
+    } finally {
+      await handle.close();
+    }
+    await fs.rename(temp, file);
+    if (process.platform !== "win32") {
+      const directory = await fs.open(path.dirname(file), "r");
+      try {
+        await directory.sync();
+      } finally {
+        await directory.close();
+      }
+    }
+  } finally {
+    await fs.rm(temp, { force: true });
+  }
 }
 export async function readJson<T>(file: string): Promise<T> {
   return JSON.parse(await fs.readFile(file, "utf8")) as T;

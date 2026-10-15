@@ -361,8 +361,8 @@ export async function applyProposal(
 ) {
   if (applying)
     throw new Error("Another change is being saved. Try again in a moment.");
-  applying = true;
   const entry = path.join(store, "proposals", path.basename(proposalPath(id)));
+  applying = true;
   let proposal: Proposal | undefined;
   let file = "";
   let written = false;
