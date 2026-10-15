@@ -1,18 +1,20 @@
 {
   "name": "Storyfold",
-  "milestone": "Build the first working editor",
-  "updatedAt": "2026-10-15T16:28:48.864Z",
-  "message": "The editor and Catalyst panel are running. Browser sample/export flow and 15 core tests passed; the six-second portrait render proves a one-second L-cut. Finishing upload checks, documentation and Git review/undo acceptance.",
+  "milestone": "First local release \u2014 ready to try",
+  "updatedAt": "2026-10-15T16:32:38.449347+00:00",
+  "message": "The editor and Catalyst panel are ready locally. Strict typecheck, lint, 17 core tests, five browser flows and the ffmpeg L-cut/caption/chapter checks passed. Review/apply/undo created real Git commits and restored the practice file. Next: validate your interview and choose Doberman hook scope.",
   "tasks": [
     {
       "id": "foundation",
       "title": "Make the build visible",
       "acceptance": "Architecture and schema committed; progress, task edits, source review and undo available in Catalyst.",
       "lane": "Now",
-      "status": "doing",
+      "status": "done",
       "evidence": [
         "docs/ARCHITECTURE.md",
-        "packages/schema/site.schema.json"
+        "packages/schema/site.schema.json",
+        "tests/catalyst.test.ts",
+        "tests/e2e/app.spec.ts"
       ]
     },
     {
@@ -20,24 +22,35 @@
       "title": "Edit an interview by sentences",
       "acceptance": "Topic folders, sentence selection, live groups, reorder, trims, camera selection, L-cuts, skip, undo and persisted autosave work.",
       "lane": "Now",
-      "status": "todo",
-      "evidence": []
+      "status": "done",
+      "evidence": [
+        "apps/web/src/Editor.tsx",
+        "tests/timeline.test.ts",
+        "tests/e2e/app.spec.ts"
+      ]
     },
     {
       "id": "media",
       "title": "Process and export real media",
       "acceptance": "Upload and timed transcript or word-timestamp transcription; ffmpeg proxies, peaks and MP4; SRT, EDL and FCPXML downloads.",
       "lane": "Now",
-      "status": "todo",
-      "evidence": []
+      "status": "done",
+      "evidence": [
+        "apps/server/media.ts",
+        "docs/validation/media-smoke.json",
+        "tests/e2e/app.spec.ts"
+      ]
     },
     {
       "id": "verify",
       "title": "Verify the complete local flow",
       "acceptance": "Typecheck, lint, unit and integration tests, browser acceptance and probed ffmpeg render pass.",
       "lane": "Now",
-      "status": "todo",
-      "evidence": []
+      "status": "done",
+      "evidence": [
+        "docs/validation/RESULTS.md",
+        "docs/validation/media-smoke.json"
+      ]
     },
     {
       "id": "real-interview",
@@ -62,6 +75,17 @@
       "lane": "Later",
       "status": "todo",
       "evidence": []
+    },
+    {
+      "id": "doberman-hooks",
+      "title": "Choose and verify Doberman hook scope",
+      "acceptance": "Ryan chooses project-only, user-wide, or package-only. If enabled, verify a supported Codex host, save policy, trust the hook and confirm real decisions in a new session. Installed package and isolated adapter check already pass.",
+      "lane": "Next",
+      "status": "todo",
+      "evidence": [
+        "docs/DOBERMAN.md",
+        "docs/validation/doberman-smoke.json"
+      ]
     }
   ]
 }

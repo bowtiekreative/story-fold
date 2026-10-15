@@ -8,9 +8,10 @@ Verified locally on Linux with Node 22.23.1 and ffmpeg 6.1.1.
   timestamp validation, timecodes, interchange generation, source protection,
   stale review detection, Git commit/undo and preserved unrelated staged work,
   known audio-envelope offset, immutable media fields and concurrent saves.
-- Four browser flows passed: sample processing/editing/autosave/reload/playback/
+- Five browser flows passed: sample processing/editing/autosave/reload/playback/
   MP4 download; Catalyst source review/discard/preview/pause; phone layout;
-  uploaded video + timed transcript + simultaneous stale-save rejection.
+  uploaded video + timed transcript + simultaneous stale-save rejection; a real
+  repository file review/apply/commit followed by reviewed undo.
 - `media-smoke.json`: six-second, 720×1280 MP4, two chapters, burned white caption
   pixels, picture changes at 2s while audio stays at 440Hz until 3s and then
   changes to 880Hz. The virtual B crop is rendered too.
@@ -18,9 +19,10 @@ Verified locally on Linux with Node 22.23.1 and ffmpeg 6.1.1.
 - Doberman package 0.18.7 and isolated hook-adapter allow/deny fixtures verified;
   `doberman-smoke.json`. No live Codex hook activation is claimed.
 
-The real-repository browser apply/undo flow is checked after the feature commit
-and recorded in this file when it passes. The unit Git test already passes in a
-disposable repository.
+The real-repository browser apply/undo test passed after feature commit
+`bdddc7e`. Commits `195cdfd` and `8d723c5` record the applied practice edit and
+its undo. `docs/demos/REVIEW-CHECK.md` is restored exactly. The original reference
+prototypes remain untouched and untracked, as they were at the start.
 
 CI is configured for Ubuntu and Windows core checks and Ubuntu media/browser
 checks. It has not run remotely; no remote CI result is claimed. No commit was
