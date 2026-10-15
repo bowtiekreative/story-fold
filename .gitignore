@@ -1,0 +1,15 @@
+node_modules/
+dist/
+data/
+.env
+.env.*
+!.env.example
+.catalyst/private/
+.catalyst/runs/
+.catalyst/site.json
+.catalyst/control.json
+test-results/
+playwright-report/
+*.log
+.thumbnail
+.doberman/

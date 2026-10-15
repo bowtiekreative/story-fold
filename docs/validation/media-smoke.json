@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "checks": [
+    "portrait dimensions",
+    "six-second duration",
+    "two MP4 chapters",
+    "picture changes at 2 seconds",
+    "audio changes at 3 seconds",
+    "virtual crop rendered",
+    "captions rendered",
+    "MP4/EDL/FCPXML/SRT artifacts"
+  ],
+  "observed": {
+    "duration": "6.000000",
+    "width": 720,
+    "height": 1280,
+    "chapters": 2,
+    "earlyFrequency": 440,
+    "lateFrequency": 880
+  },
+  "at": "2026-10-15T16:29:26.834Z"
+}

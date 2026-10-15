@@ -1,0 +1,10 @@
+/* CaroSlides — Webfonts
+ * Loaded via Google Fonts CDN. To self-host, download the .ttf/.woff2 files,
+ * drop them in assets/fonts/, and replace this @import with @font-face rules.
+ *
+ * Lexend  — body & UI. Engineered for reading proficiency; chosen for
+ *           neurodivergent / low-stimulation readability (core to the brand).
+ * Outfit  — display & headings. Friendly geometric sans for warmth + energy.
+ * Space Grotesk — numerals / mono accents (order IDs, prices, counters).
+ */
+@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap");

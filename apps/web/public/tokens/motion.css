@@ -1,0 +1,26 @@
+/* CaroSlides — Motion tokens.
+ * Calm, low-stimulation motion: short, gentle fades and small transles.
+ * No bounces, no parallax, no infinite decorative loops. Always respect
+ * prefers-reduced-motion in components.
+ */
+:root {
+  /* default ease-out */
+  --ease-standard: cubic-bezier(0.2, 0, 0.2, 1); /* @kind other */
+  /* gentle settle */
+  --ease-entrance: cubic-bezier(0.16, 1, 0.3, 1); /* @kind other */
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1); /* @kind other */
+
+  /* hover / press feedback */
+  --duration-fast: 120ms; /* @kind other */
+  /* default transitions */
+  --duration-base: 200ms; /* @kind other */
+  /* panels, sheets */
+  --duration-slow: 320ms; /* @kind other */
+  /* page-level entrances */
+  --duration-slower: 480ms; /* @kind other */
+
+  /* gentle lift on interactive cards */
+  --translate-hover: -2px; /* @kind spacing */
+  /* press feedback */
+  --press-scale: 0.98; /* @kind other */
+}

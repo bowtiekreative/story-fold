@@ -1,0 +1,48 @@
+/* CaroSlides — Typography tokens
+ * Outfit (display) + Lexend (body/UI, readability-optimized) + Space Grotesk (numerals).
+ * Generous line-height and slightly open letter-spacing on body for low-stim reading.
+ */
+:root {
+  /* ---- Families ---- */
+  --font-display: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: "Lexend", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Space Grotesk", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* ---- Weights ---- */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-extrabold: 800;
+
+  /* ---- Type scale (px → rem at 16px base) ---- */
+  --text-display-1: 4.5rem; /* 72 — hero */
+  --text-display-2: 3.5rem; /* 56 */
+  --text-h1: 2.75rem; /* 44 */
+  --text-h2: 2.125rem; /* 34 */
+  --text-h3: 1.625rem; /* 26 */
+  --text-h4: 1.25rem; /* 20 */
+  --text-lg: 1.125rem; /* 18 — lead / large body */
+  --text-base: 1rem; /* 16 — body */
+  --text-sm: 0.875rem; /* 14 — secondary / UI */
+  --text-xs: 0.75rem; /* 12 — labels / captions */
+  --text-2xs: 0.6875rem; /* 11 — eyebrow / overline */
+
+  /* ---- Line heights ---- */
+  --leading-tight: 1.08; /* display */
+  --leading-snug: 1.2; /* headings */
+  --leading-normal: 1.45; /* UI text */
+  --leading-relaxed: 1.65; /* body paragraphs (low-stim readability) */
+
+  /* ---- Letter spacing ---- */
+  --tracking-tight: -0.02em; /* large display */
+  --tracking-snug: -0.01em; /* headings */
+  --tracking-normal: 0em;
+  --tracking-wide: 0.04em; /* eyebrow / small caps labels */
+  --tracking-wider: 0.08em;
+
+  /* ---- Semantic roles ---- */
+  --type-eyebrow-size: var(--text-2xs);
+  --type-eyebrow-weight: var(--weight-semibold);
+  --type-eyebrow-tracking: var(--tracking-wider);
+}

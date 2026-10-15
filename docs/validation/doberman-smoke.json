@@ -1,0 +1,16 @@
+{
+  "version": "0.18.7",
+  "isolatedAdapterSmoke": [
+    {
+      "fixture": "benign",
+      "decision": "abstain",
+      "exitCode": 0
+    },
+    {
+      "fixture": "destructive",
+      "decision": "deny",
+      "exitCode": 0
+    }
+  ],
+  "note": "Payloads were evaluated only. No payload command was executed. This does not verify host hooks for this running session."
+}

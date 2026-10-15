@@ -1,0 +1,121 @@
+/* CaroSlides — Color tokens
+ * A calm, warm neutral canvas (low-stimulation) punctuated by a vibrant,
+ * social-media-energetic accent spectrum. Accents appear as soft tinted
+ * surfaces (bento tiles) and saturated ink (icons/labels) — never as large
+ * saturated fills behind body text. Primary brand color: Violet.
+ */
+:root {
+  /* ---- Warm neutral canvas (low-stim base) ---- */
+  --canvas: #faf8f4; /* page background — warm off-white */
+  --surface: #ffffff; /* cards, sheets */
+  --surface-sunken: #f2efe8; /* wells, inset fields, code */
+  --surface-raised: #ffffff; /* elevated cards (pairs with shadow) */
+  --overlay: rgba(27, 26, 34, 0.48); /* modal scrim */
+
+  /* ---- Ink (warm-cool near-black, never pure #000 — softer for low-stim) ---- */
+  --ink-900: #1b1a22; /* headings */
+  --ink-700: #3b3947; /* body text */
+  --ink-500: #6a6878; /* muted / secondary */
+  --ink-300: #a7a4b2; /* placeholder / disabled */
+  --ink-on-accent: #ffffff; /* text on saturated accent fills */
+
+  /* ---- Hairlines & borders ---- */
+  --line: #eae6de; /* default border */
+  --line-strong: #d9d3c8; /* emphasized border / dividers */
+  --line-faint: #f1ede6; /* faintest separators */
+
+  /* ===========================================================
+     ACCENT SPECTRUM — each accent has:
+       -600  solid (icon, text, fill on light)
+       -500  bright (CTA fills, dots)
+       -100  soft tint (bento tile background)
+       -50   faintest tint (hover wash)
+     =========================================================== */
+
+  /* Violet — PRIMARY brand */
+  --violet-700: #4f31d6;
+  --violet-600: #6442ee;
+  --violet-500: #7c5cf6;
+  --violet-100: #ebe6fe;
+  --violet-50: #f5f2fe;
+
+  /* Coral — warmth, "people" categories */
+  --coral-700: #d62e58;
+  --coral-600: #f0436b;
+  --coral-500: #fb6f92;
+  --coral-100: #ffe2ea;
+  --coral-50: #fff1f4;
+
+  /* Teal — calm, "wellness / neurodivergent" categories */
+  --teal-700: #0b7e74;
+  --teal-600: #0e9c90;
+  --teal-500: #16b7a8;
+  --teal-100: #d2f3ef;
+  --teal-50: #ecfaf8;
+
+  /* Amber — energy, "finance / growth" categories */
+  --amber-700: #b86a0c;
+  --amber-600: #d98512;
+  --amber-500: #f5a524;
+  --amber-100: #fcedcf;
+  --amber-50: #fef7e8;
+
+  /* Sky — trust, "tech / SaaS" categories */
+  --sky-700: #195fbc;
+  --sky-600: #1f73e0;
+  --sky-500: #2e8cf6;
+  --sky-100: #daeafe;
+  --sky-50: #eef5fe;
+
+  /* Lime — fresh, "education / coaching" categories */
+  --lime-700: #497b0e;
+  --lime-600: #5c9a12;
+  --lime-500: #7dbf24;
+  --lime-100: #e6f3cf;
+  --lime-50: #f4fae8;
+
+  /* ---- Semantic ---- */
+  --success-600: #128a5e;
+  --success-500: #1fa971;
+  --success-100: #d5f0e3;
+  --warning-600: #d98512;
+  --warning-500: #f5a524;
+  --warning-100: #fcedcf;
+  --danger-600: #d03036;
+  --danger-500: #e5484d;
+  --danger-100: #fbddde;
+  --info-600: #1f73e0;
+  --info-500: #2e8cf6;
+  --info-100: #daeafe;
+
+  /* ===========================================================
+     SEMANTIC ALIASES — reference these in components
+     =========================================================== */
+  --bg-page: var(--canvas);
+  --bg-card: var(--surface);
+  --bg-sunken: var(--surface-sunken);
+
+  --text-heading: var(--ink-900);
+  --text-body: var(--ink-700);
+  --text-muted: var(--ink-500);
+  --text-subtle: var(--ink-300);
+  --text-link: var(--violet-600);
+
+  --border-default: var(--line);
+  --border-strong: var(--line-strong);
+  --divider: var(--line);
+
+  --brand: var(--violet-600);
+  --brand-strong: var(--violet-700);
+  --brand-tint: var(--violet-100);
+  --brand-wash: var(--violet-50);
+
+  --focus-ring: var(--violet-500);
+  --focus-ring-offset: var(--canvas);
+
+  --accent-coral: var(--coral-600);
+  --accent-teal: var(--teal-600);
+  --accent-amber: var(--amber-600);
+  --accent-sky: var(--sky-600);
+  --accent-lime: var(--lime-600);
+}

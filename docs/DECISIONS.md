@@ -16,3 +16,13 @@
   commits provide recovery without publishing incomplete work to the remote.
 - Pause/cancel controls apply to local pipeline checks. They cannot suspend the
   Codex runtime; the UI must explain that distinction.
+- Use an FFT library for audio-envelope correlation. A coarse sampled search
+  produced a false match in the known-offset test; full normalized FFT
+  correlation resolves the offset to 10ms while remaining fast on five minutes.
+- Quantize video cuts by absolute 25fps boundary differences to prevent rounding
+  drift across many concatenated clips. Audio retains exact sample timing.
+- The first renderer uses 5ms fades at audio cut edges. A 10ms crossfade that
+  preserves the exact shared story duration remains a later refinement.
+- Doberman Core was added at Ryan's request. Package installation is verified;
+  hook activation awaits an explicit scope choice after global auto-review
+  rejection, and the installed Codex snap is outside upstream's tested range.

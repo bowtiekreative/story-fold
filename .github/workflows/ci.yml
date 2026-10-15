@@ -1,0 +1,42 @@
+name: Local app checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  core:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+  browser-and-media:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: npx playwright install --with-deps chromium
+      - run: git config user.name "Storyfold acceptance" && git config user.email "acceptance@example.invalid"
+      - run: npm run test:media
+      - name: Run the local browser acceptance suite
+        run: |
+          npm run dev > /tmp/storyfold-dev.log 2>&1 &
+          for attempt in {1..30}; do
+            curl -fsS http://127.0.0.1:4310/api/health && break
+            sleep 1
+          done
+          npm run test:e2e

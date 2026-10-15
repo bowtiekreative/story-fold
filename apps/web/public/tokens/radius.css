@@ -1,0 +1,10 @@
+/* CaroSlides — Radius tokens. Friendly, rounded bento aesthetic. */
+:root {
+  --radius-xs: 6px; /* tags, small chips */
+  --radius-sm: 10px; /* inputs, buttons */
+  --radius-md: 16px; /* default card */
+  --radius-lg: 22px; /* bento tile */
+  --radius-xl: 28px; /* large feature panel */
+  --radius-2xl: 36px; /* hero / showcase container */
+  --radius-pill: 999px; /* pills, avatars, toggles */
+}

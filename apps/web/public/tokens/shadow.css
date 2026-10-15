@@ -1,0 +1,26 @@
+/* CaroSlides — Elevation / shadow tokens.
+ * Soft, diffuse, low-contrast shadows (low-stim). Many surfaces use a hairline
+ * border + a barely-there shadow rather than a heavy drop shadow.
+ * Shadows carry a faint warm/violet tint to sit naturally on the warm canvas.
+ */
+:root {
+  --shadow-xs: 0 1px 2px rgba(27, 26, 34, 0.04);
+  --shadow-sm:
+    0 1px 3px rgba(27, 26, 34, 0.05), 0 1px 2px rgba(27, 26, 34, 0.04);
+  --shadow-md:
+    0 4px 16px rgba(27, 26, 34, 0.06), 0 2px 6px rgba(27, 26, 34, 0.04);
+  --shadow-lg:
+    0 12px 34px rgba(27, 26, 34, 0.08), 0 4px 12px rgba(27, 26, 34, 0.05);
+  --shadow-xl:
+    0 24px 60px rgba(27, 26, 34, 0.1), 0 8px 24px rgba(27, 26, 34, 0.06);
+
+  /* Colored glow — used sparingly under primary CTAs on hover */
+  --shadow-brand: 0 8px 24px rgba(100, 66, 238, 0.28);
+
+  /* Focus ring (paired with --focus-ring color) */
+  --ring-width: 3px;
+  --ring: 0 0 0 var(--ring-width) rgba(124, 92, 246, 0.35);
+
+  /* Hairline elevation — border + whisper shadow (premium/minimal default) */
+  --elevation-hairline: inset 0 0 0 1px var(--line), var(--shadow-xs);
+}

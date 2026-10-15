@@ -1,0 +1,67 @@
+{
+  "name": "Storyfold",
+  "milestone": "Build the first working editor",
+  "updatedAt": "2026-10-15T16:28:48.864Z",
+  "message": "The editor and Catalyst panel are running. Browser sample/export flow and 15 core tests passed; the six-second portrait render proves a one-second L-cut. Finishing upload checks, documentation and Git review/undo acceptance.",
+  "tasks": [
+    {
+      "id": "foundation",
+      "title": "Make the build visible",
+      "acceptance": "Architecture and schema committed; progress, task edits, source review and undo available in Catalyst.",
+      "lane": "Now",
+      "status": "doing",
+      "evidence": [
+        "docs/ARCHITECTURE.md",
+        "packages/schema/site.schema.json"
+      ]
+    },
+    {
+      "id": "editor",
+      "title": "Edit an interview by sentences",
+      "acceptance": "Topic folders, sentence selection, live groups, reorder, trims, camera selection, L-cuts, skip, undo and persisted autosave work.",
+      "lane": "Now",
+      "status": "todo",
+      "evidence": []
+    },
+    {
+      "id": "media",
+      "title": "Process and export real media",
+      "acceptance": "Upload and timed transcript or word-timestamp transcription; ffmpeg proxies, peaks and MP4; SRT, EDL and FCPXML downloads.",
+      "lane": "Now",
+      "status": "todo",
+      "evidence": []
+    },
+    {
+      "id": "verify",
+      "title": "Verify the complete local flow",
+      "acceptance": "Typecheck, lint, unit and integration tests, browser acceptance and probed ffmpeg render pass.",
+      "lane": "Now",
+      "status": "todo",
+      "evidence": []
+    },
+    {
+      "id": "real-interview",
+      "title": "Validate your sample interview",
+      "acceptance": "20-sentence accuracy/timing audit, camera clap alignment and NLE import checked using the supplied real interview.",
+      "lane": "Next",
+      "status": "todo",
+      "evidence": []
+    },
+    {
+      "id": "desktop",
+      "title": "Package the desktop app",
+      "acceptance": "Windows and Ubuntu installers and CI; native folder picker and keychain support.",
+      "lane": "Later",
+      "status": "todo",
+      "evidence": []
+    },
+    {
+      "id": "publish",
+      "title": "Connect publishing and site care",
+      "acceptance": "Configured deployment, preflight, rollback, host adapters, CLI/MCP and backups verified.",
+      "lane": "Later",
+      "status": "todo",
+      "evidence": []
+    }
+  ]
+}
