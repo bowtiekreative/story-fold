@@ -8,3 +8,5 @@ compare Before with After. **Apply & commit** saves only this file to Git.
 
 The automated browser acceptance test temporarily edits this file and restores
 it through the same review and undo controls. Those two commits stay visible.
+
+Temporary browser acceptance edit.
