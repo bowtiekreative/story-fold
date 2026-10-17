@@ -5,6 +5,7 @@ import { spawn, type ChildProcess } from "node:child_process";
 import { z } from "zod";
 import { command } from "./media.ts";
 import { root, writeJson, readJson } from "./storage.ts";
+import { topicSettings } from "./topics.ts";
 
 export interface BuildTask {
   id: string;
@@ -229,9 +230,15 @@ export async function scanSite() {
     integrations: [
       {
         id: "transcription",
-        name: "Transcription and topics",
+        name: "Speech transcription",
         via: "OpenAI",
         env: ["OPENAI_API_KEY"],
+      },
+      {
+        id: "topics",
+        name: "Topic folders",
+        via: topicSettings().topicProvider,
+        env: ["CLAUDE_API_KEY", "ANTHROPIC_API_KEY", "OPENAI_API_KEY"],
       },
     ],
     scannedAt: new Date().toISOString(),
@@ -545,6 +552,6 @@ export async function toolsStatus() {
       () => false,
     ),
     transcription: !!process.env.OPENAI_API_KEY,
-    topicModel: process.env.TOPIC_MODEL ?? "gpt-4.1-mini",
+    ...topicSettings(),
   };
 }

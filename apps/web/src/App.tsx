@@ -25,7 +25,11 @@ export function App() {
     [name, setName] = useState(""),
     [manual, setManual] = useState(false),
     [drag, setDrag] = useState(false),
-    [provider, setProvider] = useState(false);
+    [providers, setProviders] = useState({
+      transcription: false,
+      topics: false,
+      topicProvider: "Manual",
+    });
   const picker = useRef<HTMLInputElement>(null);
   async function refresh() {
     try {
@@ -39,8 +43,8 @@ export function App() {
     void refresh();
   }, [id]);
   useEffect(() => {
-    void api<{ transcription: boolean }>("/health")
-      .then((h) => setProvider(h.transcription))
+    void api<typeof providers>("/health")
+      .then(setProviders)
       .catch(() => {});
   }, []);
   useEvents(() => {
@@ -261,6 +265,18 @@ export function App() {
                     </p>
                   </div>
                 </div>
+                <div className="provider-readiness" role="status">
+                  <Badge tone={providers.topics ? "teal" : "amber"}>
+                    {providers.topics
+                      ? `${providers.topicProvider} topics configured`
+                      : "Manual topics available"}
+                  </Badge>
+                  <small>
+                    {providers.transcription
+                      ? "Speech transcription ready"
+                      : "Include a timed transcript JSON with your video."}
+                  </small>
+                </div>
                 {files.length > 0 && (
                   <div className="upload-options">
                     <label>
@@ -273,9 +289,9 @@ export function App() {
                     </label>
                     <label>
                       Timed transcript JSON{" "}
-                      {provider
+                      {providers.transcription
                         ? "(optional)"
-                        : "(required without a provider)"}
+                        : "(required for speech timing)"}
                       <input
                         type="file"
                         accept=".json"
@@ -295,9 +311,12 @@ export function App() {
                     <small>
                       Timed JSON:{" "}
                       {'{"words":[{"text":"Hello.","start":0.2,"end":1.1}]}'}{" "}
-                      {provider
-                        ? "Automatic processing sends audio and transcript to OpenAI."
-                        : "Audio stays local when you import a transcript."}
+                      {providers.transcription
+                        ? "Automatic speech transcription sends audio to OpenAI. "
+                        : "With an imported transcript, audio stays local. "}
+                      {!manual && providers.topics
+                        ? `Transcript text is sent to ${providers.topicProvider} for topic suggestions.`
+                        : "Organize topics locally."}
                     </small>
                   </div>
                 )}
@@ -305,7 +324,12 @@ export function App() {
                 <div className="upload-actions">
                   <button
                     className="button primary"
-                    disabled={busy}
+                    disabled={
+                      busy ||
+                      (files.length > 0 &&
+                        !providers.transcription &&
+                        !transcript)
+                    }
                     onClick={() =>
                       files.length ? void upload() : picker.current?.click()
                     }

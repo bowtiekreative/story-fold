@@ -1,5 +1,34 @@
 # Validation record — 2026-10-15
 
+## Claude update — 2026-10-17
+
+- Applied the explicitly approved Doberman 0.18.7 adapter repair. Installed and
+  backup hashes match the tested candidate and original. Native source edits
+  now pass; protected example-config edits are still refused.
+- Claude is selected when its private key is configured. Both supported key
+  names work. OpenAI remains available for speech transcription and as the
+  fallback topic provider when no Claude key is configured.
+- A live standalone Claude Haiku 5.5 structured-output request produced four
+  folders and assigned all four synthetic sentences. Authentication returned
+  HTTP 200. No private interview content was sent.
+- Typecheck, lint, the frontend build and 23 unit/integration tests passed.
+  New tests cover provider selection, request format, key redaction, incomplete
+  responses, application grouping, preserved speech timing and manual fallback.
+  Application grouping tests use mocked provider responses.
+- Six browser flows passed, including Claude readiness, required timed words,
+  local manual grouping, sample editing/export, review/undo and phone layouts.
+  The actual welcome screenshot shows Claude configured with the private key;
+  the backend restarted successfully after the integration changes.
+- A separate live application-grouping probe was refused by the remaining
+  high-entropy rule. It was not rerouted; live end-to-end grouping remains
+  unverified. The same rule blocked Blue progress sync. Policy remains enabled.
+
+Claude handles topic text. A Claude-only setup still needs an imported timed
+transcript alongside video. Audio transcription with a real interview and the
+full production release remain open.
+
+## Original local release
+
 Verified locally on Linux with Node 22.23.1 and ffmpeg 6.1.1.
 
 - TypeScript strict typecheck and ESLint passed.

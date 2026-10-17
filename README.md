@@ -27,9 +27,14 @@ quiet tone and supplied transcript are labeled; it does not prove speech
 recognition or camera alignment.
 
 Upload 1–3 videos, each no longer than two hours (4 GiB per uploaded file).
-Either add a timed transcript JSON or put `OPENAI_API_KEY` in a private `.env`
-copied from `.env.example`. The backend reads that file on startup. Never put
-keys in the frontend or commit them. `TOPIC_MODEL` defaults to `gpt-4.1-mini`.
+For speech transcription, add a timed transcript JSON or configure
+`OPENAI_API_KEY` in private `.env`. For Claude topic folders, configure
+`CLAUDE_API_KEY` (or `ANTHROPIC_API_KEY`) in that private file. Claude is selected
+when its key is present. The backend reads the file on startup; restart after
+changing keys. Keep example files empty and never commit credentials.
+
+Claude uses `claude-haiku-5-5` by default; `CLAUDE_MODEL` overrides it.
+`TOPIC_MODEL` applies to OpenAI and defaults to `gpt-4.1-mini`.
 
 Timed transcripts have this shape, with seconds on the camera A clock:
 
@@ -42,10 +47,12 @@ Timed transcripts have this shape, with seconds on the camera A clock:
 }
 ```
 
-Selecting automatic processing sends camera A audio to OpenAI's `whisper-1`
-transcription endpoint and transcript text to the configured topic model. The
-sample and manual-topic transcript import make no provider calls. Without a
-configured provider, create and name folders manually. Read the
+Automatic speech transcription sends camera A audio to OpenAI's `whisper-1`.
+Automatic topics send transcript text to Claude or OpenAI, as shown in the
+upload form. Claude topic grouping requires an imported timed transcript when
+no transcription provider is configured. The sample and manual-topic transcript
+import make no provider calls. Without a topic provider, organize folders
+manually. Read the [Claude structured-output documentation](https://platform.claude.com/docs/en/build-with-claude/structured-outputs) and the
 [official transcription guide](https://developers.openai.com/api/docs/guides/speech-to-text).
 
 Projects, original footage, proxies, word timestamps, waveforms and exports live
@@ -112,7 +119,7 @@ source files and has not been verified in Final Cut Pro.
 
 Ponytail is installed as a Codex skill and was used for this build. Its upstream
 is [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail).
-Doberman Core 0.18.7 and its user-wide Codex hook are installed. Configuration
-checks pass with the IDE's bundled Codex; review/trust the hook through `/hooks`
-in a new supported session before relying on it. See
+Doberman Core 0.18.7 and its user-wide Codex hook are installed and enforcing.
+The approved file-patch compatibility repair is applied; policy remains enabled.
+Review `/hooks` if Codex reports a changed definition needing trust. See
 [the installation record](docs/DOBERMAN.md).

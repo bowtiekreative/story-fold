@@ -1,6 +1,42 @@
 import { test, expect } from "@playwright/test";
 import { promises as fs } from "node:fs";
 import path from "node:path";
+test("Claude topic readiness still requires timed words when speech transcription is unavailable", async ({
+  page,
+}) => {
+  await page.route("**/api/health", (route) =>
+    route.fulfill({
+      json: { transcription: false, topics: true, topicProvider: "Claude" },
+    }),
+  );
+  await page.goto("/");
+  await expect(
+    page.getByText("Claude topics configured", { exact: true }),
+  ).toBeVisible();
+  await page.locator('input[type="file"][multiple]').setInputFiles({
+    name: "interview.mp4",
+    mimeType: "video/mp4",
+    buffer: Buffer.from("fixture"),
+  });
+  const start = page.getByRole("button", {
+    name: "Find my story",
+    exact: true,
+  });
+  await expect(start).toBeDisabled();
+  await expect(
+    page.getByText(/Transcript text is sent to Claude/),
+  ).toBeVisible();
+  await page.getByLabel(/Timed transcript JSON/).setInputFiles({
+    name: "words.json",
+    mimeType: "application/json",
+    buffer: Buffer.from('{"words":[{"text":"Hello.","start":0,"end":1}]}'),
+  });
+  await expect(start).toBeEnabled();
+  await page.getByLabel("Organize topics myself").check();
+  await expect(
+    page.getByText(/Transcript text is sent to Claude/),
+  ).not.toBeVisible();
+});
 test("welcome, sample processing, editing, autosave, playback and export work together", async ({
   page,
 }) => {

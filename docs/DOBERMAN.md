@@ -45,7 +45,8 @@ the patch under `command`. The shared command rule then tries to parse source
 text as a shell command. A source comment containing an apostrophe reproduces
 the `opaque_command` false positive.
 
-Ryan authorized preparing a narrow compatibility repair. The reviewed
+Ryan authorized preparing a narrow compatibility repair, then explicitly
+approved applying it and connecting Claude on 2026-10-17. The reviewed
 [patch](../scripts/doberman-compat/codex.patch) moves the patch text into
 content while preserving supplied extra content. It retains target extraction,
 batch and move-path checks, secret scanning and the normal Bash mapping. It
@@ -57,12 +58,18 @@ four modes; protected paths, traversal, symlink escape, batch and move targets,
 sensitive files, secrets and destructive shell commands still receive their
 expected verdicts. Missing targets still fail closed. Fixture commands were
 never executed. The candidate compiled and the patch passed a zero-fuzz dry
-run. The installed adapter remains unchanged. Live policy, correlation,
-approval and host execution have not been retested with the candidate.
+run. On explicit approval, the patch was applied to the installed adapter with
+the original preserved as `codex.py.storyfold-original`. The installed digest
+matches the tested candidate digest in the verification record; the backup
+matches its original digest. Subsequent native source patches pass, while an
+attempted example-config edit is still blocked by protected-path policy.
+The live approval dialog remains unavailable in this session. The remaining
+high-entropy rule blocked an extra integration probe and a Blue progress note;
+those actions were not rerouted or used to weaken the rule.
 
 Doberman also rejected creation of the interactive repair helper. That helper
-was not written through another tool. Apply the prepared patch in a regular
-terminal outside the hooked agent session, after reviewing it:
+was not written through another tool. The following is the manual application
+command retained for reference; the repair is already installed:
 
 ```sh
 patch --backup --suffix=.storyfold-original --forward --fuzz=0 --reject-file=- \
@@ -73,8 +80,8 @@ patch --backup --suffix=.storyfold-original --forward --fuzz=0 --reject-file=- \
 This is specific to the installed 0.18.7 adapter. The command preserves its
 original as `codex.py.storyfold-original` and rejects a mismatching or already
 applied patch. Restore that backup in the same terminal if rollback is needed.
-Package upgrades may replace this local repair. After application, resume this
-conversation for an actual harmless edit check before production work resumes.
+Package upgrades may replace this local repair. Source edits have now been
+verified through the actual hook after application.
 Review `/hooks` only if Codex reports a definition needing trust; this repair
 does not change that definition. See the
 [official hook trust documentation](https://learn.chatgpt.com/docs/hooks#review-and-trust-hooks).

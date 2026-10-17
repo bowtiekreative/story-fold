@@ -17,6 +17,8 @@ interface Dashboard {
     ffprobe: boolean;
     transcription: boolean;
     topicModel: string;
+    topicProvider: string;
+    topics: boolean;
   };
   history: {
     commits: { id: string; at: string; message: string }[];
@@ -541,6 +543,14 @@ export function Catalyst() {
                           {data.tools.transcription
                             ? "Provider configured"
                             : "Timed transcript / sample available"}
+                        </Badge>
+                      </span>
+                      <span>
+                        Topic folders{" "}
+                        <Badge tone={data.tools.topics ? "teal" : "amber"}>
+                          {data.tools.topics
+                            ? `${data.tools.topicProvider} configured`
+                            : "Manual topics"}
                         </Badge>
                       </span>
                       <span>

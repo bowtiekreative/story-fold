@@ -437,6 +437,17 @@ input[type="checkbox"] {
   gap: 15px;
   padding-top: 20px;
 }
+.provider-readiness {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+.provider-readiness small {
+  color: var(--ink-500);
+  font-size: 12px;
+}
 .upload-options small {
   font-size: 10px;
   line-height: 1.8;
