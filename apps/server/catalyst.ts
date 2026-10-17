@@ -6,6 +6,7 @@ import { z } from "zod";
 import { command } from "./media.ts";
 import { root, writeJson, readJson } from "./storage.ts";
 import { topicSettings } from "./topics.ts";
+import { speechStatus } from "./whisper.ts";
 
 export interface BuildTask {
   id: string;
@@ -231,7 +232,7 @@ export async function scanSite() {
       {
         id: "transcription",
         name: "Speech transcription",
-        via: "OpenAI",
+        via: (await speechStatus()).speechProvider,
         env: ["OPENAI_API_KEY"],
       },
       {
@@ -551,7 +552,7 @@ export async function toolsStatus() {
       () => true,
       () => false,
     ),
-    transcription: !!process.env.OPENAI_API_KEY,
+    ...(await speechStatus()),
     ...topicSettings(),
   };
 }

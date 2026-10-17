@@ -1,5 +1,35 @@
 # Validation record — 2026-10-15
 
+## Automatic Whisper update — 2026-10-17
+
+- Video uploads now use automatic word-timestamp transcription. Timed JSON is
+  an optional import. Manual topics skips only AI grouping, not transcription.
+- Added an isolated local faster-whisper setup command and offline CPU worker.
+  The server prefers completed local setup, retains the existing OpenAI Whisper
+  fallback, validates timed output and checkpoints each audio chunk for resume.
+- Typecheck, ESLint, the frontend build and 25 JavaScript tests passed. Two
+  Python worker tests passed using mocked model responses; they verify offline
+  loading, decoding settings and word-timestamp JSON, not recognition accuracy.
+- The setup script passed Node syntax checking. The Python worker compiled.
+- Seven browser checks passed across runs: video-only submission without a
+  transcript, actionable malformed-import errors, sample editing/export,
+  Catalyst source review, phone layouts, imported transcripts and stale saves,
+  and reviewed Git apply/undo. The Git apply/undo check was rerun after removing
+  a confirmed unowned stale index lock and reverting its interrupted test edit.
+  The dev preview was restarted with polling after the system watcher limit
+  prevented its backend from reloading; the current backend passes the checks.
+- Doberman refused the package download with `egress_requires_auth` and
+  `correlated_trifecta`; its approval dialog cannot open in this session. The
+  download was not retried through another tool or wrapper. The Python virtual
+  environment exists, but Whisper and its model are not installed. Ryan was
+  given `npm run setup:whisper` to run in a regular interactive terminal.
+- A proposed CI workflow edit was separately refused as a sensitive path and
+  left unchanged. The Python checks are documented for manual execution.
+
+Actual local speech recognition and video-only processing remain unverified
+until setup completes. This update supersedes the Claude-only timed-import
+requirement described below. Blue progress sync remains blocked by the guard.
+
 ## Claude update — 2026-10-17
 
 - Applied the explicitly approved Doberman 0.18.7 adapter repair. Installed and

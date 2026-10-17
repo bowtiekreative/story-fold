@@ -15,9 +15,15 @@ ffprobe validation, 1–3 cameras, 2-hour duration limit, upload size limit, ffm
 argument arrays (no shell interpolation), fixed export artifact names and
 project ID validation. The local OS must provide updated ffmpeg/ffprobe.
 
-Real transcription sends audio to OpenAI only when explicitly selected on
-upload. Topic classification sends transcript text to the configured provider.
-The offline sample and imported timed transcripts do not call a provider.
+Local Whisper runs in an isolated Python environment with a downloaded model.
+The setup command installs pinned faster-whisper from PyPI and downloads the
+public small model from Systran on Hugging Face. Runtime model loading is
+local-only with Hugging Face offline mode; interview audio stays local.
+If local Whisper is unavailable and an OpenAI key is configured, the displayed
+OpenAI Whisper fallback sends camera A audio to OpenAI. Topic classification
+sends transcript text to the configured provider unless manual topics is
+selected. Imported timed transcripts skip speech recognition; the synthetic
+sample and manual-topic imports make no provider calls.
 
 Single-user local use is the v1 boundary. Authentication, quotas, resource
 isolation, encryption and upload scanning need a separate review before public

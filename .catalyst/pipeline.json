@@ -1,8 +1,8 @@
 {
   "name": "Storyfold",
-  "milestone": "Claude connected - production hardening continues",
-  "updatedAt": "2026-10-17T07:06:58.431Z",
-  "message": "Claude topic grouping is connected and shown in the app. Build, lint, 23 tests and six browser flows passed. The approved Doberman repair is installed; security policy remains enabled. Claude-only uploads require timed transcript JSON. A separate live integration probe and Blue progress sync remain blocked by the high-entropy rule.",
+  "milestone": "Automatic Whisper implemented - local setup pending",
+  "updatedAt": "2026-10-17T08:39:00Z",
+  "message": "Automatic Whisper is wired into video uploads; transcript JSON is optional and Claude still handles topic suggestions. Doberman blocked the runtime download with no approval dialog. Run npm run setup:whisper in a regular project terminal; actual speech testing awaits that setup. Local checks are recorded in docs/validation/RESULTS.md.",
   "tasks": [
     {
       "id": "foundation",
@@ -123,6 +123,22 @@
       "evidence": [
         "apps/server/topics.ts",
         "tests/topics.test.ts",
+        "tests/e2e/app.spec.ts",
+        "docs/validation/RESULTS.md"
+      ]
+    },
+    {
+      "id": "whisper-auto",
+      "title": "Transcribe video automatically with Whisper",
+      "acceptance": "Local Whisper installed and exercised on speech, video-only upload creates word timestamps and sentence clips, optional transcript import remains available, and UI/backend tests pass.",
+      "lane": "Now",
+      "status": "doing",
+      "evidence": [
+        "apps/server/whisper.ts",
+        "scripts/whisper.py",
+        "scripts/setup-whisper.mjs",
+        "tests/whisper.test.ts",
+        "tests/test_whisper.py",
         "tests/e2e/app.spec.ts",
         "docs/validation/RESULTS.md"
       ]

@@ -27,10 +27,12 @@ export function App() {
     [drag, setDrag] = useState(false),
     [providers, setProviders] = useState({
       transcription: false,
+      speechProvider: "Checking",
       topics: false,
       topicProvider: "Manual",
     });
   const picker = useRef<HTMLInputElement>(null);
+  const transcriptPicker = useRef<HTMLInputElement>(null);
   async function refresh() {
     try {
       setProjects(await api<Summary[]>("/projects"));
@@ -273,9 +275,18 @@ export function App() {
                   </Badge>
                   <small>
                     {providers.transcription
-                      ? "Speech transcription ready"
-                      : "Include a timed transcript JSON with your video."}
+                      ? `${providers.speechProvider} transcribes your video automatically.`
+                      : providers.speechProvider === "Checking"
+                        ? "Checking automatic transcription…"
+                        : "Automatic Whisper transcription needs one-time setup."}
                   </small>
+                  {!providers.transcription &&
+                    providers.speechProvider !== "Checking" && (
+                      <small>
+                        Run <code>npm run setup:whisper</code> once in the
+                        project terminal, then refresh this page.
+                      </small>
+                    )}
                 </div>
                 {files.length > 0 && (
                   <div className="upload-options">
@@ -287,19 +298,36 @@ export function App() {
                         maxLength={120}
                       />
                     </label>
-                    <label>
-                      Timed transcript JSON{" "}
-                      {providers.transcription
-                        ? "(optional)"
-                        : "(required for speech timing)"}
-                      <input
-                        type="file"
-                        accept=".json"
-                        onChange={(e) =>
-                          setTranscript(e.target.files?.[0] ?? null)
-                        }
-                      />
-                    </label>
+                    <details className="transcript-import">
+                      <summary>Use an existing transcript (optional)</summary>
+                      <label>
+                        Timed transcript JSON (optional)
+                        <input
+                          ref={transcriptPicker}
+                          type="file"
+                          accept=".json"
+                          onChange={(e) =>
+                            setTranscript(e.target.files?.[0] ?? null)
+                          }
+                        />
+                      </label>
+                      {transcript && (
+                        <button
+                          className="button quiet"
+                          onClick={() => {
+                            setTranscript(null);
+                            if (transcriptPicker.current)
+                              transcriptPicker.current.value = "";
+                          }}
+                        >
+                          Use automatic Whisper instead
+                        </button>
+                      )}
+                      <small>
+                        Timed JSON:{" "}
+                        {'{"words":[{"text":"Hello.","start":0.2,"end":1.1}]}'}
+                      </small>
+                    </details>
                     <label className="check-label">
                       <input
                         type="checkbox"
@@ -309,11 +337,13 @@ export function App() {
                       Organize topics myself
                     </label>
                     <small>
-                      Timed JSON:{" "}
-                      {'{"words":[{"text":"Hello.","start":0.2,"end":1.1}]}'}{" "}
-                      {providers.transcription
-                        ? "Automatic speech transcription sends audio to OpenAI. "
-                        : "With an imported transcript, audio stays local. "}
+                      {transcript
+                        ? "Using your imported transcript; audio stays local. "
+                        : providers.speechProvider === "Local Whisper"
+                          ? "Whisper transcribes audio on this computer. "
+                          : providers.speechProvider === "OpenAI Whisper"
+                            ? "Whisper transcribes speech using the OpenAI audio API. "
+                            : "Whisper will create the transcript after setup. "}
                       {!manual && providers.topics
                         ? `Transcript text is sent to ${providers.topicProvider} for topic suggestions.`
                         : "Organize topics locally."}
@@ -324,12 +354,7 @@ export function App() {
                 <div className="upload-actions">
                   <button
                     className="button primary"
-                    disabled={
-                      busy ||
-                      (files.length > 0 &&
-                        !providers.transcription &&
-                        !transcript)
-                    }
+                    disabled={busy}
                     onClick={() =>
                       files.length ? void upload() : picker.current?.click()
                     }

@@ -7,10 +7,12 @@ and undoing them through Git.
 
 ## Run it
 
-Requires Node **22.12+**, Git, and `ffmpeg` / `ffprobe` on PATH.
+Requires Node **22.12+**, Python **3.9+** with `venv`, Git, and
+`ffmpeg` / `ffprobe` on PATH.
 
 ```sh
 npm ci
+npm run setup:whisper
 npm run dev
 ```
 
@@ -27,8 +29,13 @@ quiet tone and supplied transcript are labeled; it does not prove speech
 recognition or camera alignment.
 
 Upload 1–3 videos, each no longer than two hours (4 GiB per uploaded file).
-For speech transcription, add a timed transcript JSON or configure
-`OPENAI_API_KEY` in private `.env`. For Claude topic folders, configure
+Whisper automatically transcribes camera A and generates word timestamps;
+no transcript JSON is required. Run `npm run setup:whisper` once to install
+the isolated Python runtime and download the small model (about 500 MB).
+Setup needs internet; subsequent local transcription runs offline on the CPU.
+Refresh the app after setup and look for **Local Whisper** readiness.
+
+For Claude topic folders, configure
 `CLAUDE_API_KEY` (or `ANTHROPIC_API_KEY`) in that private file. Claude is selected
 when its key is present. The backend reads the file on startup; restart after
 changing keys. Keep example files empty and never commit credentials.
@@ -36,7 +43,10 @@ changing keys. Keep example files empty and never commit credentials.
 Claude uses `claude-haiku-5-5` by default; `CLAUDE_MODEL` overrides it.
 `TOPIC_MODEL` applies to OpenAI and defaults to `gpt-4.1-mini`.
 
-Timed transcripts have this shape, with seconds on the camera A clock:
+**Organize topics myself** skips AI topic grouping while Whisper still
+transcribes automatically. An existing transcript can optionally be imported
+under **Use an existing transcript**. It has this shape, with seconds on the
+camera A clock:
 
 ```json
 {
@@ -47,13 +57,14 @@ Timed transcripts have this shape, with seconds on the camera A clock:
 }
 ```
 
-Automatic speech transcription sends camera A audio to OpenAI's `whisper-1`.
-Automatic topics send transcript text to Claude or OpenAI, as shown in the
-upload form. Claude topic grouping requires an imported timed transcript when
-no transcription provider is configured. The sample and manual-topic transcript
-import make no provider calls. Without a topic provider, organize folders
-manually. Read the [Claude structured-output documentation](https://platform.claude.com/docs/en/build-with-claude/structured-outputs) and the
-[official transcription guide](https://developers.openai.com/api/docs/guides/speech-to-text).
+Local Whisper keeps interview audio on this computer. If local Whisper is not
+installed and `OPENAI_API_KEY` is configured, the existing OpenAI `whisper-1`
+fallback sends camera A audio to OpenAI; the upload form identifies the active
+speech provider. Automatic topics send transcript text to Claude or OpenAI,
+as shown in the upload form. Imported transcripts skip speech recognition.
+The sample and manual-topic transcript import make no provider calls.
+Without a topic provider, organize folders manually. The local worker uses
+[faster-whisper](https://github.com/SYSTRAN/faster-whisper) with word timestamps.
 
 Projects, original footage, proxies, word timestamps, waveforms and exports live
 under ignored `data/projects/`. Set `STORYFOLD_DATA_DIR` to use another disk.
@@ -91,6 +102,7 @@ npm run catalyst -- resume
 npm run typecheck
 npm run lint
 npm test
+python3 -m unittest discover -s tests -p test_whisper.py
 npm run build
 npm run test:media
 # With npm run dev running in another terminal:

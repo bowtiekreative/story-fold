@@ -448,6 +448,15 @@ input[type="checkbox"] {
   color: var(--ink-500);
   font-size: 12px;
 }
+.transcript-import summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-500);
+}
+.transcript-import[open] label {
+  margin-top: 12px;
+}
 .upload-options small {
   font-size: 10px;
   line-height: 1.8;

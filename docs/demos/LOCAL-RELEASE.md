@@ -1,6 +1,9 @@
 # Try the local build
 
-1. Run `npm ci`, then `npm run dev`. Open <http://127.0.0.1:5173>.
+1. Run `npm ci`, `npm run setup:whisper`, then `npm run dev`.
+   Open <http://127.0.0.1:5173>. Choose a video with audible dialogue; Whisper
+   generates the transcript and timing automatically. Transcript import is
+   optional. Manual topics only skips AI folder suggestions.
 2. Open the synthetic sample. Its test pattern and quiet tone are labeled; the
    text is a supplied fixture, not a transcription of the tone.
 3. Add a topic folder, preview a sentence, change an angle, trim a cut and enable

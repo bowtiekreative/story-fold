@@ -29,6 +29,7 @@ import {
   type ProcessingInput,
 } from "./media.ts";
 import * as catalyst from "./catalyst.ts";
+import { speechStatus } from "./whisper.ts";
 import type { Project, CamId } from "../../packages/timeline/index.ts";
 
 try {
@@ -236,7 +237,6 @@ app.post("/api/projects", (req, res, next) => {
             req.body.name || videos[0].originalname.replace(/\.[^.]+$/, ""),
           );
         const project = newProject(name);
-        await fs.mkdir(projectDir(project.id), { recursive: true });
         const input: ProcessingInput = {
           manual: req.body.grouping === "manual",
         };
@@ -246,15 +246,34 @@ app.post("/api/projects", (req, res, next) => {
             throw new Error(
               "Timed transcript JSON must be smaller than 20 MB.",
             );
-          const data = JSON.parse(
-            await fs.readFile(transcriptFile.path, "utf8"),
-          ) as { words: unknown };
-          input.words = wordSchema.array().min(1).max(200000).parse(data.words);
+          let data: unknown;
+          try {
+            data = JSON.parse(await fs.readFile(transcriptFile.path, "utf8"));
+          } catch {
+            throw new Error(
+              "The optional transcript is not valid JSON. Remove it to transcribe the video automatically with Whisper.",
+            );
+          }
+          const parsed = wordSchema
+            .array()
+            .min(1)
+            .max(200000)
+            .safeParse(
+              typeof data === "object" && data !== null && "words" in data
+                ? data.words
+                : undefined,
+            );
+          if (!parsed.success)
+            throw new Error(
+              "The optional transcript needs words with text, start and end times. Remove it to let Whisper create the transcript automatically.",
+            );
+          input.words = parsed.data;
         }
-        if (!input.words && !process.env.OPENAI_API_KEY)
+        if (!input.words && !(await speechStatus()).transcription)
           throw new Error(
-            "Add a timed transcript JSON or configure OPENAI_API_KEY on the server.",
+            "Whisper needs one-time setup on this computer. Run npm run setup:whisper in the project terminal, then upload your video again.",
           );
+        await fs.mkdir(projectDir(project.id), { recursive: true });
         for (let i = 0; i < videos.length; i++) {
           const id = (["A", "B", "C"] as CamId[])[i];
           await fs.rename(

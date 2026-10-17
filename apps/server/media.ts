@@ -15,17 +15,30 @@ import {
 import { projectDir, saveProject, readJson, writeJson } from "./storage.ts";
 import { wordSchema } from "./model.ts";
 import { requestTopics, topicSettings, TopicProviderError } from "./topics.ts";
+import { speechStatus, speechWords, whisperPaths } from "./whisper.ts";
 
 export async function command(
   bin: string,
   args: string[],
   onOutput?: (text: string) => void,
+  options: { timeoutMs?: number; env?: NodeJS.ProcessEnv } = {},
 ): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const child = spawn(bin, args, {
       stdio: ["ignore", "pipe", "pipe"],
       windowsHide: true,
+      env: options.env ?? process.env,
     });
+    const timeout = options.timeoutMs
+      ? setTimeout(() => {
+          child.kill("SIGKILL");
+          reject(
+            new Error(
+              `${path.basename(bin)} took too long. Try a shorter clip or resume processing.`,
+            ),
+          );
+        }, options.timeoutMs)
+      : undefined;
     const chunks: Buffer[] = [];
     let error = "";
     child.stdout.on("data", (b: Buffer) => {
@@ -42,11 +55,14 @@ export async function command(
         ),
       ),
     );
-    child.on("close", (code) =>
-      code === 0
-        ? resolve(Buffer.concat(chunks))
-        : reject(new Error(`${bin} failed: ${error.slice(-1500)}`)),
-    );
+    child.on("close", (code) => {
+      clearTimeout(timeout);
+      if (code === 0) resolve(Buffer.concat(chunks));
+      else
+        reject(
+          new Error(`${path.basename(bin)} failed: ${error.slice(-1500)}`),
+        );
+    });
   });
 }
 const ff = (args: string[], onOutput?: (text: string) => void) =>
@@ -176,72 +192,86 @@ async function envelope(file: string) {
   );
 }
 const accents: Accent[] = ["violet", "coral", "teal", "amber", "sky", "lime"];
-async function transcribe(project: Project): Promise<Word[]> {
-  if (!process.env.OPENAI_API_KEY)
+async function transcribe(
+  project: Project,
+  changed: (detail: string, pct: number) => Promise<void>,
+): Promise<Word[]> {
+  const status = await speechStatus();
+  if (!status.transcription)
     throw new Error(
-      "Transcription needs OPENAI_API_KEY on the server. You can also upload a timed transcript JSON with your video.",
+      "Automatic Whisper transcription needs setup. Run npm run setup:whisper in the project terminal, then resume processing.",
     );
   const dir = projectDir(project.id);
   const words: Word[] = [];
   for (let start = 0; start < project.cameras[0].duration; start += 599) {
+    await changed(
+      `${status.speechProvider}: transcribing from minute ${Math.floor(start / 60)} of ${Math.ceil(project.cameras[0].duration / 60)}`,
+      30 + (20 * start) / project.cameras[0].duration,
+    );
     const wav = path.join(dir, `audio-${start}.wav`);
-    await ff([
-      "-ss",
-      String(start),
-      "-i",
-      path.join(dir, project.cameras[0].sourcePath),
-      "-t",
-      "600",
-      "-vn",
-      "-ar",
-      "16000",
-      "-ac",
-      "1",
-      wav,
-    ]);
-    const form = new FormData();
-    form.set(
-      "file",
-      new Blob([new Uint8Array(await fs.readFile(wav))], { type: "audio/wav" }),
-      "interview.wav",
-    );
-    form.set("model", "whisper-1");
-    form.set("response_format", "verbose_json");
-    form.append("timestamp_granularities[]", "word");
-    const response = await fetch(
-      "https://api.openai.com/v1/audio/transcriptions",
-      {
-        method: "POST",
-        headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
-        body: form,
-        signal: AbortSignal.timeout(300000),
-      },
-    );
-    if (!response.ok)
-      throw new Error(
-        `Transcription provider returned ${response.status}. Check your server key, credits and audio format.`,
-      );
-    const result = (await response.json()) as {
-      words?: { word: string; start: number; end: number }[];
-      segments?: { text: string }[];
-      text?: string;
-    };
-    if (!result.words?.length)
-      throw new Error("Transcription provider returned no word timestamps.");
-    // Whisper words may omit punctuation; align the punctuated text by token order.
-    const tokens = (result.text ?? "").split(/\s+/).filter(Boolean);
-    const normalize = (s: string) =>
-      s.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
-    let ti = 0;
-    for (const w of result.words) {
-      let text = w.word.trim();
-      if (tokens[ti] && normalize(tokens[ti]) === normalize(text))
-        text = tokens[ti++];
-      const word = {
-        text,
-        start: w.start + start,
-        end: Math.min(w.end + start, project.cameras[0].duration),
-      };
+    const checkpoint = path.join(dir, `transcript-${start}.json`);
+    let result: unknown;
+    if (await exists(checkpoint)) {
+      result = await readJson(checkpoint);
+    } else {
+      await ff([
+        "-ss",
+        String(start),
+        "-i",
+        path.join(dir, project.cameras[0].sourcePath),
+        "-t",
+        "600",
+        "-vn",
+        "-ar",
+        "16000",
+        "-ac",
+        "1",
+        wav,
+      ]);
+      if (status.speechProvider === "Local Whisper") {
+        const worker = whisperPaths();
+        const output = await command(
+          worker.python,
+          [worker.worker, "--model", worker.model, "--audio", wav],
+          undefined,
+          { timeoutMs: 1800000, env: { ...process.env, HF_HUB_OFFLINE: "1" } },
+        );
+        result = JSON.parse(output.toString());
+      } else {
+        const form = new FormData();
+        form.set(
+          "file",
+          new Blob([new Uint8Array(await fs.readFile(wav))], {
+            type: "audio/wav",
+          }),
+          "interview.wav",
+        );
+        form.set("model", "whisper-1");
+        form.set("response_format", "verbose_json");
+        form.append("timestamp_granularities[]", "word");
+        const response = await fetch(
+          "https://api.openai.com/v1/audio/transcriptions",
+          {
+            method: "POST",
+            headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
+            body: form,
+            signal: AbortSignal.timeout(300000),
+          },
+        );
+        if (!response.ok)
+          throw new Error(
+            `Transcription provider returned ${response.status}. Check your server key, credits and audio format.`,
+          );
+        result = await response.json();
+      }
+      speechWords(result, start, project.cameras[0].duration);
+      await writeJson(checkpoint, result);
+    }
+    for (const word of speechWords(
+      result,
+      start,
+      project.cameras[0].duration,
+    )) {
       if (
         word.start >= (words.at(-1)?.end ?? 0) - 0.03 &&
         word.end > word.start
@@ -249,6 +279,14 @@ async function transcribe(project: Project): Promise<Word[]> {
         words.push(word);
     }
   }
+  if (!words.length)
+    throw new Error(
+      "Whisper found no speech. Check that camera A has audible dialogue, then try again.",
+    );
+  await changed(
+    `${status.speechProvider}: ${words.length} words transcribed`,
+    50,
+  );
   return words;
 }
 export async function groupTopics(project: Project) {
@@ -481,7 +519,10 @@ export async function processProject(
     const wordFile = path.join(dir, "words.json");
     const words = (await exists(wordFile))
       ? await readJson<Word[]>(wordFile)
-      : (input.words ?? (await transcribe(project)));
+      : (input.words ??
+        (await transcribe(project, (detail, pct) =>
+          progress("transcribing", detail, pct),
+        )));
     wordSchema.array().min(1).max(200000).parse(words);
     await writeJson(wordFile, words);
     await progress("segmenting", "Finding sentence boundaries", 55);

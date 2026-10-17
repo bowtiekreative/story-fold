@@ -67,6 +67,14 @@ The live approval dialog remains unavailable in this session. The remaining
 high-entropy rule blocked an extra integration probe and a Blue progress note;
 those actions were not rerouted or used to weaken the rule.
 
+During the automatic Whisper update, the package download was refused with
+`egress_requires_auth` / `correlated_trifecta`. No interactive approval channel
+was available. The download was not replayed through a wrapper; the documented
+`npm run setup:whisper` command is for Ryan's regular interactive terminal.
+Local integration code and mocked-worker tests were completed independently;
+real speech verification awaits installation. A proposed CI workflow edit was
+also refused as a sensitive path and left unchanged.
+
 Doberman also rejected creation of the interactive repair helper. That helper
 was not written through another tool. The following is the manual application
 command retained for reference; the repair is already installed:

@@ -24,11 +24,20 @@ check prevents stale clients from overwriting newer project changes.
 
 ## Media flow
 
-Upload → ffprobe → proxy + waveform → transcription (or imported timed words)
+Upload → ffprobe → proxy + waveform → automatic Whisper (or imported timed words)
 → sentence splitting → topic classification → editor. Missing provider setup is
 reported explicitly. A labeled synthetic sample exercises the pipeline offline.
 Camera A is the audio master; virtual B/C crops use the same file. Additional
 real cameras require verified offsets before the project is ready.
+
+`npm run setup:whisper` prepares `data/runtime/whisper` and the small model in
+`data/models/whisper-small`. A readiness marker is written only after the model
+loads successfully. The server spawns `scripts/whisper.py` offline on CPU with
+int8 computation, VAD and word timestamps. It processes ten-minute audio chunks
+with a one-second overlap and persists validated chunk results so interrupted
+processing can resume. The existing OpenAI Whisper API is used only when local
+Whisper is unavailable and an OpenAI key is configured. Claude handles topic
+grouping independently of speech recognition.
 
 The shared timeline flattens live topic groups and individual sentences and
 computes separate audio and video intervals for L-cuts. Preview, MP4 rendering,

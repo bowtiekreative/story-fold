@@ -1,12 +1,17 @@
 import { test, expect } from "@playwright/test";
 import { promises as fs } from "node:fs";
 import path from "node:path";
-test("Claude topic readiness still requires timed words when speech transcription is unavailable", async ({
+test("Whisper transcription is automatic and existing transcripts are optional", async ({
   page,
 }) => {
   await page.route("**/api/health", (route) =>
     route.fulfill({
-      json: { transcription: false, topics: true, topicProvider: "Claude" },
+      json: {
+        transcription: true,
+        speechProvider: "Local Whisper",
+        topics: true,
+        topicProvider: "Claude",
+      },
     }),
   );
   await page.goto("/");
@@ -22,7 +27,14 @@ test("Claude topic readiness still requires timed words when speech transcriptio
     name: "Find my story",
     exact: true,
   });
-  await expect(start).toBeDisabled();
+  await expect(start).toBeEnabled();
+  await expect(
+    page.getByText("Local Whisper transcribes your video automatically."),
+  ).toBeVisible();
+  await expect(page.getByLabel(/Timed transcript JSON/)).not.toBeVisible();
+  await page
+    .getByText("Use an existing transcript (optional)", { exact: true })
+    .click();
   await expect(
     page.getByText(/Transcript text is sent to Claude/),
   ).toBeVisible();
@@ -32,10 +44,55 @@ test("Claude topic readiness still requires timed words when speech transcriptio
     buffer: Buffer.from('{"words":[{"text":"Hello.","start":0,"end":1}]}'),
   });
   await expect(start).toBeEnabled();
+  await page
+    .getByRole("button", { name: "Use automatic Whisper instead" })
+    .click();
+  await expect(page.getByLabel(/Timed transcript JSON/)).toHaveValue("");
   await page.getByLabel("Organize topics myself").check();
+  await expect(start).toBeEnabled();
   await expect(
     page.getByText(/Transcript text is sent to Claude/),
   ).not.toBeVisible();
+  let body = "";
+  await page.route("**/api/projects", async (route) => {
+    if (route.request().method() !== "POST") return route.continue();
+    body = route.request().postDataBuffer()!.toString();
+    await route.fulfill({
+      status: 400,
+      json: { error: "Upload submission checked" },
+    });
+  });
+  await start.click();
+  await expect(page.getByText("Upload submission checked")).toBeVisible();
+  expect(body).toContain('name="files"');
+  expect(body).toMatch(/name="grouping"\r\n\r\nmanual/);
+  expect(body).not.toContain('name="transcript"');
+});
+test("invalid optional transcript imports explain how to switch to Whisper", async ({
+  request,
+}) => {
+  const { token } = await request.get("/api/session").then((r) => r.json());
+  for (const json of ["not JSON", '{"words":[{"text":"Missing timing"}]}']) {
+    const response = await request.post("/api/projects", {
+      headers: { "X-Storyfold-Token": token },
+      multipart: {
+        files: {
+          name: "interview.mp4",
+          mimeType: "video/mp4",
+          buffer: Buffer.from("unused video fixture"),
+        },
+        transcript: {
+          name: "transcript.json",
+          mimeType: "application/json",
+          buffer: Buffer.from(json),
+        },
+      },
+    });
+    expect(response.status()).toBe(400);
+    expect((await response.json()).error).toMatch(
+      /optional transcript.*Remove it.*Whisper/,
+    );
+  }
 });
 test("welcome, sample processing, editing, autosave, playback and export work together", async ({
   page,

@@ -16,6 +16,7 @@ interface Dashboard {
     ffmpeg: boolean;
     ffprobe: boolean;
     transcription: boolean;
+    speechProvider: string;
     topicModel: string;
     topicProvider: string;
     topics: boolean;
@@ -541,8 +542,8 @@ export function Catalyst() {
                           tone={data.tools.transcription ? "teal" : "amber"}
                         >
                           {data.tools.transcription
-                            ? "Provider configured"
-                            : "Timed transcript / sample available"}
+                            ? `${data.tools.speechProvider} configured`
+                            : "Whisper setup needed"}
                         </Badge>
                       </span>
                       <span>
