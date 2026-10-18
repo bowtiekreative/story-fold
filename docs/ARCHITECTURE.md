@@ -39,6 +39,15 @@ processing can resume. The existing OpenAI Whisper API is used only when local
 Whisper is unavailable and an OpenAI key is configured. Claude handles topic
 grouping independently of speech recognition.
 
+Topic grouping uses at most 300 sentences and 60,000 sentence-text characters
+per assignment request. Multi-batch interviews first discover 4–10 shared
+folders from up to 120 excerpts distributed across the full transcript, then
+classify every full sentence against those fixed IDs. Each request retries once
+after malformed or failed output. Assignments must cover exactly the requested
+sentence IDs and reference known folders. All results are applied together;
+failure retains the complete transcript in a consistent manual folder. Progress
+events report discovery and batch counts; resume reuses saved word timings.
+
 Setup also decodes a small silent WAV before reporting readiness. PyAV is
 constrained below 19 because faster-whisper 1.2.1 calls an option removed in
 that release; a successful model load alone did not catch this incompatibility.

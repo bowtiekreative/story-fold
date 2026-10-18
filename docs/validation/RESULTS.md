@@ -1,5 +1,30 @@
 # Validation record — 2026-10-15
 
+## Long interview grouping — 2026-10-18
+
+- Removed the 400-sentence rejection. Grouping now discovers shared folders
+  from excerpts spanning the whole interview, then assigns full sentence text
+  in requests bounded to 300 sentences and 60,000 sentence-text characters.
+  Structured batch output permits only the discovered folder IDs.
+- All assignments must cover the requested sentence IDs exactly once. Each
+  request gets one retry. Results are applied together; failed classification
+  leaves the whole transcript in a consistent, editable manual folder.
+- 29 unit/integration tests, typecheck, ESLint and the frontend build pass.
+  New checks cover a 1,001-sentence interview, character-budget batching without
+  truncated assignment text, shared folder IDs, targeted retries, monotonic
+  progress, preserved speech timing and a failure after an earlier batch passes.
+- The saved interview that hit the old limit has 612 sentences and 11,647
+  cached words. Its transcription is still present. An automatic-resume helper
+  under `/tmp` was refused by Doberman's repository-boundary and high-entropy
+  checks and was not recreated elsewhere. Refresh the project and select
+  **Resume processing** to reuse those saved words and media outputs.
+- Live Claude Haiku 5.5 validation passed on 612 generated sentences in 67.3
+  seconds: four shared folders, three assignment batches, complete sentence
+  coverage and unchanged timing. See [topic-batches.json](topic-batches.json).
+  No private interview text was sent by this test or included in artifacts.
+  The saved interview itself still awaits the user's Resume action. Blue
+  progress sync remains blocked by the guard.
+
 ## Automatic Whisper update — 2026-10-17
 
 - **Installed and speech-tested after Ryan's explicit approval.** The setup

@@ -1,8 +1,8 @@
 {
   "name": "Storyfold",
-  "milestone": "Automatic Whisper verified - production hardening continues",
-  "updatedAt": "2026-10-18T05:55:57Z",
-  "message": "Local Whisper is installed and verified through a video-only browser upload: 41 timed words from 13.5 seconds of synthesized speech opened in the editor without transcript JSON. Claude remains the topic provider. Refresh Storyfold and upload your interview. Real-interview accuracy and the remaining production tasks are still open.",
+  "milestone": "Long-interview grouping verified - production hardening continues",
+  "updatedAt": "2026-10-18T06:48:01Z",
+  "message": "Removed the 400-sentence grouping cap. Live Claude validation assigned all 612 generated sentences to shared folders in three batches. Your saved 612-sentence interview retains 11,647 timed words: refresh its page and click Resume processing. Doberman blocked the automatic-resume helper. Remaining production work stays on the roadmap.",
   "tasks": [
     {
       "id": "foundation",
@@ -117,13 +117,28 @@
     {
       "id": "claude-topics",
       "title": "Use Claude for topic folders",
-      "acceptance": "Private key accepted; Claude topic requests and validation are wired into the app, with clear transcript requirements. Build, unit and browser checks pass. Live end-to-end grouping still awaits a permitted probe.",
+      "acceptance": "Private key accepted; Claude topic requests and validation are wired into the app. Live application grouping passed with 612 generated sentences, complete assignments and preserved timing. Full private-interview review remains separate.",
       "lane": "Now",
       "status": "done",
       "evidence": [
         "apps/server/topics.ts",
         "tests/topics.test.ts",
+        "docs/validation/topic-batches.json",
         "tests/e2e/app.spec.ts",
+        "docs/validation/RESULTS.md"
+      ]
+    },
+    {
+      "id": "long-topics",
+      "title": "Group interviews beyond 400 sentences",
+      "acceptance": "Bounded requests share one folder vocabulary, cover every sentence, report batch progress and preserve speech timing. Retry and failure checks pass; live Claude grouping of 612 generated sentences succeeds. Saved projects can resume using cached transcription.",
+      "lane": "Now",
+      "status": "done",
+      "evidence": [
+        "apps/server/topics.ts",
+        "apps/server/media.ts",
+        "tests/topics.test.ts",
+        "docs/validation/topic-batches.json",
         "docs/validation/RESULTS.md"
       ]
     },

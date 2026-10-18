@@ -78,6 +78,12 @@ public test-fixture download was refused, so validation used local synthesis.
 A proposed CI workflow edit was also refused as a sensitive path and left
 unchanged. No guard policy was disabled or weakened.
 
+During the long-interview grouping repair, an automatic-resume validation
+helper targeting `/tmp` was refused by the repository-boundary and high-entropy
+checks. It was not recreated under another path or run through another writer.
+The code repair and independent synthetic-topic tests continued. The existing
+app's **Resume processing** control remains available for the saved interview.
+
 Doberman also rejected creation of the interactive repair helper. That helper
 was not written through another tool. The following is the manual application
 command retained for reference; the repair is already installed:

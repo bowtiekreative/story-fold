@@ -66,6 +66,13 @@ The sample and manual-topic transcript import make no provider calls.
 Without a topic provider, organize folders manually. The local worker uses
 [faster-whisper](https://github.com/SYSTRAN/faster-whisper) with word timestamps.
 
+Long interviews use one shared set of topic folders, discovered from excerpts
+spanning the interview. Full sentence text is then assigned in batches bounded
+by sentence count and text size. Each request gets one retry; if grouping cannot
+finish, the complete transcript remains editable with manual topics.
+If a saved project stopped at the former 400-sentence limit, refresh its page
+and select **Resume processing**. Saved word timings and media outputs are reused.
+
 Projects, original footage, proxies, word timestamps, waveforms and exports live
 under ignored `data/projects/`. Set `STORYFOLD_DATA_DIR` to use another disk.
 Processing reports real progress and can resume from persisted outputs after an
@@ -126,6 +133,13 @@ STORYFOLD_TEST_WHISPER=1 npm run test:e2e -- tests/e2e/whisper.spec.ts
 Its evidence is `docs/validation/whisper-smoke.json`. This short synthesized
 clip does not measure real-interview accuracy.
 
+With a configured Claude key, the opt-in grouping check makes live requests
+using 612 generated sentences and records `docs/validation/topic-batches.json`:
+
+```sh
+STORYFOLD_TEST_TOPICS=1 node --import tsx --test --test-name-pattern="live Claude groups" tests/topics.test.ts
+```
+
 The [demo checklist](docs/demos/LOCAL-RELEASE.md) describes the user flow.
 [Architecture](docs/ARCHITECTURE.md), [decisions](docs/DECISIONS.md) and
 [security boundaries](docs/SECURITY.md) document the implementation.
@@ -135,8 +149,8 @@ The [demo checklist](docs/demos/LOCAL-RELEASE.md) describes the user flow.
 This is the first working local release. Real-interview transcription accuracy,
 one-frame multicamera alignment, gap-free playback on slow disks, NLE import,
 Windows installers and publishing remain to be validated. Automatic topic
-classification currently handles up to 400 sentences; longer imports can use
-manual topics. Audio cuts use 5ms fades to avoid clicks, rather than the brief's
+suggestions need editorial review; folder discovery samples the interview.
+Audio cuts use 5ms fades to avoid clicks, rather than the brief's
 10ms crossfade. EDL records virtual crops as notes; FCPXML requires relinking
 source files and has not been verified in Final Cut Pro.
 

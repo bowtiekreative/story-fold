@@ -14,7 +14,7 @@ import {
 } from "../../packages/timeline/index.ts";
 import { projectDir, saveProject, readJson, writeJson } from "./storage.ts";
 import { wordSchema } from "./model.ts";
-import { requestTopics, topicSettings, TopicProviderError } from "./topics.ts";
+import { classifyTopics, topicSettings, TopicProviderError } from "./topics.ts";
 import { speechStatus, speechWords, whisperPaths } from "./whisper.ts";
 
 export async function command(
@@ -289,7 +289,10 @@ async function transcribe(
   );
   return words;
 }
-export async function groupTopics(project: Project) {
+export async function groupTopics(
+  project: Project,
+  changed?: (detail: string, fraction: number) => Promise<void>,
+) {
   if (!topicSettings().topics) {
     project.topics = [
       {
@@ -297,7 +300,7 @@ export async function groupTopics(project: Project) {
         name: "Interview",
         accent: "violet",
         summary:
-          "Imported transcript. Create topic folders and move sentences to organize it.",
+          "Create topic folders and move sentences to organize your transcript.",
       },
     ];
     project.grouping = "Manual topics";
@@ -307,97 +310,28 @@ export async function groupTopics(project: Project) {
     );
     return;
   }
-  if (project.sentences.length > 400)
-    throw new Error(
-      "This first release supports automatic grouping for up to 400 sentences. Import a shorter interview or organize the transcript manually.",
+  try {
+    const { topics, assignments } = await classifyTopics(
+      project.sentences,
+      changed,
     );
-  const schema = {
-    type: "object",
-    additionalProperties: false,
-    required: ["topics", "assignments"],
-    properties: {
-      topics: {
-        type: "array",
-        items: {
-          type: "object",
-          additionalProperties: false,
-          required: ["id", "name", "summary"],
-          properties: {
-            id: { type: "string" },
-            name: { type: "string" },
-            summary: { type: "string" },
-          },
-        },
-      },
-      assignments: {
-        type: "array",
-        items: {
-          type: "object",
-          additionalProperties: false,
-          required: ["n", "topicId"],
-          properties: { n: { type: "integer" }, topicId: { type: "string" } },
-        },
-      },
-    },
-  };
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const out = (await requestTopics(project.sentences, schema)) as {
-        topics: { id: string; name: string; summary: string }[];
-        assignments: { n: number; topicId: string }[];
-      };
-      if (
-        !Array.isArray(out.topics) ||
-        out.topics.length < 4 ||
-        out.topics.length > 10 ||
-        new Set(out.topics.map((t) => t.id)).size !== out.topics.length ||
-        out.topics.some(
-          (t) =>
-            !/^[\w-]{1,80}$/.test(t.id) ||
-            typeof t.name !== "string" ||
-            t.name.length > 80 ||
-            typeof t.summary !== "string",
-        )
-      )
-        throw new Error("Invalid topic folders.");
-      const assignments = new Map(out.assignments.map((a) => [a.n, a.topicId]));
-      if (
-        out.assignments.length !== project.sentences.length ||
-        assignments.size !== project.sentences.length ||
-        project.sentences.some((s) => !assignments.has(s.n))
-      )
-        throw new Error("Topic assignments must cover each sentence once.");
-      project.topics = out.topics.map((t, i) => ({
-        ...t,
-        accent: accents[i % accents.length],
-      }));
-      for (const s of project.sentences) {
-        const id = assignments.get(s.n)!;
-        s.topicId = project.topics.some((t) => t.id === id) ? id : "other";
-      }
-      if (
-        project.sentences.some((s) => s.topicId === "other") &&
-        !project.topics.some((t) => t.id === "other")
-      )
-        project.topics.push({ id: "other", name: "Other", accent: "lime" });
-      project.grouping = `${topicSettings().topicProvider} topic suggestions — review before editing`;
-      return;
-    } catch (error) {
-      if (attempt === 1) {
-        project.topics = [
-          { id: "interview", name: "Interview", accent: "violet" },
-        ];
-        project.grouping = "Manual topics";
-        for (const sentence of project.sentences)
-          sentence.topicId = "interview";
-        project.warnings.push(
-          (error instanceof TopicProviderError
-            ? error.message
-            : "Topic classification failed validation.") +
-            " Your transcript is intact; organize it manually.",
-        );
-      }
-    }
+    project.topics = topics.map((topic, i) => ({
+      ...topic,
+      accent: accents[i % accents.length],
+    }));
+    for (const sentence of project.sentences)
+      sentence.topicId = assignments.get(sentence.n)!;
+    project.grouping = `${topicSettings().topicProvider} topic suggestions — review before editing`;
+  } catch (error) {
+    project.topics = [{ id: "interview", name: "Interview", accent: "violet" }];
+    project.grouping = "Manual topics";
+    for (const sentence of project.sentences) sentence.topicId = "interview";
+    project.warnings.push(
+      (error instanceof TopicProviderError
+        ? error.message
+        : "Topic classification failed validation.") +
+        " Your transcript is intact; organize it manually.",
+    );
   }
 }
 async function exists(file: string) {
@@ -568,7 +502,10 @@ export async function processProject(
         { id: "interview", name: "Interview", accent: "violet" },
       ];
       project.grouping = "Manual topics";
-    } else await groupTopics(project);
+    } else
+      await groupTopics(project, (detail, fraction) =>
+        progress("grouping", detail, 82 + 14 * fraction),
+      );
     const seen = new Set<string>();
     let k = 0;
     project.sentences.forEach((s) => {

@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-18T06:48:01.757Z",
+  "provider": "Claude",
+  "model": "claude-haiku-5-5",
+  "fixture": "612 generated sentences; no private interview text",
+  "sentenceCount": 612,
+  "topicCount": 4,
+  "assignmentBatches": 3,
+  "allSentencesAssigned": true,
+  "timingPreserved": true
+}
