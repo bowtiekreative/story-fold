@@ -1,0 +1,218 @@
+{
+  "at": "2026-10-18T05:55:50.493Z",
+  "fixture": "Locally synthesized speech with FFmpeg flite/slt; no private footage",
+  "speechProvider": "Local Whisper",
+  "projectId": "62f5552d-c501-49d4-b67f-2a8c54c37871",
+  "sourceDuration": 13.485,
+  "sentenceCount": 1,
+  "wordCount": 41,
+  "grouping": "Manual topics",
+  "importedTranscript": false,
+  "words": [
+    {
+      "text": "Welcome",
+      "start": 0,
+      "end": 0.42
+    },
+    {
+      "text": "to",
+      "start": 0.42,
+      "end": 0.72
+    },
+    {
+      "text": "the",
+      "start": 0.72,
+      "end": 0.84
+    },
+    {
+      "text": "bakery,",
+      "start": 0.84,
+      "end": 1.12
+    },
+    {
+      "text": "every",
+      "start": 1.64,
+      "end": 1.92
+    },
+    {
+      "text": "morning",
+      "start": 1.92,
+      "end": 2.36
+    },
+    {
+      "text": "we",
+      "start": 2.36,
+      "end": 2.74
+    },
+    {
+      "text": "make",
+      "start": 2.74,
+      "end": 3
+    },
+    {
+      "text": "fresh",
+      "start": 3,
+      "end": 3.34
+    },
+    {
+      "text": "bread",
+      "start": 3.34,
+      "end": 3.56
+    },
+    {
+      "text": "for",
+      "start": 3.56,
+      "end": 3.78
+    },
+    {
+      "text": "our",
+      "start": 3.78,
+      "end": 4
+    },
+    {
+      "text": "neighbors,",
+      "start": 4,
+      "end": 4.44
+    },
+    {
+      "text": "my",
+      "start": 4.78,
+      "end": 4.94
+    },
+    {
+      "text": "mother",
+      "start": 4.94,
+      "end": 5.18
+    },
+    {
+      "text": "taught",
+      "start": 5.18,
+      "end": 5.52
+    },
+    {
+      "text": "me",
+      "start": 5.52,
+      "end": 5.76
+    },
+    {
+      "text": "to",
+      "start": 5.76,
+      "end": 5.86
+    },
+    {
+      "text": "be",
+      "start": 5.86,
+      "end": 6.02
+    },
+    {
+      "text": "patient,",
+      "start": 6.02,
+      "end": 6.48
+    },
+    {
+      "text": "we",
+      "start": 6.72,
+      "end": 6.84
+    },
+    {
+      "text": "started",
+      "start": 6.84,
+      "end": 7.2
+    },
+    {
+      "text": "with",
+      "start": 7.2,
+      "end": 7.52
+    },
+    {
+      "text": "one",
+      "start": 7.52,
+      "end": 7.74
+    },
+    {
+      "text": "small",
+      "start": 7.74,
+      "end": 7.98
+    },
+    {
+      "text": "oven,",
+      "start": 7.98,
+      "end": 8.28
+    },
+    {
+      "text": "today",
+      "start": 8.52,
+      "end": 8.72
+    },
+    {
+      "text": "our",
+      "start": 8.72,
+      "end": 9
+    },
+    {
+      "text": "family",
+      "start": 9,
+      "end": 9.34
+    },
+    {
+      "text": "works",
+      "start": 9.34,
+      "end": 9.76
+    },
+    {
+      "text": "together,",
+      "start": 9.76,
+      "end": 10.18
+    },
+    {
+      "text": "the",
+      "start": 10.52,
+      "end": 10.64
+    },
+    {
+      "text": "best",
+      "start": 10.64,
+      "end": 10.94
+    },
+    {
+      "text": "part",
+      "start": 10.94,
+      "end": 11.22
+    },
+    {
+      "text": "of",
+      "start": 11.22,
+      "end": 11.4
+    },
+    {
+      "text": "this",
+      "start": 11.4,
+      "end": 11.62
+    },
+    {
+      "text": "job",
+      "start": 11.62,
+      "end": 11.94
+    },
+    {
+      "text": "is",
+      "start": 11.94,
+      "end": 12.08
+    },
+    {
+      "text": "seeing",
+      "start": 12.08,
+      "end": 12.3
+    },
+    {
+      "text": "people",
+      "start": 12.3,
+      "end": 12.62
+    },
+    {
+      "text": "smile.",
+      "start": 12.62,
+      "end": 13.04
+    }
+  ]
+}

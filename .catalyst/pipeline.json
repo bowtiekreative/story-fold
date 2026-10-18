@@ -1,8 +1,8 @@
 {
   "name": "Storyfold",
-  "milestone": "Automatic Whisper implemented - local setup pending",
-  "updatedAt": "2026-10-17T08:39:00Z",
-  "message": "Automatic Whisper is wired into video uploads; transcript JSON is optional and Claude still handles topic suggestions. Doberman blocked the runtime download with no approval dialog. Run npm run setup:whisper in a regular project terminal; actual speech testing awaits that setup. Local checks are recorded in docs/validation/RESULTS.md.",
+  "milestone": "Automatic Whisper verified - production hardening continues",
+  "updatedAt": "2026-10-18T05:55:57Z",
+  "message": "Local Whisper is installed and verified through a video-only browser upload: 41 timed words from 13.5 seconds of synthesized speech opened in the editor without transcript JSON. Claude remains the topic provider. Refresh Storyfold and upload your interview. Real-interview accuracy and the remaining production tasks are still open.",
   "tasks": [
     {
       "id": "foundation",
@@ -132,7 +132,7 @@
       "title": "Transcribe video automatically with Whisper",
       "acceptance": "Local Whisper installed and exercised on speech, video-only upload creates word timestamps and sentence clips, optional transcript import remains available, and UI/backend tests pass.",
       "lane": "Now",
-      "status": "doing",
+      "status": "done",
       "evidence": [
         "apps/server/whisper.ts",
         "scripts/whisper.py",
@@ -140,6 +140,8 @@
         "tests/whisper.test.ts",
         "tests/test_whisper.py",
         "tests/e2e/app.spec.ts",
+        "tests/e2e/whisper.spec.ts",
+        "docs/validation/whisper-smoke.json",
         "docs/validation/RESULTS.md"
       ]
     }

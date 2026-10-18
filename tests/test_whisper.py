@@ -6,6 +6,7 @@ from pathlib import Path
 import sys
 from types import SimpleNamespace
 import unittest
+import wave
 from unittest.mock import patch
 
 
@@ -41,14 +42,34 @@ class WorkerTests(unittest.TestCase):
 
     def test_setup_downloads_only_the_named_public_model(self):
         calls = []
+        decoded = []
+        def decode(audio):
+            with wave.open(audio, "rb") as wav:
+                decoded.append((wav.getframerate(), wav.getnframes()))
         module = SimpleNamespace(WhisperModel=lambda *args, **kwargs: None)
         utils = SimpleNamespace(download_model=lambda *args, **kwargs: calls.append((args, kwargs)))
-        with patch.dict(sys.modules, {"faster_whisper": module, "faster_whisper.utils": utils}), patch.object(sys, "argv", ["worker", "--model", "fixture", "--prepare"]):
+        audio = SimpleNamespace(decode_audio=decode)
+        with patch.dict(sys.modules, {"faster_whisper": module, "faster_whisper.utils": utils, "faster_whisper.audio": audio}), patch.object(sys, "argv", ["worker", "--model", "fixture", "--prepare"]):
             output = io.StringIO()
             with contextlib.redirect_stdout(output):
                 worker.main()
         self.assertEqual(calls, [(("small",), {"output_dir": "fixture", "use_auth_token": False})])
+        self.assertEqual(decoded, [(16000, 1600)])
         self.assertTrue(json.loads(output.getvalue())["ready"])
+
+    def test_setup_cannot_report_ready_with_an_incompatible_audio_decoder(self):
+        def broken(audio):
+            raise TypeError("incompatible decoder")
+        modules = {
+            "faster_whisper": SimpleNamespace(WhisperModel=lambda *args, **kwargs: None),
+            "faster_whisper.utils": SimpleNamespace(download_model=lambda *args, **kwargs: None),
+            "faster_whisper.audio": SimpleNamespace(decode_audio=broken),
+        }
+        output = io.StringIO()
+        with patch.dict(sys.modules, modules), patch.object(sys, "argv", ["worker", "--model", "fixture", "--prepare"]), contextlib.redirect_stdout(output):
+            with self.assertRaisesRegex(TypeError, "incompatible decoder"):
+                worker.main()
+        self.assertNotIn("ready", output.getvalue())
 
 
 if __name__ == "__main__":

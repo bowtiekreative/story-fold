@@ -1,10 +1,24 @@
 """Local Whisper worker. Model downloads happen only during explicit setup."""
 
 import argparse
+import io
 import json
 import os
 import sys
+import wave
 from pathlib import Path
+
+
+def check_audio_decoder():
+    from faster_whisper.audio import decode_audio
+    audio = io.BytesIO()
+    with wave.open(audio, "wb") as wav:
+        wav.setnchannels(1)
+        wav.setsampwidth(2)
+        wav.setframerate(16000)
+        wav.writeframes(bytes(3200))
+    audio.seek(0)
+    decode_audio(audio)
 
 
 def main():
@@ -17,6 +31,7 @@ def main():
     if args.prepare:
         from faster_whisper.utils import download_model
         download_model("small", output_dir=args.model, use_auth_token=False)
+        check_audio_decoder()
     elif not args.audio:
         parser.error("--audio is required for transcription")
 

@@ -70,10 +70,13 @@ those actions were not rerouted or used to weaken the rule.
 During the automatic Whisper update, the package download was refused with
 `egress_requires_auth` / `correlated_trifecta`. No interactive approval channel
 was available. The download was not replayed through a wrapper; the documented
-`npm run setup:whisper` command is for Ryan's regular interactive terminal.
-Local integration code and mocked-worker tests were completed independently;
-real speech verification awaits installation. A proposed CI workflow edit was
-also refused as a sensitive path and left unchanged.
+`npm run setup:whisper` command was provided for Ryan's regular terminal.
+After Ryan explicitly approved the installation in chat, the escalated setup
+command succeeded. Local Whisper was then verified through a video-only upload
+of locally synthesized speech; see `validation/whisper-smoke.json`. A separate
+public test-fixture download was refused, so validation used local synthesis.
+A proposed CI workflow edit was also refused as a sensitive path and left
+unchanged. No guard policy was disabled or weakened.
 
 Doberman also rejected creation of the interactive repair helper. That helper
 was not written through another tool. The following is the manual application

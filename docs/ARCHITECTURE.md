@@ -39,6 +39,10 @@ processing can resume. The existing OpenAI Whisper API is used only when local
 Whisper is unavailable and an OpenAI key is configured. Claude handles topic
 grouping independently of speech recognition.
 
+Setup also decodes a small silent WAV before reporting readiness. PyAV is
+constrained below 19 because faster-whisper 1.2.1 calls an option removed in
+that release; a successful model load alone did not catch this incompatibility.
+
 The shared timeline flattens live topic groups and individual sentences and
 computes separate audio and video intervals for L-cuts. Preview, MP4 rendering,
 SRT and EDL all use those same intervals. Media remains local except audio or

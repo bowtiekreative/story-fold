@@ -115,6 +115,17 @@ renders portrait MP4 and checks that the picture changes at 2s, the audio at 3s,
 the duration is 6s, and captions/chapters are present. Results are recorded in
 `docs/validation/`. Browser tests save screenshots under `test-results/`.
 
+The opt-in Whisper browser check generates speech locally, uploads only its
+video and verifies recognized words, word timestamps and an editable project.
+It requires completed Whisper setup, the running app and FFmpeg with `flite`:
+
+```sh
+STORYFOLD_TEST_WHISPER=1 npm run test:e2e -- tests/e2e/whisper.spec.ts
+```
+
+Its evidence is `docs/validation/whisper-smoke.json`. This short synthesized
+clip does not measure real-interview accuracy.
+
 The [demo checklist](docs/demos/LOCAL-RELEASE.md) describes the user flow.
 [Architecture](docs/ARCHITECTURE.md), [decisions](docs/DECISIONS.md) and
 [security boundaries](docs/SECURITY.md) document the implementation.

@@ -74,6 +74,8 @@ try {
     "https://pypi.org/simple",
     "--only-binary=:all:",
     "faster-whisper==1.2.1",
+    // faster-whisper 1.2.1 passes an audio-decoder option removed in PyAV 19.
+    "av>=11,<19",
     "huggingface-hub<1",
   ]);
   console.log(

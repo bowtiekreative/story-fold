@@ -2,6 +2,22 @@
 
 ## Automatic Whisper update — 2026-10-17
 
+- **Installed and speech-tested after Ryan's explicit approval.** The setup
+  command completed and the app now reports Local Whisper ready. Its isolated
+  runtime uses faster-whisper 1.2.1 and PyAV 18.1.0 with the small CPU model.
+- The live browser upload supplied only a locally synthesized 13.485-second
+  video, with manual topic grouping. Whisper generated 41 words with finite,
+  ordered source timestamps (0–13.04 seconds) and an editable sentence clip.
+  All five expected content keywords were recognized. No imported transcript,
+  private footage or cloud speech API was used. The complete check passed in
+  20.1 seconds; evidence is [whisper-smoke.json](whisper-smoke.json).
+- The first live check found that the initially resolved PyAV 19.0.1 removed
+  an argument used by faster-whisper 1.2.1. Setup now constrains PyAV below 19
+  and decodes a silent WAV before reporting ready. Three Python worker checks
+  pass, including refusal to report readiness when the decoder is incompatible.
+  Typecheck and ESLint pass after the repair. The
+  [upstream decoder](https://github.com/SYSTRAN/faster-whisper/blob/master/faster_whisper/audio.py)
+  documents the same PyAV 19 API change.
 - Video uploads now use automatic word-timestamp transcription. Timed JSON is
   an optional import. Manual topics skips only AI grouping, not transcription.
 - Added an isolated local faster-whisper setup command and offline CPU worker.
@@ -21,14 +37,16 @@
 - Doberman refused the package download with `egress_requires_auth` and
   `correlated_trifecta`; its approval dialog cannot open in this session. The
   download was not retried through another tool or wrapper. The Python virtual
-  environment exists, but Whisper and its model are not installed. Ryan was
-  given `npm run setup:whisper` to run in a regular interactive terminal.
+  environment initially contained only pip. Ryan was given the terminal
+  command, then explicitly approved installation in chat. The authorized setup
+  succeeded and the live validation above replaces that installation blocker.
 - A proposed CI workflow edit was separately refused as a sensitive path and
   left unchanged. The Python checks are documented for manual execution.
 
-Actual local speech recognition and video-only processing remain unverified
-until setup completes. This update supersedes the Claude-only timed-import
-requirement described below. Blue progress sync remains blocked by the guard.
+Local speech recognition and video-only processing now pass with synthesized
+speech. Real-interview accuracy, noisy audio, long recordings and multicamera
+alignment remain unverified. This update supersedes the Claude-only timed-import
+requirement below. Blue progress sync remains blocked by the guard.
 
 ## Claude update — 2026-10-17
 
