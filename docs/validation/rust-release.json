@@ -1,0 +1,29 @@
+{
+  "passed": true,
+  "checkedAt": "2026-10-19T03:31:41.050948+00:00",
+  "sourceCommit": "dfe5bc9e6985d73c76489ab78b8abb9f5dd03465",
+  "profile": "release (optimized)",
+  "binaries": [
+    {
+      "name": "storyfold-desktop",
+      "bytes": 15269648,
+      "sha256": "632ed99932a682e75b3eaf12b9bcb6fe001561e2d3469677015175d9275a1c05"
+    },
+    {
+      "name": "storyfold-server",
+      "bytes": 12672568,
+      "sha256": "6c3e060dde92b53478758c362f4361e0a56a584d927445e5fe64eee30d5057e5"
+    }
+  ],
+  "bundledService": {
+    "runtime": "Rust",
+    "ffmpeg": true,
+    "ffprobe": true,
+    "speechProvider": "Local Whisper",
+    "topicProvider": "Claude"
+  },
+  "existingSavedProjectReadOnly": true,
+  "exportSmoke": "rust-media.json",
+  "platform": "Linux x86_64",
+  "scope": "Local build and running application; no Windows interactive or installer claim."
+}

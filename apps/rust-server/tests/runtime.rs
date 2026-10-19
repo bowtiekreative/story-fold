@@ -224,8 +224,9 @@ fn git(root: &std::path::Path, args: &[&str]) {
 }
 #[tokio::test]
 async fn build_control_reviews_saves_and_undoes_source_without_touching_other_work() {
-    let (temp, store, app, _) = setup().await;
-    let root = temp.path();
+    let (_temp, store, app, _) = setup().await;
+    // Use the store's canonical root, including Windows' extended path prefix.
+    let root = store.root.as_path();
     std::fs::create_dir(root.join("docs")).unwrap();
     std::fs::create_dir(root.join(".catalyst")).unwrap();
     std::fs::write(root.join(".gitignore"), "data/\n.catalyst/private/\n").unwrap();

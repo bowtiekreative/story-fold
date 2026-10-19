@@ -101,7 +101,16 @@ or platform. The outstanding checks below remain explicit.
   navigation between the editor and Build pane passed. The test restored its
   generated sample after editing. The app also handles GTK loader paths inherited
   from a Snap-hosted IDE without changing WebKit sandbox settings.
+- [Optimized Linux release](validation/rust-release.json): both native binaries
+  built, the desktop opened its bundled service, and the release API passed the
+  full rendered-media check. Local Whisper and Claude reported ready. Loading
+  an existing saved interview left its original JSON bytes unchanged.
 
-Optimized release and remote CI results are recorded separately when their
-checks finish. These synthetic fixtures do not establish real-footage
+The complete workspace passes formatting, all 28 tests and Clippy with warnings
+denied. The retained web release also passes its Ubuntu/Windows checks and
+browser/media acceptance suite. The isolated Python adapter remains necessary
+for local Whisper; the application and orchestration no longer need Node.
+
+Remote Rust CI results are recorded when their checks finish. These synthetic
+fixtures do not establish real-footage
 transcription accuracy, multicamera alignment or NLE import acceptance.
