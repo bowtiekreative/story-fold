@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "runtime": "Rust",
+  "revision": 2,
+  "duration": 6.0,
+  "dimensions": [
+    720,
+    1280
+  ],
+  "chapters": 2,
+  "pictureCutSeconds": 2,
+  "audioCutSeconds": 3,
+  "frequencies": [
+    440.0,
+    880.0
+  ],
+  "captions": true,
+  "artifacts": [
+    "story.mp4",
+    "story.edl",
+    "story.fcpxml",
+    "story.srt",
+    "chapters.txt"
+  ],
+  "fcpxmlStructurallyParsed": true
+}

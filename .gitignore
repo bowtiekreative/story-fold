@@ -13,3 +13,6 @@ playwright-report/
 *.log
 .thumbnail
 .doberman/
+/target/
+__pycache__/
+*.pyc

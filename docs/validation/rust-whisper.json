@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "runtime": "Rust",
+  "provider": "Local Whisper",
+  "videoOnlyUpload": true,
+  "wordCount": 35,
+  "sentenceCount": 3
+}

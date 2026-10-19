@@ -7,6 +7,35 @@ and undoing them through Git.
 
 ## Run it
 
+Storyfold now has a Rust desktop editor, Rust local runtime and shared Rust
+timeline core. It reuses existing saved projects and local Whisper models.
+Node is not required by this runtime. Whisper uses an isolated Python ML worker;
+FFmpeg/ffprobe remain external media tools.
+
+With Rust installed, launch on Linux:
+
+```sh
+./scripts/run-storyfold.sh
+```
+
+The native application starts its bundled local service on port **4311**.
+Closing it stops a service it started; an independently running service is reused.
+For Windows, build with `cargo build --workspace --release --locked`, then open
+`target/release/storyfold-desktop.exe` with the server binary beside it.
+Linux build dependencies include `libwebkit2gtk-4.1-dev`, `libxdo-dev`,
+`libssl-dev`, `libayatana-appindicator3-dev`, `librsvg2-dev`, and `lld`.
+
+Existing Whisper setup is reused. A new computer can run
+`python3 scripts/setup-whisper.py` once; use `--data` when storing projects on
+another disk. Keys stay in the private `.env` file. The native **Build** tab shows
+tasks, pause/resume, actual Cargo build/test output, source review and Git undo.
+
+See [Rust migration and validation](docs/RUST-MIGRATION.md) for compatibility
+checks and remaining acceptance work.
+
+### Previous web release
+
+The previous web application remains available for recovery and comparison.
 Requires Node **22.12+**, Python **3.9+** with `venv`, Git, and
 `ffmpeg` / `ffprobe` on PATH.
 
@@ -30,7 +59,7 @@ recognition or camera alignment.
 
 Upload 1–3 videos, each no longer than two hours (4 GiB per uploaded file).
 Whisper automatically transcribes camera A and generates word timestamps;
-no transcript JSON is required. Run `npm run setup:whisper` once to install
+no transcript JSON is required. Run `python3 scripts/setup-whisper.py` once to install
 the isolated Python runtime and download the small model (about 500 MB).
 Setup needs internet; subsequent local transcription runs offline on the CPU.
 Refresh the app after setup and look for **Local Whisper** readiness.
@@ -80,7 +109,12 @@ interruption. Exports retain a snapshot of the project revision they rendered.
 
 ## Control your build
 
-Catalyst shows real source files, local Git history, tasks and build output.
+The native **Build** tab shows real source files, local Git history, tasks and
+Cargo build/test output. Select a source file, edit its draft and review the
+diff before applying it. History supports reviewed undo. Task priorities,
+pause/resume and cancellation are available in the same panel.
+
+In the previous web release, Catalyst shows source files and build output.
 **Content** opens the welcome copy, **Design** opens the stylesheet, and **Code**
 opens other supported text files. Draft → Review → Apply makes one scoped Git
 commit; **History → Review undo** restores the prior content as a new commit.
@@ -104,6 +138,19 @@ npm run catalyst -- resume
 ```
 
 ## Verification
+
+The Rust runtime and native editor checks are:
+
+```sh
+./scripts/cargo.sh fmt --all -- --check
+./scripts/cargo.sh test --workspace --locked
+./scripts/cargo.sh clippy --workspace --all-targets --locked -- -D warnings
+./scripts/cargo.sh build --workspace --release --locked
+# With the Rust service running:
+python3 scripts/rust-smoke.py
+```
+
+The retained web release checks are:
 
 ```sh
 npm run typecheck
@@ -156,7 +203,5 @@ source files and has not been verified in Final Cut Pro.
 
 Ponytail is installed as a Codex skill and was used for this build. Its upstream
 is [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail).
-Doberman Core 0.18.7 and its user-wide Codex hook are installed and enforcing.
-The approved file-patch compatibility repair is applied; policy remains enabled.
-Review `/hooks` if Codex reports a changed definition needing trust. See
-[the installation record](docs/DOBERMAN.md).
+Ryan removed Doberman Core and its Codex hook; removal was verified. See
+[the historical installation record](docs/DOBERMAN.md).

@@ -1,0 +1,28 @@
+[package]
+name = "storyfold-server"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+storyfold-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+reqwest.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+tempfile.workspace = true
+regex.workspace = true
+axum = { version = "0.8", features = ["multipart"] }
+tower-http = { version = "0.6", features = ["fs", "limit", "set-header"] }
+tokio-util = { version = "0.7", features = ["io", "rt"] }
+dotenvy = "0.15"
+sha2 = "0.10"
+rustfft = "6"
+fs2 = "0.4"
+futures-util = "0.3"
+tower = { version = "0.5", features = ["util"] }
+
+[dev-dependencies]
+http-body-util = "0.1"

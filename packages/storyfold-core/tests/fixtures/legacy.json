@@ -1,0 +1,319 @@
+{
+  "project": {
+    "id": "fixture",
+    "name": "A & B <story>",
+    "revision": 0,
+    "createdAt": "2026-10-15T00:00:00Z",
+    "status": "ready",
+    "cameras": [
+      {
+        "id": "A",
+        "name": "Wide",
+        "sourcePath": "source-A.mp4",
+        "proxyPath": "proxy-A.mp4",
+        "duration": 40,
+        "offset": 0
+      },
+      {
+        "id": "B",
+        "name": "Close-up",
+        "sourcePath": "source-A.mp4",
+        "proxyPath": "proxy-A.mp4",
+        "duration": 40,
+        "offset": 0,
+        "virtual": {
+          "scale": 1.65,
+          "x": 0.5,
+          "y": 0.5
+        }
+      }
+    ],
+    "sentences": [
+      {
+        "id": "s1",
+        "n": 1,
+        "text": "Sentence s1.",
+        "words": [],
+        "start": 1,
+        "end": 4,
+        "in": 1,
+        "out": 4,
+        "topicId": "one",
+        "cam": "A",
+        "lcut": 1,
+        "skip": false
+      },
+      {
+        "id": "s2",
+        "n": 2,
+        "text": "Sentence s2.",
+        "words": [],
+        "start": 7,
+        "end": 10,
+        "in": 7,
+        "out": 10,
+        "topicId": "one",
+        "cam": "B",
+        "lcut": 0,
+        "skip": false
+      },
+      {
+        "id": "s3",
+        "n": 3,
+        "text": "Sentence s3.",
+        "words": [],
+        "start": 12,
+        "end": 15,
+        "in": 12,
+        "out": 15,
+        "topicId": "two",
+        "cam": "A",
+        "lcut": 0,
+        "skip": false
+      }
+    ],
+    "topics": [
+      {
+        "id": "one",
+        "name": "First topic",
+        "accent": "violet"
+      },
+      {
+        "id": "two",
+        "name": "Second topic",
+        "accent": "teal"
+      }
+    ],
+    "timeline": [
+      {
+        "kind": "group",
+        "topicId": "one"
+      },
+      {
+        "kind": "group",
+        "topicId": "two"
+      }
+    ],
+    "exportSettings": {
+      "ratio": "16:9",
+      "captions": true,
+      "chapters": true
+    },
+    "progress": [],
+    "warnings": []
+  },
+  "sequence": {
+    "clips": [
+      {
+        "sentence": {
+          "id": "s1",
+          "n": 1,
+          "text": "Sentence s1.",
+          "words": [],
+          "start": 1,
+          "end": 4,
+          "in": 1,
+          "out": 4,
+          "topicId": "one",
+          "cam": "A",
+          "lcut": 1,
+          "skip": false
+        },
+        "itemIndex": 0,
+        "dur": 3,
+        "aStart": 0,
+        "aEnd": 3,
+        "l": 1,
+        "vStart": 0,
+        "vEnd": 2
+      },
+      {
+        "sentence": {
+          "id": "s2",
+          "n": 2,
+          "text": "Sentence s2.",
+          "words": [],
+          "start": 7,
+          "end": 10,
+          "in": 7,
+          "out": 10,
+          "topicId": "one",
+          "cam": "B",
+          "lcut": 0,
+          "skip": false
+        },
+        "itemIndex": 0,
+        "dur": 3,
+        "aStart": 3,
+        "aEnd": 6,
+        "l": 0,
+        "vStart": 2,
+        "vEnd": 6
+      },
+      {
+        "sentence": {
+          "id": "s3",
+          "n": 3,
+          "text": "Sentence s3.",
+          "words": [],
+          "start": 12,
+          "end": 15,
+          "in": 12,
+          "out": 15,
+          "topicId": "two",
+          "cam": "A",
+          "lcut": 0,
+          "skip": false
+        },
+        "itemIndex": 1,
+        "dur": 3,
+        "aStart": 6,
+        "aEnd": 9,
+        "l": 0,
+        "vStart": 6,
+        "vEnd": 9
+      }
+    ],
+    "spans": [
+      {
+        "start": 0,
+        "end": 6,
+        "count": 2
+      },
+      {
+        "start": 6,
+        "end": 9,
+        "count": 1
+      }
+    ],
+    "total": 9
+  },
+  "frame": {
+    "audio": {
+      "sentence": {
+        "id": "s1",
+        "n": 1,
+        "text": "Sentence s1.",
+        "words": [],
+        "start": 1,
+        "end": 4,
+        "in": 1,
+        "out": 4,
+        "topicId": "one",
+        "cam": "A",
+        "lcut": 1,
+        "skip": false
+      },
+      "itemIndex": 0,
+      "dur": 3,
+      "aStart": 0,
+      "aEnd": 3,
+      "l": 1,
+      "vStart": 0,
+      "vEnd": 2
+    },
+    "video": {
+      "sentence": {
+        "id": "s2",
+        "n": 2,
+        "text": "Sentence s2.",
+        "words": [],
+        "start": 7,
+        "end": 10,
+        "in": 7,
+        "out": 10,
+        "topicId": "one",
+        "cam": "B",
+        "lcut": 0,
+        "skip": false
+      },
+      "itemIndex": 0,
+      "dur": 3,
+      "aStart": 3,
+      "aEnd": 6,
+      "l": 0,
+      "vStart": 2,
+      "vEnd": 6
+    },
+    "audioTime": 3.5,
+    "videoTime": 7.5,
+    "lcut": true
+  },
+  "words": [
+    {
+      "text": "Hi.",
+      "start": 0.2,
+      "end": 0.5
+    },
+    {
+      "text": "This",
+      "start": 0.6,
+      "end": 1
+    },
+    {
+      "text": "works!",
+      "start": 1.1,
+      "end": 1.8
+    },
+    {
+      "text": "Next.",
+      "start": 2.2,
+      "end": 3.4
+    }
+  ],
+  "sentences": [
+    {
+      "id": "s1",
+      "n": 1,
+      "text": "Hi. This works!",
+      "words": [
+        {
+          "text": "Hi.",
+          "start": 0.2,
+          "end": 0.5
+        },
+        {
+          "text": "This",
+          "start": 0.6,
+          "end": 1
+        },
+        {
+          "text": "works!",
+          "start": 1.1,
+          "end": 1.8
+        }
+      ],
+      "start": 0.2,
+      "end": 1.8,
+      "in": 0.05000000000000002,
+      "out": 1.9000000000000001,
+      "topicId": "interview",
+      "cam": "A",
+      "lcut": 0,
+      "skip": false
+    },
+    {
+      "id": "s2",
+      "n": 2,
+      "text": "Next.",
+      "words": [
+        {
+          "text": "Next.",
+          "start": 2.2,
+          "end": 3.4
+        }
+      ],
+      "start": 2.2,
+      "end": 3.4,
+      "in": 2.0500000000000003,
+      "out": 3.5,
+      "topicId": "interview",
+      "cam": "A",
+      "lcut": 0,
+      "skip": false
+    }
+  ],
+  "srt": "1\n00:00:00,000 --> 00:00:03,000\nSentence s1.\n\n2\n00:00:03,000 --> 00:00:06,000\nSentence s2.\n\n3\n00:00:06,000 --> 00:00:09,000\nSentence s3.\n",
+  "edl": "TITLE: A & B <story>\nFCM: NON-DROP FRAME\n\n001  CAMA     V     C        00:00:01:00 00:00:03:00 00:00:00:00 00:00:02:00\n* FROM CLIP NAME: source-A.mp4\n* First topic: Sentence s1.\n\n002  CAMA     A     C        00:00:01:00 00:00:04:00 00:00:00:00 00:00:03:00\n* FROM CLIP NAME: source-A.mp4\n* First topic: Sentence s1.\n\n003  CAMA     V     C        00:00:07:00 00:00:11:00 00:00:02:00 00:00:06:00\n* FROM CLIP NAME: source-A.mp4\n* First topic: Sentence s2.\n* VIRTUAL CROP B: scale 1.65; reapply crop in your NLE\n\n004  CAMA     A     C        00:00:07:00 00:00:10:00 00:00:03:00 00:00:06:00\n* FROM CLIP NAME: source-A.mp4\n* First topic: Sentence s2.\n\n005  CAMA     V     C        00:00:12:00 00:00:15:00 00:00:06:00 00:00:09:00\n* FROM CLIP NAME: source-A.mp4\n* Second topic: Sentence s3.\n\n006  CAMA     A     C        00:00:12:00 00:00:15:00 00:00:06:00 00:00:09:00\n* FROM CLIP NAME: source-A.mp4\n* Second topic: Sentence s3.\n",
+  "fcpxml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE fcpxml><fcpxml version=\"1.10\"><resources><format id=\"r1\" name=\"FFVideoFormat720p25\" frameDuration=\"1/25s\" width=\"1280\" height=\"720\"/><asset id=\"r2\" name=\"Wide\" start=\"0s\" duration=\"1000000/25000s\" hasVideo=\"1\" hasAudio=\"1\" audioSources=\"1\" audioChannels=\"2\" format=\"r1\"><media-rep kind=\"original-media\" src=\"file:///Storyfold/source-A.mp4\"/></asset><asset id=\"r3\" name=\"Close-up\" start=\"0s\" duration=\"1000000/25000s\" hasVideo=\"1\" hasAudio=\"1\" audioSources=\"1\" audioChannels=\"2\" format=\"r1\"><media-rep kind=\"original-media\" src=\"file:///Storyfold/source-A.mp4\"/></asset></resources><library><event name=\"Storyfold\"><project name=\"A &amp; B &lt;story&gt;\"><sequence format=\"r1\" duration=\"225000/25000s\" tcStart=\"0s\" tcFormat=\"NDF\" audioLayout=\"stereo\" audioRate=\"48k\"><spine><asset-clip ref=\"r2\" name=\"Sentence s1.\" offset=\"0/25000s\" start=\"25000/25000s\" duration=\"50000/25000s\" audioRole=\"dialogue\" srcEnable=\"video\"><adjust-transform scale=\"1 1\"/><asset-clip ref=\"r2\" lane=\"-1\" offset=\"25000/25000s\" start=\"25000/25000s\" duration=\"75000/25000s\" srcEnable=\"audio\" audioRole=\"dialogue\"/></asset-clip><asset-clip ref=\"r3\" name=\"Sentence s2.\" offset=\"50000/25000s\" start=\"175000/25000s\" duration=\"100000/25000s\" audioRole=\"dialogue\" srcEnable=\"video\"><adjust-transform scale=\"1.65 1.65\"/><asset-clip ref=\"r2\" lane=\"-1\" offset=\"200000/25000s\" start=\"175000/25000s\" duration=\"75000/25000s\" srcEnable=\"audio\" audioRole=\"dialogue\"/></asset-clip><asset-clip ref=\"r2\" name=\"Sentence s3.\" offset=\"150000/25000s\" start=\"300000/25000s\" duration=\"75000/25000s\" audioRole=\"dialogue\" srcEnable=\"video\"><adjust-transform scale=\"1 1\"/><asset-clip ref=\"r2\" lane=\"-1\" offset=\"300000/25000s\" start=\"300000/25000s\" duration=\"75000/25000s\" srcEnable=\"audio\" audioRole=\"dialogue\"/></asset-clip></spine></sequence></project></event></library></fcpxml>"
+}

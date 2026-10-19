@@ -1,5 +1,10 @@
 # Doberman Core installation
 
+**Current status: removed by Ryan.** Verified on 2026-10-18: the CLI and installed
+package are absent, and the user-wide Codex hooks file has no Doberman commands.
+The Rust download, compilation, tests and GitHub push now execute successfully.
+The remainder of this document is the historical installation/repair record.
+
 Requested by Ryan on 2026-10-15 from
 [DobermanCore/Doberman-Core](https://github.com/DobermanCore/Doberman-Core).
 

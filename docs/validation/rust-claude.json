@@ -1,0 +1,11 @@
+{
+  "assignedCount": 612,
+  "assignmentBatches": 3,
+  "elapsedSeconds": 43.266372744,
+  "input": "Generated text only",
+  "passed": true,
+  "provider": "Claude",
+  "runtime": "Rust",
+  "sentenceCount": 612,
+  "topicCount": 4
+}

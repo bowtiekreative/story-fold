@@ -1,8 +1,8 @@
 {
   "name": "Storyfold",
-  "milestone": "Long-interview grouping verified - production hardening continues",
-  "updatedAt": "2026-10-18T06:48:01Z",
-  "message": "Removed the 400-sentence grouping cap. Live Claude validation assigned all 612 generated sentences to shared folders in three batches. Your saved 612-sentence interview retains 11,647 timed words: refresh its page and click Resume processing. Doberman blocked the automatic-resume helper. Remaining production work stays on the roadmap.",
+  "milestone": "Rust desktop migration \u2014 release verification",
+  "updatedAt": "2026-10-19T03:28:02.661797+00:00",
+  "message": "Rust native editor and runtime implemented. All 28 Rust tests, formatting, Clippy, native Linux playback/edit/save/undo, real FFmpeg output, local Whisper and live Claude batching passed. Optimized release build and remote CI are running; manual footage/NLE and installer acceptance remain visible tasks.",
   "tasks": [
     {
       "id": "foundation",
@@ -104,7 +104,10 @@
       "acceptance": "Long interviews batch correctly, sync uncertainty is explicit, crossfades preserve timing and interchange exports have structural validation.",
       "lane": "Now",
       "status": "doing",
-      "evidence": []
+      "evidence": [
+        "docs/validation/rust-media.json",
+        "docs/validation/rust-claude.json"
+      ]
     },
     {
       "id": "production-playback",
@@ -112,7 +115,10 @@
       "acceptance": "Buffering pauses the story clock; cuts seek accurately and cached video slots preload the following clip; 20-edit undo and trim preview verified.",
       "lane": "Now",
       "status": "doing",
-      "evidence": []
+      "evidence": [
+        "docs/validation/rust-native.json",
+        "docs/validation/rust-media.json"
+      ]
     },
     {
       "id": "claude-topics",
@@ -158,6 +164,22 @@
         "tests/e2e/whisper.spec.ts",
         "docs/validation/whisper-smoke.json",
         "docs/validation/RESULTS.md"
+      ]
+    },
+    {
+      "id": "rust-migration",
+      "title": "Migrate Storyfold to Rust",
+      "acceptance": "Rust-native editor and runtime preserve saved projects, automatic Whisper, Claude long-interview grouping, edits, playback/export timing and build controls. Compile, lint, unit, integration and native smoke checks pass before changing the launcher.",
+      "lane": "Now",
+      "status": "doing",
+      "evidence": [
+        "packages/storyfold-core/tests/compatibility.rs",
+        "apps/rust-server/tests/runtime.rs",
+        "docs/validation/rust-native.json",
+        "docs/validation/rust-media.json",
+        "docs/validation/rust-whisper.json",
+        "docs/validation/rust-claude.json",
+        "docs/RUST-MIGRATION.md"
       ]
     }
   ]
