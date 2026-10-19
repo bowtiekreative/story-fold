@@ -1,7 +1,7 @@
 {
   "passed": true,
-  "checkedAt": "2026-10-19T03:31:41.050948+00:00",
-  "sourceCommit": "dfe5bc9e6985d73c76489ab78b8abb9f5dd03465",
+  "checkedAt": "2026-10-19T03:39:45.279572+00:00",
+  "sourceCommit": "ffe26a04fb277ebd8db02d959e18ce9bbdf34522",
   "profile": "release (optimized)",
   "binaries": [
     {
@@ -11,8 +11,8 @@
     },
     {
       "name": "storyfold-server",
-      "bytes": 12672568,
-      "sha256": "6c3e060dde92b53478758c362f4361e0a56a584d927445e5fe64eee30d5057e5"
+      "bytes": 12670056,
+      "sha256": "a498c7b9e5af890cc9260fa903cbf095285e5e5ff73ed9adfcdd5929c57be6a8"
     }
   ],
   "bundledService": {

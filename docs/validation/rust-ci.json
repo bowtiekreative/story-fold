@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "sourceCommit": "ffe26a04fb277ebd8db02d959e18ce9bbdf34522",
+  "url": "https://github.com/bowtiekreative/story-fold/actions/runs/39195717130",
+  "jobs": [
+    {
+      "name": "check (windows-latest)",
+      "conclusion": "success"
+    },
+    {
+      "name": "check (ubuntu-latest)",
+      "conclusion": "success"
+    }
+  ]
+}

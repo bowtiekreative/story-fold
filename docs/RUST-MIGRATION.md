@@ -111,6 +111,17 @@ denied. The retained web release also passes its Ubuntu/Windows checks and
 browser/media acceptance suite. The isolated Python adapter remains necessary
 for local Whisper; the application and orchestration no longer need Node.
 
-Remote Rust CI results are recorded when their checks finish. These synthetic
-fixtures do not establish real-footage
+[Rust CI](validation/rust-ci.json) passed tests, Clippy and optimized builds on
+Ubuntu and Windows for source commit `ffe26a0`. Ubuntu also passed the real
+HTTP/FFmpeg media check. Windows required a canonical fixture root and a
+repository-relative private Git index; reviewed apply/undo and preservation of
+unrelated staged work now pass there too.
+
+[Build control](validation/rust-build-control.json) launched the complete Cargo
+test suite from the running app and retained its passing output in check history.
+One 15-second test polling request timed out during compilation; the job completed
+and subsequent history readback succeeded in 0.08 seconds. This does not establish
+performance on slow disks.
+
+These synthetic fixtures do not establish real-footage
 transcription accuracy, multicamera alignment or NLE import acceptance.

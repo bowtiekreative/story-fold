@@ -1,8 +1,8 @@
 {
   "name": "Storyfold",
-  "milestone": "Rust desktop migration \u2014 release verification",
-  "updatedAt": "2026-10-19T03:28:02.661797+00:00",
-  "message": "Rust native editor and runtime implemented. All 28 Rust tests, formatting, Clippy, native Linux playback/edit/save/undo, real FFmpeg output, local Whisper and live Claude batching passed. Optimized release build and remote CI are running; manual footage/NLE and installer acceptance remain visible tasks.",
+  "milestone": "Rust desktop migration complete \u2014 local release verified",
+  "updatedAt": "2026-10-19T03:51:44.772626+00:00",
+  "message": "Rust desktop app built and launched. Automatic local Whisper, Claude long-interview grouping, playback/export timing and reviewed build controls are verified. Ubuntu and Windows Rust tests, lint and optimized builds passed; retained web checks also passed. Real-footage/NLE acceptance and installers remain on the roadmap.",
   "tasks": [
     {
       "id": "foundation",
@@ -171,7 +171,7 @@
       "title": "Migrate Storyfold to Rust",
       "acceptance": "Rust-native editor and runtime preserve saved projects, automatic Whisper, Claude long-interview grouping, edits, playback/export timing and build controls. Compile, lint, unit, integration and native smoke checks pass before changing the launcher.",
       "lane": "Now",
-      "status": "doing",
+      "status": "done",
       "evidence": [
         "packages/storyfold-core/tests/compatibility.rs",
         "apps/rust-server/tests/runtime.rs",
@@ -179,6 +179,9 @@
         "docs/validation/rust-media.json",
         "docs/validation/rust-whisper.json",
         "docs/validation/rust-claude.json",
+        "docs/validation/rust-release.json",
+        "docs/validation/rust-build-control.json",
+        "docs/validation/rust-ci.json",
         "docs/RUST-MIGRATION.md"
       ]
     }

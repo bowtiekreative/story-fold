@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "runtime": "Rust",
+  "trigger": "Storyfold Build control API",
+  "kind": "test",
+  "runId": "3e90cfde-aae0-4b14-98d8-e4722dfbd0a8",
+  "status": "passed",
+  "exitCode": 0,
+  "fullWorkspace": true,
+  "visibleInApplicationHistory": true,
+  "readbackVerified": true,
+  "observedLimit": "One 15-second history polling request timed out during compilation. The job completed, persisted its full passing output, and subsequent history readback completed in 0.08 seconds."
+}
