@@ -242,7 +242,12 @@ async fn git(c: &Control, args: &[&str], index: Option<&FsPath>) -> Result<Strin
         .env("GIT_ATTR_NOSYSTEM", "1")
         .env("GIT_TERMINAL_PROMPT", "0");
     if let Some(index) = index {
-        cmd.env("GIT_INDEX_FILE", index);
+        // Keep Windows' canonical extended-path prefix out of Git's environment.
+        // The command always runs from this root; its private index stays inside it.
+        let relative = index
+            .strip_prefix(&c.store.root)
+            .map_err(|_| AppError::bad("Git index must remain inside the application."))?;
+        cmd.env("GIT_INDEX_FILE", relative);
     }
     let out = cmd.output().await?;
     if !out.status.success() {
