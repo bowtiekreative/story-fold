@@ -134,3 +134,39 @@ Not verified: API-key-backed transcription and topic quality, a real interview's
 95% accuracy / 150ms timing targets, multicamera clap alignment, playback under
 slow-disk or large-project load, Resolve/Premiere/Final Cut import, desktop
 installers, general Astro/Next/WordPress management, host publishing and rollback.
+
+## Recording studio and YouTube clips — 2026-10-19
+
+The native Rust studio implements camera/microphone takes, hold/tap recording,
+immutable source bins, trim/split/reorder, six manual text cards with source-time
+marks, horizontal/vertical MP4 rendering, and handoff to the transcript editor.
+YouTube controls import selected URL intervals and explicitly upload reviewed
+exports through Google's resumable API, defaulting to Private and binding the
+request to the reviewed channel.
+
+- All **52 workspace tests** passed with the two generated FFmpeg tests included.
+  The final YouTube subset was rerun after adding reviewed-channel binding:
+  **8 passed**, including generated normalization and mock resumable transfer.
+- Formatting and Clippy with warnings denied passed.
+- The actual Linux native synthetic flow passed hold/release, tap/Stop, overlay
+  marks, navigation protection, saved title readback, split/reorder, source
+  preservation, playable rendered MP4, draft preservation and YouTube controls.
+  See [native evidence](rust-recording-native.json).
+- A live **2.0-second** public YouTube import reached the bin and sequence through
+  the app API. See [import evidence](rust-youtube-live.json).
+- A generated speech take rendered through the studio and reached the existing
+  local Whisper/editor workflow: **24 timed words**, manual topic grouping,
+  original take preserved. See [handoff evidence](rust-recording-handoff.json).
+- [Check summary](rust-recording-checks.json) records the completed gates.
+
+No physical webcam is exposed on this host. Real camera/microphone compatibility,
+lip-sync, native file dialogs, and Windows/macOS interactive execution remain
+manual acceptance checks. The Google Desktop OAuth client and real channel
+consent were not supplied, so no real video was uploaded. Mocked upload responses
+are not evidence of a connected channel or published video. Existing private
+interviews were not used as test fixtures.
+
+The optimized release built and opened through the installed launcher target.
+The running service exposes the new routes, local Whisper and the ready importer.
+Saved project files were byte-for-byte unchanged during the service upgrade.
+See [release evidence](rust-recording-release.json).

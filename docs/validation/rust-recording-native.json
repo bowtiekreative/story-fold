@@ -1,0 +1,24 @@
+{
+  "checks": {
+    "captureNavigationGuard": true,
+    "clips": 3,
+    "draftSurvivesNavigation": true,
+    "explicitStop": true,
+    "holdClip": true,
+    "nativeNavigation": true,
+    "overlayTimingMark": true,
+    "renderedMp4Ready": true,
+    "sequenceSplitReorder": true,
+    "sourceTakesPreserved": true,
+    "syntheticOnly": true,
+    "takes": 2,
+    "tapLongTake": true,
+    "titleSaveReadback": true,
+    "youtubeConnectSetupControls": true,
+    "youtubeImportControls": true,
+    "youtubePrivateDefault": true,
+    "youtubeUploadGuard": true
+  },
+  "ok": true,
+  "runtime": "Rust/Dioxus desktop"
+}

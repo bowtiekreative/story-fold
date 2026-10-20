@@ -73,7 +73,7 @@ async fn read_bounded<R: tokio::io::AsyncRead + Unpin>(
     }
 }
 
-async fn run(
+pub(crate) async fn run(
     bin: &Path,
     args: &[String],
     cancel: &CancellationToken,
@@ -142,7 +142,7 @@ fn path_arg(path: &Path) -> String {
     path.to_string_lossy().into_owned()
 }
 
-async fn ff(values: Vec<String>, cancel: &CancellationToken) -> Result<Vec<u8>> {
+pub(crate) async fn ff(values: Vec<String>, cancel: &CancellationToken) -> Result<Vec<u8>> {
     let mut all = args(&["-hide_banner", "-loglevel", "error", "-y"]);
     all.extend(values);
     run(
@@ -941,7 +941,7 @@ pub async fn create_sample(store: &Store, project: &Project) -> Result<Vec<Word>
         .collect())
 }
 
-fn ass_time(t: f64) -> String {
+pub(crate) fn ass_time(t: f64) -> String {
     let cs = (t.max(0.0) * 100.0).round() as u64;
     format!(
         "{}:{:02}:{:02}.{:02}",

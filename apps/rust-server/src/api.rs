@@ -1,7 +1,9 @@
 use crate::{
     AppError, Result, Store, control,
     media::{self, ExportJob, ProcessingInput},
+    recordings,
     storage::{read_json, write_json},
+    youtube,
 };
 use axum::{
     Json, Router,
@@ -33,13 +35,17 @@ pub struct AppState {
     processing: Arc<Mutex<HashMap<String, CancellationToken>>>,
     exports: Arc<Mutex<HashMap<String, CancellationToken>>>,
     queue: Arc<Semaphore>,
-    export_queue: Arc<Semaphore>,
+    pub(crate) export_queue: Arc<Semaphore>,
     pub control: control::Control,
+    pub recordings: recordings::Recorder,
+    pub youtube: youtube::YouTube,
 }
 impl AppState {
     pub fn new(store: Store) -> Self {
         Self {
             control: control::Control::new(store.clone()),
+            recordings: recordings::Recorder::default(),
+            youtube: youtube::YouTube::default(),
             store,
             token: Arc::new(format!(
                 "{}{}",
@@ -84,6 +90,8 @@ pub fn router(store: Store) -> Router {
             post(cancel_export),
         )
         .merge(control::routes())
+        .merge(recordings::routes())
+        .merge(youtube::routes())
         .fallback(|| async {
             (
                 StatusCode::NOT_FOUND,
@@ -221,7 +229,7 @@ async fn edit(
 ) -> Result<Json<Project>> {
     Ok(Json(s.store.edit(&id, input).await?))
 }
-fn new_project(name: String) -> Project {
+pub(crate) fn new_project(name: String) -> Project {
     Project {
         id: uuid::Uuid::new_v4().to_string(),
         name,
@@ -230,7 +238,12 @@ fn new_project(name: String) -> Project {
         ..Default::default()
     }
 }
-async fn enqueue(s: AppState, p: Project, input: ProcessingInput, generate: bool) -> Result<()> {
+pub(crate) async fn enqueue(
+    s: AppState,
+    p: Project,
+    input: ProcessingInput,
+    generate: bool,
+) -> Result<()> {
     let mut active = s.processing.lock().await;
     if active.contains_key(&p.id) {
         return Err(AppError::conflict(

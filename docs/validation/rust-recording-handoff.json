@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "generatedSpeech": true,
+  "recordingMp4Render": true,
+  "editorHandoff": true,
+  "localWhisper": true,
+  "manualGrouping": true,
+  "wordCount": 24,
+  "sentenceCount": 1,
+  "originalTakePreserved": true,
+  "privateProjectsUntouched": true
+}

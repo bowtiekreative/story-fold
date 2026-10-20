@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "builtAt": "2026-10-20T01:48:49.070955+00:00",
+  "platform": "Linux",
+  "releaseBuild": true,
+  "desktopOpened": true,
+  "launcherVerified": true,
+  "newApiRoutesVerified": true,
+  "localWhisper": true,
+  "youtubeImporterReady": true,
+  "googleConfigured": false,
+  "googleConnected": false,
+  "syntheticCaptureDisabled": true,
+  "physicalCameraCount": 0,
+  "realUploadAttempted": false,
+  "existingProjectFilesUnchanged": true,
+  "binarySha256": {
+    "storyfold-desktop": "c3ee943ccfe506587d8acd1ed553b26d5f0ac5e7f321a5381c3132fcc4cb347b",
+    "storyfold-server": "e37cff02b96c2c9244129737c218387665aa092a205b4b87b90a809fcabf7404"
+  }
+}

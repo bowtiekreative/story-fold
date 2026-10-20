@@ -23,7 +23,9 @@ Ubuntu/Windows CI passed. Doberman was removed by Ryan and removal was verified.
 The Storyfold implementation uses a shared Rust timeline/model crate, an Axum
 runtime, and a Dioxus native desktop editor. The system WebView supplies video
 and audio decoding. The isolated Python Whisper worker remains an explicit ML
-adapter; Node and TypeScript are not required by the new application runtime.
+adapter; Node and TypeScript are not required by the editor runtime. The later
+YouTube import feature additionally uses yt-dlp and Node.js 22+ for YouTube
+challenge support; recording and channel publishing remain Rust-controlled.
 
 ## Existing behavior to preserve
 

@@ -1,9 +1,11 @@
 pub mod api;
 pub mod control;
 pub mod media;
+pub mod recordings;
 pub mod storage;
 pub mod topics;
 pub mod whisper;
+pub mod youtube;
 
 use axum::{
     Json,

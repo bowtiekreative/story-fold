@@ -1,8 +1,8 @@
 {
   "name": "Storyfold",
-  "milestone": "Rust desktop migration complete \u2014 local release verified",
-  "updatedAt": "2026-10-19T03:51:44.772626+00:00",
-  "message": "Rust desktop app built and launched. Automatic local Whisper, Claude long-interview grouping, playback/export timing and reviewed build controls are verified. Ubuntu and Windows Rust tests, lint and optimized builds passed; retained web checks also passed. Real-footage/NLE acceptance and installers remain on the roadmap.",
+  "milestone": "Recording studio and YouTube clips \u2014 installed",
+  "updatedAt": "2026-10-20T01:49:06.855648+00:00",
+  "message": "Native recording studio and both YouTube directions are installed. Record/edit/manual-card/MP4/native checks passed; real URL clip import and local Whisper handoff passed. Publishing defaults to Private and binds to the reviewed channel. Google client setup/channel consent and physical camera verification remain user acceptance.",
   "tasks": [
     {
       "id": "foundation",
@@ -183,6 +183,33 @@
         "docs/validation/rust-build-control.json",
         "docs/validation/rust-ci.json",
         "docs/RUST-MIGRATION.md"
+      ]
+    },
+    {
+      "id": "recording-studio",
+      "title": "Record takes in a native studio",
+      "acceptance": "Explicit camera/mic recording; horizontal/vertical preview; hold/tap takes; saved clip bin and sequence edits; manual timed overlays in MP4; handoff to existing Whisper/editor. Native and generated-media checks pass.",
+      "lane": "Now",
+      "status": "done",
+      "evidence": [
+        "docs/RECORDING.md",
+        "docs/validation/rust-recording-native.json",
+        "docs/validation/rust-recording-handoff.json",
+        "docs/validation/rust-recording-checks.json",
+        "docs/validation/rust-recording-release.json"
+      ]
+    },
+    {
+      "id": "youtube-clips",
+      "title": "Import and publish YouTube clips",
+      "acceptance": "Validated URL/range imports become local takes. Explicit Google connection and reviewed resumable upload default to Private. Progress, cancel/retry, secure tokens and meaningful checks; no automated real publishing.",
+      "lane": "Now",
+      "status": "done",
+      "evidence": [
+        "docs/YOUTUBE.md",
+        "docs/validation/rust-youtube-live.json",
+        "docs/validation/rust-recording-checks.json",
+        "docs/validation/rust-recording-release.json"
       ]
     }
   ]

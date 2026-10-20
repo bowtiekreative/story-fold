@@ -5,8 +5,12 @@ mod dom;
 mod editor;
 pub mod model;
 mod player;
+mod recording;
+#[cfg(debug_assertions)]
+mod recording_smoke;
 #[cfg(debug_assertions)]
 mod smoke;
+mod youtube;
 
 use api::Api;
 use dioxus::prelude::*;
@@ -20,6 +24,7 @@ pub enum Page {
     #[default]
     Library,
     Editor,
+    Record,
     Build,
 }
 #[derive(Clone, Debug, PartialEq)]
@@ -41,13 +46,15 @@ pub struct State {
     pub busy: bool,
     pub saving: bool,
     pub source_dirty: bool,
+    pub recording_dirty: bool,
+    pub recording_capture: bool,
     pub build_dialog: bool,
     pub pending: Option<Destination>,
     pub export_job: Option<ExportJob>,
 }
 impl State {
     pub fn dirty(&self) -> bool {
-        self.source_dirty || self.current.as_ref().is_some_and(Draft::dirty)
+        self.source_dirty || self.recording_dirty || self.current.as_ref().is_some_and(Draft::dirty)
     }
 }
 
@@ -99,7 +106,9 @@ pub fn App() -> Element {
     let mut state = use_signal(State::default);
     #[cfg(debug_assertions)]
     use_future(move || async move {
-        if let Some(path) = std::env::var_os("STORYFOLD_SMOKE_FILE") {
+        if let Some(path) = std::env::var_os("STORYFOLD_RECORD_SMOKE_FILE") {
+            recording_smoke::run(state, PathBuf::from(path)).await;
+        } else if let Some(path) = std::env::var_os("STORYFOLD_SMOKE_FILE") {
             smoke::run(state, PathBuf::from(path)).await;
         }
     });
@@ -168,7 +177,7 @@ pub fn App() -> Element {
         }
     });
     use_effect(move || {
-        let dirty = state.read().dirty();
+        let dirty = state.read().dirty() || state.read().recording_capture;
         if let Some(window) = try_consume_context::<dioxus::desktop::DesktopContext>() {
             window.set_close_behavior(if dirty {
                 dioxus::desktop::WindowCloseBehaviour::WindowHides
@@ -185,9 +194,14 @@ pub fn App() -> Element {
                 event: dioxus::desktop::tao::event::WindowEvent::CloseRequested,
                 ..
             }
-        ) && state.peek().dirty()
+        ) && (state.peek().dirty() || state.peek().recording_capture)
         {
-            state.write().pending = Some(Destination::Quit);
+            if state.peek().recording_capture {
+                state.write().error =
+                    "Stop and save your recording before closing Storyfold.".into();
+            } else {
+                state.write().pending = Some(Destination::Quit);
+            }
             spawn(async move {
                 tokio::time::sleep(Duration::from_millis(30)).await;
                 dioxus::desktop::window().set_visible(true);
@@ -199,6 +213,7 @@ pub fn App() -> Element {
     let heading = match s.page {
         Page::Library => "Your interviews",
         Page::Editor => "Your story",
+        Page::Record => "Recording studio",
         Page::Build => "Your build",
     };
     rsx! {
@@ -211,6 +226,7 @@ pub fn App() -> Element {
                 nav {"aria-label":"Main navigation",
                     button {class:if s.page==Page::Library {"active"}else{""},onclick:move |_|navigate(state,Destination::Page(Page::Library)),"Interviews"}
                     if s.current.is_some() {button {class:if s.page==Page::Editor {"active"}else{""},onclick:move |_|navigate(state,Destination::Page(Page::Editor)),"Editor"}}
+                    button {class:if s.page==Page::Record {"active"}else{""},onclick:move |_|navigate(state,Destination::Page(Page::Record)),"Record"}
                     button {class:if s.page==Page::Build {"active"}else{""},onclick:move |_|navigate(state,Destination::Page(Page::Build)),"Your build"}
                 }
             }
@@ -226,13 +242,14 @@ pub fn App() -> Element {
                 }
                 // Keep source drafts mounted when switching views. Polling never replaces their text.
                 div {hidden:s.page!=Page::Build,build::Build {state,active:s.page==Page::Build}}
+                div {hidden:s.page!=Page::Record,recording::RecordingStudio {state,active:s.page==Page::Record}}
             }
             }
             if let Some(destination)=s.pending.clone() {
                 div {class:"modal-backdrop",
                     section {class:"modal",role:"alertdialog","aria-modal":"true","aria-labelledby":"discard-title",onkeydown:move |e|if e.key()==Key::Escape {e.stop_propagation();state.write().pending=None;},
                         h2 {id:"discard-title","Keep your changes?"}
-                        p {"Your transcript or source draft has unsaved edits. Save the draft before leaving, or discard it."}
+                        p {"Your transcript, recording studio, or source draft has unsaved edits. Save the draft before leaving, or discard it."}
                         div {class:"actions",
                             button {class:"primary",autofocus:true,onclick:move |_|state.write().pending=None,"Keep editing"}
                             button {disabled:s.busy||s.saving,onclick:move |_| {state.write().pending=None;go(state,destination.clone());},"Discard and continue"}
@@ -245,6 +262,10 @@ pub fn App() -> Element {
 }
 
 pub fn navigate(mut state: Signal<State>, destination: Destination) {
+    if state.peek().recording_capture {
+        state.write().error = "Stop and save your recording before leaving the studio.".into();
+        return;
+    }
     if state.peek().busy || state.peek().saving {
         state.write().error = "Wait for the current request to finish before leaving.".into();
         return;

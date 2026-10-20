@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "livePublicVideo": true,
+  "requestedSeconds": 2,
+  "status": "done",
+  "publicationAttempted": false,
+  "connectedAccount": false,
+  "takeInBin": true,
+  "clipInSequence": true,
+  "duration": 2.0
+}

@@ -9,8 +9,9 @@ and undoing them through Git.
 
 Storyfold now has a Rust desktop editor, Rust local runtime and shared Rust
 timeline core. It reuses existing saved projects and local Whisper models.
-Node is not required by this runtime. Whisper uses an isolated Python ML worker;
-FFmpeg/ffprobe remain external media tools.
+Whisper uses an isolated Python ML worker; FFmpeg/ffprobe remain external media
+tools. YouTube clip imports additionally use an isolated yt-dlp runtime and
+Node.js 22+ for YouTube challenge support.
 
 With Rust installed, launch on Linux:
 
@@ -32,6 +33,24 @@ tasks, pause/resume, actual Cargo build/test output, source review and Git undo.
 
 See [Rust migration and validation](docs/RUST-MIGRATION.md) for compatibility
 checks and remaining acceptance work.
+
+### Record a video
+
+Open **Record**, create a recording, and select your camera and microphone.
+Hold the record button and release to save a short take, or tap it to record
+until you press Stop. Original takes stay in the bin while you trim, split,
+reorder and remove clips from your sequence. Save changes before recording
+another take or exporting.
+
+Add up to six manual text cards and show/hide them while recording. Their
+timing is saved with the take and burned into the rendered MP4. Horizontal and
+vertical exports are supported. **Send to transcript editor** sends the rendered
+sequence through automatic Whisper transcription and your chosen topic grouping.
+
+The studio also imports a selected interval from a YouTube URL and uploads
+finished exports to your channel. Uploads require explicit Google connection
+and review; visibility defaults to **Private**. See [recording details](docs/RECORDING.md)
+and [YouTube setup](docs/YOUTUBE.md).
 
 ### Previous web release
 
