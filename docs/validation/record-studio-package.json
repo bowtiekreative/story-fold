@@ -1,0 +1,23 @@
+{
+  "package": "storyfold-record_0.1.0~preview.1_amd64.deb",
+  "package_sha256": "788f87dfcdb14a048066897d4508d822c17c26e6e95f55a972a9313c71725390",
+  "binary_sha256": "3b257a8de7fedfd3f1b3981638917c990c23151686fb50e558c5d0965cbff7da",
+  "startup_alive_for_8_seconds": true,
+  "exit_code": 124,
+  "stderr": "",
+  "camera_opened": false,
+  "private_media_opened": false,
+  "fresh_os_install_tested": false,
+  "checked_at": "2026-10-20",
+  "workspace_commit": "c9a9125",
+  "package_scope": "Native M1\u20138 preview checkpoint; YouTube sources under separate implementation",
+  "user_install": true,
+  "installed_binary_hash_matches": true,
+  "desktop_file_valid": true,
+  "icon_location": "app-owned user data directory",
+  "isolated_install_checks": true,
+  "operating_system": "Ubuntu24.04.5 LTS, x86_64",
+  "newer_packaging_source_changes": "Directory modes normalized and user icon location fixed after this package was built; binary unchanged",
+  "physical_camera_acceptance": false,
+  "windows_acceptance": false
+}

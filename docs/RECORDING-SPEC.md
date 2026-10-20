@@ -14,9 +14,7 @@ it does not assert that the full studio has been implemented.
   the new studio has feature parity; an empty foundation does not replace it.
 - Ryan chose **local AI** for Record’s overlay builder. This supersedes the
   reference’s paid Claude/ChatGPT provider and paid API budget gate. No paid
-  provider fallback. Ollama is available locally with installed Qwen and LLaVA models. Vision/text
-  inference and a real search source still need verification at the AI milestone;
-  no inference calls occur in milestone 1.
+  provider fallback. Ollama is available locally with installed Qwen and LLaVA models. A generated screenshot passed local Qwen3.5:9b vision with a strict JSON schema and exact OCR text. A real public search response was verified. Native review/search/capture/HTML passed real generated-source integration and an actual egui review-button roundtrip, including preservation of newer edits.
 - Live YouTube publishing requires Ryan’s Google Desktop OAuth client and
   consent. An app-side connection control or mocked upload is not that consent.
 
@@ -80,13 +78,13 @@ Windows compile and runtime validation status.
 | 1 | Workspace/window foundation; architecture, security, decisions | Linux foundation built and validated (14 tests, lint, native screenshots), Catalyst Solo commit a084433. Windows acceptance remains unverified. |
 | 2 | Core project/timeline model and every cue/save invariant test | Implemented and verified on Linux in Catalyst Solo commit922ec11: typed edits, clip-relative cues,100-snapshot history, safe local saves/Git. |
 | 3 | Ordered bin/sequence, drag, playhead tools, shape, Removed, Undo | Implemented egui ordered bin/sequence, drag/buttons, playhead, both-end frame/second trim, Removed/Restore, Undo/Redo and shape switch. Linux native layout and38 workspace tests passed. |
-| 4 | Persistent segmented capture and hardware acceptance | Segmented session core implemented in Catalyst Solo commit19f3fd8;50 workspace tests plus two gated generated-media checks passed. Native studio integration and physical timing/drift/unplug acceptance remain pending. |
-| 5 | Shared renderer, six overlay types, nine slots and playback | Shared tiny-skia/cosmic-text renderer is in progress. Installed recorder retains nine slots/keys and four text card types with ASS export. |
-| 6 | Search/screenshot/local AI review, HTML and usage | Pending; Ollama discovered, inference protocol and search source unverified. |
-| 7 | Media inserts and matching zoom preview/export | Pending. |
-| 8 | 1080p MP4 in both shapes, progress/cancel | HD render/preview/export repair installed and validated; cancellation and full specification acceptance pending. |
-| 9 | Keychain OAuth/PKCE resumable upload, Unlisted default | Existing explicit Private upload flow is partial; keychain migration/new default pending. No live publishing acceptance claimed. |
-| 10 | Ubuntu .deb, icon, clean-install acceptance | Existing local launcher; package and clean-install acceptance pending. |
+| 4 | Persistent segmented capture and hardware acceptance | Segmented core19f3fd8 and egui controlscc4c9ba implemented; generated pointer/Space/tap workflow passed. Natural4:3 preview check passed. Physical20-hold/timing/drift/unplug acceptance remains pending. |
+| 5 | Shared renderer, six overlay types, nine slots and playback | Shared6-type renderer0232857 and native manual-card controlscc4c9ba verified. Performance7533004 measured23.052ms mean/30.329ms p95 for3cached1080p cards;192 exact reference comparisons passed. |
+| 6 | Search/screenshot/local AI review, HTML and usage | Local Qwen vision/strict-schema protocol and real public RSS response verified. Native search/screenshot/OCR/review, HTML and token ledger implemented in586a5cd. Live core2/2 and actual egui review-button roundtrip passed; no paid fallback. |
+| 7 | Media inserts and matching zoom preview/export | Core generated scene exports matched the shared renderer at0/2.5/5s. Native start/end box drag/resize, newer-draft and exact frame-clock tests passed (07432f0/586a5cd/c9a9125). Camera card in front of media confirmed by Ryan. Compositor36.1ms mean/39.5ms p95 still exceeds the30fps budget; hardware acceptance remains. |
+| 8 | 1080p MP4 in both shapes, progress/cancel | Core92f0cfc and native controls2eec2d1 implemented. Both1080p shapes, actual progress/cancel, native generated player/cache/rebuild and newer-draft checks passed. Physical/Windows acceptance remains separate. |
+| 9 | Keychain OAuth/PKCE resumable upload, Unlisted default | Native keychain/PKCE/resumable protocol, public clip importer and Project → YouTube controls integrated. Unlisted is the new default. Workspace and strict lint passed; native0.1.1 is installed. Google setup/consent and live publishing acceptance remain. |
+| 10 | Ubuntu .deb, icon, clean-install acceptance | Native0.1.1 release .deb built/extracted/started and user launcher installed with verified hashes and app-owned downloader. Physical-device, fresh-OS and Windows acceptance remain pending; the studio remains separate from the interview editor. |
 
 Record actual commands, dates and remaining limitations in
 [VALIDATION.md](VALIDATION.md). Keep the source brief’s acceptance conditions;

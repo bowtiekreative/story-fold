@@ -85,3 +85,80 @@ This is a layout/core foundation; it opens no device, project or model and does
 not yet record, edit clips, render, persist, infer or upload. Windows CI and
 screen-reader operation were not checked. Capture/timeline/AI acceptance remain
 tracked requirements. See the nested `docs/VALIDATION.md` for commands and proof.
+
+
+## Recording responsiveness follow-up — 2026-10-20
+
+The existing Dioxus studio now has explicit Play/Pause and Expand controls above
+its native video surface. Pointer-hit tests verified play, pause, enter/exit and
+Escape without reloading or replacing the playing video. Generated source clock
+tests under a competing1080p encode measured314ms median/550ms p95 before the
+buffer changes and173ms median/258ms p95 in the final shared-machine run after.
+These figures exclude physical sensor/USB and browser painting. The same work
+fixed a lost FFmpeg stdin control pipe: normal Stop now completed in281–390ms
+instead of waiting for the8-second forced-kill fallback.58 focused unit tests,
+strict lint and complete generated capture/preview/export checks passed;31
+existing test-store files stayed byte-identical. Release service was rebuilt and
+restarted only after confirming zero active recordings/exports; health passed.
+See [the detailed proof](validation/recording-preview-responsiveness.json).
+
+The separate egui studio now queues camera stop and take saving when Preview or
+Export is selected during capture, with visible status instead of a disabled
+control. An actual egui pointer test passed through save/export/player startup.
+Its sequence player uses the installed mpv native controller with always-visible
+Play/Pause, seek and fullscreen buttons. Controller mouse-binding tests through local mpv IPC verified
+Play/Pause, a stopped playback clock, fullscreen enter/exit, Escape and replay
+from the end, preserving the original MP4. A compiled-in local handler adds EOF
+replay; arbitrary scripts/configs, sidecars and network extraction stay disabled.
+The native generated filter-clock-to-RGBA benchmark measured109ms median/132ms
+p95 across24 samples under a second1080p encode. This excludes camera sensor,
+USB/driver and GPU painting; it does not establish zero sensor-to-screen delay.
+See [native control evidence](validation/recording-native-buttons.json).
+
+The initial M1–8 native release was packaged, extracted and started on this
+Ubuntu24.04 host. A user launcher and icon were installed separately from the
+interview editor. This is package extraction/startup acceptance, not a fresh-OS
+installation test. [Package evidence](validation/record-studio-package.json).
+Physical Logitech/OBSBOT, ten-minute A/V drift and Windows acceptance remain.
+
+
+Native0.1.1 was rebuilt without test features, packaged and started from an
+extracted.deb on an isolated display for8seconds with no stderr or missing
+libraries. The user-installed binary and bundled downloader match the package
+SHA256 values. Launcher validation and installer fixtures passed; the updated
+window was launched as “Storyfold · Record studio (0.1.1)”. Older user windows
+were preserved. Google/hardware/Windows and fresh-OS acceptance remain pending.
+[Release evidence](validation/record-studio-0.1.1.json);
+[YouTube evidence](validation/record-native-youtube.json).
+
+
+The0.1.1 user retest reports that the whole native studio ignores clicks.
+Interactive desktop acceptance has therefore failed and remains open. The egui
+checks inject events directly into its context; the player test uses mpv local
+IPC mouse/button commands to exercise its controller. Neither establishes native
+window-system input delivery. A bounded opt-in native input/focus/modal/pending-
+picker probe is being prepared; no hardware or private-content capture is needed.
+
+
+## Native input follow-up and startup flow · 2026-10-20
+
+A real X11/XTest fixture, restricted to a fresh Xvfb display, now finds this
+app's own window and injects OS pointer events at its measured Project control.
+The app receives them and opens the menu. This strengthens the earlier direct
+egui-event and mpv-IPC checks; it still does not establish actual-desktop input.
+
+Version0.1.2 adds visible Create/Open project actions above Record in both
+supported shapes/minimum size, a grey inactive Record control, and native-parent
+project folder dialogs.23 focused studio tests, strict all-target/all-feature
+Clippy, the real OS-input fixture, installer checks and normal release build
+passed. The package starts for8seconds after extraction with no stderr or missing
+libraries; the installed binary hash matches it.
+[0.1.2 release proof](validation/record-studio-0.1.2.json).
+
+A separate opt-in, validation-feature-only Input check window records at most100
+lines of event counts and busy/modal/focus flags. It records no key contents,
+private paths, screenshots, credentials or media. No camera was started. The
+initial desktop probe received no pointer events before its unused window was
+replaced with the0.1.2probe; its absence of events is not evidence of the cause.
+Ryan's Project-menu result is pending. This input repair stays open. Native folder
+picker foreground behavior and physical camera timing remain unverified.

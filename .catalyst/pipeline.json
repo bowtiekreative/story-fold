@@ -1,8 +1,8 @@
 {
   "name": "Storyfold",
-  "milestone": "Installed preview feedback repaired; native recording studio in progress",
-  "updatedAt": "2026-10-20T05:28:31.780147+00:00",
-  "message": "Installed Rust app updated: fresh New project startup, Projects list, explicit video loading/error/retry, Expand/Escape, immediate loader and real export progress. Actual desktop generated-media flow and68 workspace tests passed. Segmented egui capture core verified in Catalyst Solo19f3fd8; UI integration and shared renderer in progress. Physical timing/drift acceptance remains pending.",
+  "milestone": "Native0.1.2 startup repair installed; desktop input check pending",
+  "updatedAt": "2026-10-20T08:02:24.269910+00:00",
+  "message": "Added clear Create/Open actions, a grey inactive Record button and attached project folder dialogs. Real OS-pointer fixture opens Project; actual Input check window awaits one Project click. Your reported all-click failure remains open.",
   "tasks": [
     {
       "id": "foundation",
@@ -294,7 +294,7 @@
       "id": "record-renderer",
       "title": "Render matching native overlay frames",
       "acceptance": "Six overlay types,nine slots and shared tiny-skia/cosmic-text RGBA rendering for preview and exports.",
-      "status": "doing",
+      "status": "done",
       "lane": "Now",
       "evidence": [
         "docs/RECORDING-SPEC.md"
@@ -304,28 +304,30 @@
       "id": "record-local-ai",
       "title": "Build reviewed overlays with local AI",
       "acceptance": "Real search and screenshots, dropped images, strict proposals, exact-text review/apply, HTML export, usage; local model only, no paid fallback.",
-      "status": "todo",
-      "lane": "Next",
+      "status": "done",
+      "lane": "Now",
       "evidence": [
         "docs/RECORDING-SPEC.md"
-      ]
+      ],
+      "description": "Local Qwen review, real public search and Chrome capture, OCR-exact strict proposals, approval/edit/reject, HTML and token counts implemented. Core live tests2/2 and actual egui review-button roundtrip passed on generated evidence; no paid fallback."
     },
     {
       "id": "record-inserts",
       "title": "Add photo and video zoom inserts",
-      "acceptance": "Start/end boxes,100\u2013250% zoom, duration/easing/placement, preview/export matching at0,2.5,5seconds.",
-      "status": "todo",
-      "lane": "Next",
+      "acceptance": "Start/end boxes,100–250% zoom, duration/easing/placement, preview/export matching at0,2.5,5seconds.",
+      "status": "doing",
+      "lane": "Now",
       "evidence": [
         "docs/RECORDING-SPEC.md"
-      ]
+      ],
+      "description": "Photo/video import, start/end drag/resize zoom, full/beside/opaque-camera-in-front layouts implemented.36 exact scene comparisons and12 encoded samples at0/2.5/5s passed. Measured compositor36.1ms mean/39.5ms p95 still misses30fps; hardware acceptance remains."
     },
     {
       "id": "record-native-export",
       "title": "Finish native sequence export",
       "acceptance": "1080p horizontal/vertical H264/AAC with overlays, actual progress/cancel and Shorts notice.",
-      "status": "todo",
-      "lane": "Next",
+      "status": "done",
+      "lane": "Now",
       "evidence": [
         "docs/RECORDING-SPEC.md"
       ]
@@ -334,21 +336,27 @@
       "id": "record-native-youtube",
       "title": "Move publishing into native studio",
       "acceptance": "Keychain credentials, Google client setup/consent, PKCE/resumable upload, reviewed Unlisted default; no upload without explicit action.",
-      "status": "todo",
+      "status": "doing",
       "lane": "Next",
       "evidence": [
-        "docs/RECORDING-SPEC.md"
-      ]
+        "docs/RECORDING-SPEC.md",
+        "docs/validation/record-native-youtube.json",
+        "docs/validation/record-studio-0.1.1.json"
+      ],
+      "description": "Native keychain/PKCE/resumable upload, public clip importer and Project → YouTube panel integrated. All17 protocol and7 panel tests pass; real Google client/consent, keychain and publishing acceptance remain."
     },
     {
       "id": "record-package",
       "title": "Package and validate the native studio",
       "acceptance": "Ubuntu deb/icon/integration, fresh install acceptance; report Windows/hardware checks actually performed.",
-      "status": "todo",
+      "status": "doing",
       "lane": "Next",
       "evidence": [
-        "docs/RECORDING-SPEC.md"
-      ]
+        "docs/RECORDING-SPEC.md",
+        "docs/validation/record-studio-0.1.1.json",
+        "docs/validation/record-studio-0.1.2.json"
+      ],
+      "description": "Native0.1.2 production-feature build packaged, extracted and started on Ubuntu24.04, then user-installed with verified hashes, launcher, icon and pinned app-owned downloader/licenses. Actual desktop click acceptance remains open following0.1.1 user failure; fresh-OS/hardware/Windows acceptance also remain."
     },
     {
       "id": "project-navigation",
@@ -391,6 +399,20 @@
         "docs/validation/recording-feedback-progress.json",
         "docs/validation/recording-feedback-release.json"
       ]
+    },
+    {
+      "id": "record-preview-responsiveness",
+      "title": "Make native preview buttons responsive and reduce camera delay",
+      "status": "doing",
+      "owner": "Codex",
+      "description": "Your0.1.1 retest reported the whole studio ignores clicks. Native0.1.2 adds visible Create/Open actions and attached folder dialogs;23 focused tests, strict lint and real isolated X11-pointer Project-menu opening pass. Installed0.1.2 hash matches package. A bounded Input check window is open; actual desktop Project-click result is still pending, so this task remains open.",
+      "evidence": [
+        "docs/validation/recording-preview-responsiveness.json",
+        "docs/validation/recording-native-buttons.json",
+        "docs/validation/record-studio-0.1.2.json"
+      ],
+      "lane": "Now",
+      "acceptance": "Actual pointer activation, visible stop/save/prepare while camera is on, Expand exit/Escape without playback interruption, measured generated frame age; retain source files and report physical-device limits."
     }
   ]
 }

@@ -1,0 +1,64 @@
+{
+  "verified_at": "2026-10-20",
+  "application": "Native Rust egui Record studio",
+  "physical_camera_opened": false,
+  "player_backend": "installed mpv0.37.0 with fixed visible native controller and compiled-in local replay handler",
+  "generated_camera_on_preview_button": {
+    "passed": true,
+    "run_seconds": 16.18,
+    "pipeline": "actual egui pointer\u2192stop camera\u2192save takes\u2192prepare MP4\u2192native player",
+    "recovery_idempotent": true,
+    "verified_with_repaired_mpv_player": true,
+    "final_combined_capture_and_output_test_seconds": 27.2
+  },
+  "native_camera_clock": {
+    "ageMs": {
+      "max": 136.70039176940918,
+      "median": 109.04502868652344,
+      "min": 92.46969223022461,
+      "p95": 131.76679611206055
+    },
+    "competingLoad": "1920x1080 x264 veryfast, two threads",
+    "component": "Generated filter clock to latest native RGBA frame; excludes sensor/USB and GPU painting",
+    "fps": 32.15161885375212,
+    "physicalCameraOpened": false,
+    "preview": "1280x720;1920x1080@30 capture unchanged",
+    "pulseInputQueuePackets": 8,
+    "samples": 24,
+    "syntheticOnly": true,
+    "videoInputQueuePackets": 2
+  },
+  "remaining": [
+    "Real Logitech C920/OBSBOT sensor-to-screen timing",
+    "Host compositor/device retest",
+    "Windows/macOS runtime acceptance"
+  ],
+  "release_installed": true,
+  "workspace_checks": {
+    "passed": 123,
+    "opt_in_ignored": 22,
+    "strict_all_target_all_feature_clippy": true,
+    "format": true,
+    "physical_devices_used": false
+  },
+  "release_proof": "record-studio-0.1.1.json",
+  "player_controller_bindings_via_local_mpv_ipc": {
+    "play": true,
+    "pause_stops_clock": true,
+    "fullscreen_enter": true,
+    "fullscreen_exit": true,
+    "escape": true,
+    "eof_stays_open": true,
+    "click_play_restarts_completed_sequence": true,
+    "source_bytes_unchanged": true
+  },
+  "desktop_native_input_accepted": false,
+  "user_retest": "Version0.1.1: whole Record studio ignores clicks. Unresolved; input/lifetime probe underway.",
+  "additional_startup_repair_version": "0.1.2",
+  "native_os_input_fixture": {
+    "real_x11_xtest_events": true,
+    "project_menu_opens": true,
+    "isolated_only": true
+  },
+  "current_release_proof": "record-studio-0.1.2.json"
+}

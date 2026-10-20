@@ -1,0 +1,25 @@
+{
+  "checked_at": "2026-10-20",
+  "version": "0.1.2",
+  "package": "storyfold-record_0.1.2~preview.1_amd64.deb",
+  "package_sha256": "ed70dba383951d2af8fe83ec60db8b243b7336c196b211aad64f6a24101f025e",
+  "binary_sha256": "ac800aa31158aa3316f32c4e45c81bd5bd0ab572069661316ade3aab92db77d6",
+  "startup_alive_for_8_seconds": true,
+  "startup_stderr": "",
+  "libraries_available": true,
+  "desktop_file_valid": true,
+  "physical_camera_opened": false,
+  "private_media_opened": false,
+  "test_features_enabled": false,
+  "fresh_os_install_tested": false,
+  "user_install": true,
+  "native_os_input_in_isolated_xvfb": {
+    "project_menu_opens": true,
+    "real_xtest_pointer_delivery": true
+  },
+  "desktop_input_acceptance": "Pending user Project-menu check in Input check window",
+  "installed_binary_hash_matches": true,
+  "workspace_commit": "b233e2f",
+  "diagnostic_window_title": "Storyfold \u00b7 Record studio (0.1.2) \u00b7 Input check",
+  "startup_controls_and_picker_parent": "Implemented; layout and native Project menu fixture passed. Actual picker foreground test pending."
+}
