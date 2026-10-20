@@ -1,8 +1,8 @@
 {
   "name": "Storyfold",
-  "milestone": "Recording studio and YouTube clips \u2014 installed",
-  "updatedAt": "2026-10-20T01:49:06.855648+00:00",
-  "message": "Native recording studio and both YouTube directions are installed. Record/edit/manual-card/MP4/native checks passed; real URL clip import and local Whisper handoff passed. Publishing defaults to Private and binds to the reviewed channel. Google client setup/channel consent and physical camera verification remain user acceptance.",
+  "milestone": "Camera discovery fixed \u2014 installed",
+  "updatedAt": "2026-10-20T04:04:15.672211+00:00",
+  "message": "The installed app detects OBSBOT Tiny 2 and Logitech C922 video inputs, excludes their metadata nodes and refreshes idle camera choices every three seconds. Selection, Microphone Off and unsaved drafts are preserved. Tests, lint and release passed; saved files were unchanged. No physical recording was started.",
   "tasks": [
     {
       "id": "foundation",
@@ -210,6 +210,17 @@
         "docs/validation/rust-youtube-live.json",
         "docs/validation/rust-recording-checks.json",
         "docs/validation/rust-recording-release.json"
+      ]
+    },
+    {
+      "id": "camera-detection",
+      "title": "Detect connected cameras and hotplug changes",
+      "acceptance": "Connected capture-capable cameras appear; metadata nodes are excluded; automatic refresh preserves camera selection, Microphone Off and unsaved drafts; release verified without starting physical recording.",
+      "lane": "Now",
+      "status": "done",
+      "evidence": [
+        "docs/RECORDING.md",
+        "docs/validation/camera-detection.json"
       ]
     }
   ]

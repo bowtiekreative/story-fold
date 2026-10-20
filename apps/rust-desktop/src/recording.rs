@@ -88,6 +88,7 @@ struct Studio {
     manual: bool,
     epoch: u64,
     external_job: bool,
+    discovering: bool,
 }
 fn edit(session: &RecordingSession) -> RecordingEdit {
     RecordingEdit {
@@ -99,6 +100,33 @@ fn edit(session: &RecordingSession) -> RecordingEdit {
     }
 }
 impl Studio {
+    fn update_devices(&mut self, devices: RecordingDevices, initial: bool) {
+        if self.capture() {
+            return;
+        }
+        if !devices.cameras.iter().any(|d| d.id == self.camera) {
+            self.camera = devices
+                .cameras
+                .first()
+                .map(|d| d.id.clone())
+                .unwrap_or_default();
+        }
+        if initial {
+            self.microphone = devices
+                .microphones
+                .first()
+                .map(|d| d.id.clone())
+                .unwrap_or_default();
+        } else if !self.microphone.is_empty()
+            && !devices.microphones.iter().any(|d| d.id == self.microphone)
+        {
+            self.microphone.clear();
+        }
+        self.devices = devices;
+        if self.error.starts_with("Camera discovery:") {
+            self.error.clear();
+        }
+    }
     fn dirty(&self) -> bool {
         self.session.as_ref().map(edit) != self.saved
     }
@@ -276,28 +304,22 @@ fn open_session(mut studio: Signal<Studio>, api: Api, id: String) {
     });
 }
 fn refresh_devices(mut studio: Signal<Studio>, api: Api) {
-    if studio.peek().capture() {
+    if studio.peek().capture() || studio.peek().discovering {
         return;
     }
+    studio.write().discovering = true;
     spawn(async move {
-        match api.get::<RecordingDevices>("/recording-devices").await {
+        let result = api.get::<RecordingDevices>("/recording-devices").await;
+        let mut s = studio.write();
+        s.discovering = false;
+        if s.capture() {
+            return;
+        }
+        match result {
             Ok(devices) => {
-                let mut s = studio.write();
-                if !devices.cameras.iter().any(|d| d.id == s.camera) {
-                    s.camera = devices
-                        .cameras
-                        .first()
-                        .map(|d| d.id.clone())
-                        .unwrap_or_default();
-                }
-                if !s.microphone.is_empty()
-                    && !devices.microphones.iter().any(|d| d.id == s.microphone)
-                {
-                    s.microphone.clear();
-                }
-                s.devices = devices;
+                s.update_devices(devices, false);
             }
-            Err(error) => studio.write().error = error,
+            Err(error) => s.error = format!("Camera discovery: {error}"),
         }
     });
 }
@@ -627,26 +649,28 @@ pub fn RecordingStudio(mut state: Signal<State>, active: bool) -> Element {
     use_future(move || {
         let api = poll_api.clone();
         async move {
+            let mut was_visible = false;
+            let mut next_discovery = Instant::now();
             loop {
-                if state.peek().page == Page::Record || studio.peek().capture() {
+                let visible = state.peek().page == Page::Record;
+                if visible
+                    && studio.peek().loaded
+                    && !studio.peek().capture()
+                    && (!was_visible || Instant::now() >= next_discovery)
+                {
+                    refresh_devices(studio, api.clone());
+                    next_discovery = Instant::now() + Duration::from_secs(3);
+                }
+                if visible || studio.peek().capture() {
                     if !studio.peek().loaded {
                         let devices = api.get::<RecordingDevices>("/recording-devices").await;
                         let sessions = api.get::<Vec<RecordingSession>>("/recordings").await;
                         match (devices, sessions) {
                             (Ok(devices), Ok(sessions)) => {
                                 let mut s = studio.write();
-                                s.camera = devices
-                                    .cameras
-                                    .first()
-                                    .map(|d| d.id.clone())
-                                    .unwrap_or_default();
-                                // Selection opens no hardware. Record is the explicit capture action.
-                                s.microphone = devices
-                                    .microphones
-                                    .first()
-                                    .map(|d| d.id.clone())
-                                    .unwrap_or_default();
-                                s.devices = devices;
+                                // Discovery reads capabilities; Record is the explicit capture action.
+                                s.update_devices(devices, true);
+                                next_discovery = Instant::now() + Duration::from_secs(3);
                                 s.sessions = sessions;
                                 if !s.request
                                     && s.session.is_none()
@@ -698,6 +722,7 @@ pub fn RecordingStudio(mut state: Signal<State>, active: bool) -> Element {
                         }
                     }
                 }
+                was_visible = visible;
                 tokio::time::sleep(Duration::from_millis(if studio.peek().capture() {
                     200
                 } else {
@@ -839,7 +864,7 @@ fn studio_view(state: Signal<State>, mut studio: Signal<Studio>, api: Api) -> El
                                 option {value:"","Off — record without microphone"}
                                 for device in &s.devices.microphones {option {value:"{device.id}","{device.name}"}}
                             }}
-                            button {disabled:capture,onclick:{let api=api.clone();move |_|refresh_devices(studio,api.clone())},"Refresh devices"}
+                            button {disabled:capture||s.discovering,onclick:{let api=api.clone();move |_|refresh_devices(studio,api.clone())},if s.discovering {"Checking cameras…"}else{"Refresh devices"}}
                         }
                         div {class:"record-camera-card",
                             div {class:if session.orientation=="9:16" {"record-frame portrait"}else{"record-frame"},
@@ -981,6 +1006,53 @@ fn studio_view(state: Signal<State>, mut studio: Signal<Studio>, api: Api) -> El
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn hotplug_updates_choices_preserves_selection_off_and_drafts() {
+        fn devices(ids: &[&str]) -> RecordingDevices {
+            RecordingDevices {
+                cameras: ids
+                    .iter()
+                    .map(|id| RecordingDevice {
+                        id: (*id).into(),
+                        name: (*id).into(),
+                    })
+                    .collect(),
+                microphones: vec![RecordingDevice {
+                    id: "default".into(),
+                    name: "Microphone".into(),
+                }],
+                ..Default::default()
+            }
+        }
+        let mut studio = Studio::default();
+        studio.update_devices(devices(&[]), true);
+        assert!(studio.camera.is_empty());
+        assert_eq!(studio.microphone, "default");
+        studio.microphone.clear();
+        studio.update_devices(devices(&["video0", "video2"]), false);
+        assert_eq!(studio.camera, "video0");
+        assert!(studio.microphone.is_empty());
+        studio.camera = "video2".into();
+        studio.update_devices(devices(&["video0", "video2"]), false);
+        assert_eq!(studio.camera, "video2");
+        studio.session = Some(session());
+        studio.saved = studio.session.as_ref().map(edit);
+        studio.session.as_mut().unwrap().name = "Keep this unsaved draft".into();
+        studio.update_devices(devices(&["video0"]), false);
+        assert_eq!(studio.camera, "video0");
+        assert!(studio.microphone.is_empty());
+        assert!(studio.dirty());
+        assert_eq!(
+            studio.session.as_ref().unwrap().name,
+            "Keep this unsaved draft"
+        );
+        studio.gesture.phase = CapturePhase::Starting;
+        studio.update_devices(devices(&[]), false);
+        assert_eq!(studio.camera, "video0");
+        studio.gesture = CaptureGesture::default();
+        studio.update_devices(devices(&[]), false);
+        assert!(studio.camera.is_empty());
+    }
     fn session() -> RecordingSession {
         RecordingSession {
             id: "test".into(),

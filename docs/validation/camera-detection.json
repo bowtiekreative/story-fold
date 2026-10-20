@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "verifiedAt": "2026-10-20T04:03:47.509544+00:00",
+  "runtime": "Rust release",
+  "devices": [
+    {
+      "id": "video0",
+      "name": "OBSBOT Tiny 2: OBSBOT Tiny 2 St (video0)"
+    },
+    {
+      "id": "video2",
+      "name": "C922 Pro Stream Webcam (video2)"
+    }
+  ],
+  "metadataNodesExcluded": [
+    "video1",
+    "video3"
+  ],
+  "discoveryOnly": true,
+  "physicalRecordingStarted": false,
+  "automaticRefreshSeconds": 3,
+  "testsPassed": 52,
+  "testsIgnored": 2,
+  "clippyWarningsDeniedPassed": true,
+  "releaseBuildPassed": true,
+  "existingSavedFilesUnchanged": true,
+  "selectionAndMicOffRegressionPassed": true
+}

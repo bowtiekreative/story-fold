@@ -1,5 +1,5 @@
 use super::*;
-use std::{path::Path, process::Stdio};
+use std::process::Stdio;
 use tokio::{
     io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader},
     process::Command,
@@ -15,6 +15,81 @@ pub(super) struct Input {
 }
 pub(super) fn test_source() -> bool {
     cfg!(debug_assertions) && std::env::var("STORYFOLD_CAPTURE_TEST").is_ok_and(|s| s == "1")
+}
+#[cfg(target_os = "linux")]
+mod linux {
+    use std::{
+        fs::OpenOptions,
+        io,
+        os::{fd::AsRawFd, unix::fs::OpenOptionsExt},
+        path::Path,
+    };
+
+    #[repr(C)]
+    #[derive(Default)]
+    struct Capability {
+        driver: [u8; 16],
+        card: [u8; 32],
+        bus_info: [u8; 32],
+        version: u32,
+        capabilities: u32,
+        device_caps: u32,
+        reserved: [u32; 3],
+    }
+    fn captures_video(capabilities: u32, device_caps: u32) -> bool {
+        let flags = if capabilities & 0x8000_0000 != 0 {
+            device_caps
+        } else {
+            capabilities
+        };
+        flags & (0x0000_0001 | 0x0000_1000) != 0
+    }
+    pub(super) fn camera(path: &Path) -> io::Result<Option<String>> {
+        let file = OpenOptions::new()
+            .read(true)
+            .custom_flags(libc::O_NONBLOCK)
+            .open(path)?;
+        let mut capability = Capability::default();
+        // QUERYCAP reads the node's capabilities; it never queues buffers or starts a stream.
+        let result = unsafe {
+            libc::ioctl(
+                file.as_raw_fd(),
+                libc::_IOR::<Capability>(b'V' as u32, 0),
+                &mut capability,
+            )
+        };
+        if result < 0 {
+            return Err(io::Error::last_os_error());
+        }
+        if !captures_video(capability.capabilities, capability.device_caps) {
+            return Ok(None);
+        }
+        let length = capability
+            .card
+            .iter()
+            .position(|b| *b == 0)
+            .unwrap_or(capability.card.len());
+        Ok(Some(
+            String::from_utf8_lossy(&capability.card[..length])
+                .chars()
+                .filter(|c| !c.is_control())
+                .collect(),
+        ))
+    }
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+        #[test]
+        fn per_node_capabilities_exclude_uvc_metadata_and_output_nodes() {
+            assert_eq!(std::mem::size_of::<Capability>(), 104);
+            assert_eq!(std::mem::offset_of!(Capability, device_caps), 88);
+            assert!(captures_video(0x84a0_0001, 0x0420_0001));
+            assert!(!captures_video(0x84a0_0001, 0x04a0_0000));
+            assert!(!captures_video(0x8000_0002, 2));
+            assert!(captures_video(1, 0));
+            assert!(captures_video(0x8000_1000, 0x1000));
+        }
+    }
 }
 async fn inventory() -> Result<(
     RecordingDevices,
@@ -35,24 +110,43 @@ async fn inventory() -> Result<(
             name: "Generated test tone (automation only)".into(),
         });
         audio.insert("synthetic-audio".into(), "synthetic".into());
+        result.message =
+            "Generated test source; physical devices are excluded in this debug mode.".into();
+        return Ok((result, video, audio));
     }
     #[cfg(target_os = "linux")]
     {
-        if let Ok(entries) = std::fs::read_dir("/sys/class/video4linux") {
+        use std::os::unix::fs::FileTypeExt;
+        if let Ok(entries) = std::fs::read_dir("/dev") {
             for entry in entries.flatten() {
                 let id = entry.file_name().to_string_lossy().into_owned();
-                // A V4L device node is selected from this inventory, never an arbitrary HTTP path.
+                // Enumerate accessible nodes directly; sysfs may be unavailable in an app sandbox.
                 if id.starts_with("video")
+                    && id.len() > 5
                     && id[5..].bytes().all(|b| b.is_ascii_digit())
-                    && Path::new("/dev").join(&id).exists()
+                    && entry.file_type().is_ok_and(|kind| kind.is_char_device())
                 {
-                    let name = std::fs::read_to_string(entry.path().join("name"))
-                        .unwrap_or_else(|_| id.clone());
-                    result.cameras.push(RecordingDevice {
-                        id: id.clone(),
-                        name: name.trim().into(),
-                    });
-                    video.insert(id.clone(), format!("/dev/{id}"));
+                    match linux::camera(&entry.path()) {
+                        Ok(Some(name)) => {
+                            result.cameras.push(RecordingDevice {
+                                id: id.clone(),
+                                name: if name.is_empty() {
+                                    id.clone()
+                                } else {
+                                    format!("{name} ({id})")
+                                },
+                            });
+                            video.insert(id.clone(), format!("/dev/{id}"));
+                        }
+                        Ok(None) => {}
+                        Err(error) => {
+                            result.message = if error.kind() == std::io::ErrorKind::PermissionDenied {
+                                "A camera was found, but Linux denied access. Check camera permissions for your account, then refresh devices."
+                            } else {
+                                "A camera node could not be queried. Close other camera apps and refresh devices."
+                            }.into();
+                        }
+                    }
                 }
             }
         }
@@ -128,12 +222,14 @@ async fn inventory() -> Result<(
         }
     }
     result.cameras.sort_by(|a, b| a.id.cmp(&b.id));
-    result.message = if result.cameras.is_empty() {
-        "No webcam detected. Connect a camera, close other camera apps, then refresh devices. Recording starts only when you press Record.".into()
-    } else {
-        "Camera and microphone stay off until you start a take. Recordings stay on this computer."
+    if result.message.is_empty() {
+        result.message = if result.cameras.is_empty() {
+            "No webcam detected. Connect a camera, close other camera apps, then refresh devices. Recording starts only when you press Record.".into()
+        } else {
+            "Camera and microphone stay off until you start a take. Recordings stay on this computer."
             .into()
-    };
+        };
+    }
     Ok((result, video, audio))
 }
 pub(super) async fn devices() -> Result<RecordingDevices> {

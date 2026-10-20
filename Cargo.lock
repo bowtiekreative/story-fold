@@ -4685,6 +4685,7 @@ dependencies = [
  "fs2",
  "futures-util",
  "http-body-util",
+ "libc",
  "regex",
  "reqwest",
  "rustfft",

@@ -170,3 +170,20 @@ The optimized release built and opened through the installed launcher target.
 The running service exposes the new routes, local Whisper and the ready importer.
 Saved project files were byte-for-byte unchanged during the service upgrade.
 See [release evidence](rust-recording-release.json).
+
+## Camera detection repair — 2026-10-19
+
+The studio originally cached its device list after the first load. Linux discovery
+also depended on sysfs and listed metadata-only nodes as cameras. It now queries
+accessible V4L2 nodes directly, uses per-node capture capabilities, refreshes idle
+choices every three seconds and on returning to Record, and preserves a valid
+selection, Microphone Off and unsaved edits. Refresh results cannot change choices
+during a pending or active take.
+
+All 52 normal workspace tests passed (two generated media checks were not rerun
+for this discovery-only fix). Formatting, Clippy with warnings denied and the
+optimized release passed. The running installed service lists the OBSBOT Tiny 2
+on video0 and Logitech C922 on video2, excluding metadata nodes video1/video3.
+Saved project and recording manifests were unchanged during the service upgrade.
+Capability queries did not start a physical video recording. See
+[camera detection evidence](camera-detection.json).

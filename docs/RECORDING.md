@@ -7,8 +7,11 @@ under the local Storyfold data folder.
 
 1. Choose **New recording**, name it, select horizontal or vertical, and choose
    a detected camera and microphone. The first microphone is selected initially;
-   choose **Off** to record without opening a microphone. Devices open only when
-   you start a take. Refreshing the device list preserves a valid selection.
+   choose **Off** to record without opening a microphone. Video and microphone capture start only when
+   you start a take. The studio checks for connected cameras every three seconds
+   while idle and on returning to Record. Refresh preserves a valid camera
+   selection and Microphone Off. On Linux, device capability queries exclude
+   metadata-only nodes and do not start a video stream.
 2. Hold the round button for a short take and release to save. A quick tap starts
    a long take; tap again or use **Stop and save** to finish. Separate start/stop
    buttons and keyboard controls are available. Stop is required before leaving
@@ -51,3 +54,8 @@ compatibility and lip-sync remain hardware acceptance checks. Linux uses V4L2
 and the default PulseAudio microphone; Windows uses DirectShow; macOS uses
 AVFoundation. Operating system device permissions still apply. Google consent
 and a real upload require the user's Desktop OAuth client and connected channel.
+
+Linux discovery uses the per-node `device_caps` reported by
+[VIDIOC_QUERYCAP](https://docs.kernel.org/userspace-api/media/v4l/vidioc-querycap.html),
+rather than a physical device’s combined capabilities. This keeps USB metadata
+endpoints out of the camera selector.
