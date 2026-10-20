@@ -5,6 +5,9 @@ mod dom;
 mod editor;
 pub mod model;
 mod player;
+#[cfg(debug_assertions)]
+mod preview_probe;
+mod projects;
 mod recording;
 #[cfg(debug_assertions)]
 mod recording_smoke;
@@ -18,11 +21,13 @@ use model::*;
 use reqwest::Method;
 use serde_json::Value;
 use std::{path::PathBuf, time::Duration};
+use storyfold_core::recording::RecordingSession;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub enum Page {
     #[default]
     Library,
+    Projects,
     Editor,
     Record,
     Build,
@@ -31,8 +36,14 @@ pub enum Page {
 pub enum Destination {
     Page(Page),
     Project(String),
+    Recording(Option<String>),
     Reload,
     Quit,
+}
+#[derive(Clone, Debug, PartialEq)]
+pub struct RecordingRequest {
+    pub id: Option<String>,
+    pub nonce: u64,
 }
 #[derive(Clone, Default)]
 pub struct State {
@@ -40,6 +51,10 @@ pub struct State {
     pub current: Option<Draft>,
     pub active_id: String,
     pub library: Vec<Summary>,
+    pub recording_library: Vec<RecordingSession>,
+    pub recording_request: Option<RecordingRequest>,
+    pub recording_request_nonce: u64,
+    pub recording_busy: bool,
     pub health: Health,
     pub error: String,
     pub notice: String,
@@ -55,6 +70,17 @@ pub struct State {
 impl State {
     pub fn dirty(&self) -> bool {
         self.source_dirty || self.recording_dirty || self.current.as_ref().is_some_and(Draft::dirty)
+    }
+    fn needs_confirmation(&self, destination: &Destination) -> bool {
+        match destination {
+            Destination::Quit => self.dirty(),
+            Destination::Reload => self.current.as_ref().is_some_and(Draft::dirty),
+            Destination::Project(id) => {
+                id != &self.active_id && self.current.as_ref().is_some_and(Draft::dirty)
+            }
+            Destination::Recording(_) => self.recording_dirty,
+            Destination::Page(_) => false,
+        }
     }
 }
 
@@ -106,7 +132,9 @@ pub fn App() -> Element {
     let mut state = use_signal(State::default);
     #[cfg(debug_assertions)]
     use_future(move || async move {
-        if let Some(path) = std::env::var_os("STORYFOLD_RECORD_SMOKE_FILE") {
+        if let Some(path) = std::env::var_os("STORYFOLD_PREVIEW_PROBE_FILE") {
+            preview_probe::run(state, PathBuf::from(path)).await;
+        } else if let Some(path) = std::env::var_os("STORYFOLD_RECORD_SMOKE_FILE") {
             recording_smoke::run(state, PathBuf::from(path)).await;
         } else if let Some(path) = std::env::var_os("STORYFOLD_SMOKE_FILE") {
             smoke::run(state, PathBuf::from(path)).await;
@@ -121,6 +149,11 @@ pub fn App() -> Element {
                     && state.peek().library != library
                 {
                     state.write().library = library;
+                }
+                if let Ok(library) = api.get::<Vec<RecordingSession>>("/recordings").await
+                    && state.peek().recording_library != library
+                {
+                    state.write().recording_library = library;
                 }
                 match api.get::<Health>("/health").await {
                     Ok(health) => {
@@ -211,7 +244,8 @@ pub fn App() -> Element {
     });
     let s = state.read().clone();
     let heading = match s.page {
-        Page::Library => "Your interviews",
+        Page::Library => "New project",
+        Page::Projects => "Your projects",
         Page::Editor => "Your story",
         Page::Record => "Recording studio",
         Page::Build => "Your build",
@@ -224,7 +258,8 @@ pub fn App() -> Element {
                 button {class:"brand",onclick:move |_|navigate(state,Destination::Page(Page::Library)),span {class:"mark","sf"} "Storyfold"}
                 span {class:"tagline","A little less footage. A lot more story."}
                 nav {"aria-label":"Main navigation",
-                    button {class:if s.page==Page::Library {"active"}else{""},onclick:move |_|navigate(state,Destination::Page(Page::Library)),"Interviews"}
+                    button {class:if s.page==Page::Library {"active"}else{""},onclick:move |_|navigate(state,Destination::Page(Page::Library)),"New project"}
+                    button {class:if s.page==Page::Projects {"active"}else{""},onclick:move |_|navigate(state,Destination::Page(Page::Projects)),"Projects"}
                     if s.current.is_some() {button {class:if s.page==Page::Editor {"active"}else{""},onclick:move |_|navigate(state,Destination::Page(Page::Editor)),"Editor"}}
                     button {class:if s.page==Page::Record {"active"}else{""},onclick:move |_|navigate(state,Destination::Page(Page::Record)),"Record"}
                     button {class:if s.page==Page::Build {"active"}else{""},onclick:move |_|navigate(state,Destination::Page(Page::Build)),"Your build"}
@@ -233,7 +268,9 @@ pub fn App() -> Element {
             if !s.error.is_empty() {div {class:"banner error",role:"alert",span {"{s.error}"}button {"aria-label":"Dismiss error",onclick:move |_|state.write().error.clear(),"×"}}}
             if !s.notice.is_empty() {div {class:"banner notice",role:"status",span {"{s.notice}"}button {"aria-label":"Dismiss notice",onclick:move |_|state.write().notice.clear(),"×"}}}
             main {"aria-label":"{heading}",
-                if s.page==Page::Library {Library {state}}
+                // Import choices stay intact while browsing saved projects.
+                div {hidden:s.page!=Page::Library,Library {state}}
+                if s.page==Page::Projects {projects::Projects {state}}
                 if s.page==Page::Editor {
                     if let Some(draft)=&s.current {
                         if draft.project.status=="ready" {editor::Editor {state}}
@@ -270,12 +307,16 @@ pub fn navigate(mut state: Signal<State>, destination: Destination) {
         state.write().error = "Wait for the current request to finish before leaving.".into();
         return;
     }
-    // All views retain their drafts. Only replacing a project or closing can discard work.
-    let replaces_project = matches!(&destination, Destination::Reload)
-        || matches!(&destination,Destination::Project(id) if id!=&state.peek().active_id);
-    let needs_confirm = matches!(&destination, Destination::Quit) && state.peek().dirty()
-        || replaces_project && state.peek().current.as_ref().is_some_and(Draft::dirty);
-    if needs_confirm {
+    if matches!(&destination, Destination::Recording(_))
+        && (state.peek().recording_busy || state.peek().recording_request.is_some())
+    {
+        state.write().error =
+            "Wait for the studio request or export to finish before opening another recording."
+                .into();
+        return;
+    }
+    // Views retain drafts; replacing a project or closing can discard work.
+    if state.peek().needs_confirmation(&destination) {
         state.write().pending = Some(destination);
     } else {
         go(state, destination);
@@ -295,6 +336,16 @@ fn go(mut state: Signal<State>, destination: Destination) {
             s.page = Page::Editor;
             s.error.clear();
             s.export_job = None;
+        }
+        Destination::Recording(id) => {
+            let mut s = state.write();
+            s.recording_request_nonce = s.recording_request_nonce.wrapping_add(1);
+            s.recording_request = Some(RecordingRequest {
+                id,
+                nonce: s.recording_request_nonce,
+            });
+            s.page = Page::Record;
+            s.error.clear();
         }
         Destination::Reload => {
             state.write().current = None;
@@ -381,10 +432,14 @@ fn Library(state: Signal<State>) -> Element {
     rsx! {
         div {class:"library",
             section {class:"intro",
-                span {class:"eyebrow","LESS SCRUBBING. MORE STORYTELLING."}
+                span {class:"eyebrow","NEW PROJECT"}
                 h1 {"Your words." br {} em {"A story worth sharing."}}
                 p {"Bring your interview. Whisper transcribes it on this computer, then topic folders help you find the story. Edit by sentence and keep every camera angle."}
                 div {class:"pills",span {"Local speech timing"}span {"Up to 3 angles"}span {"Sentence editing"}}
+                div {class:"actions",
+                    button {onclick:move |_|navigate(state,Destination::Recording(None)),"Start a new recording"}
+                    button {onclick:move |_|navigate(state,Destination::Page(Page::Projects)),"Open a saved project"}
+                }
             }
             section {class:"card import",
                 h2 {"Start with an interview"}
@@ -419,17 +474,10 @@ fn Library(state: Signal<State>) -> Element {
                     button {class:"primary",disabled:s.busy||files.read().is_empty(),onclick:move |_| {
                         let api=start_api.clone();let chosen=files.peek().clone();let timed=transcript.peek().clone();let title=name.peek().trim().to_owned();let manual=*manual.peek();
                         state.write().busy=true;state.write().error.clear();
-                        spawn(async move {let result=api.upload::<Value>(&chosen,timed.as_deref(),if title.is_empty(){"Untitled interview"}else{&title},manual).await;state.write().busy=false;match result {Ok(data)=>{if let Some(id)=data["projectId"].as_str(){go(state,Destination::Project(id.into()));}},Err(e)=>state.write().error=e}});
+                        spawn(async move {let result=api.upload::<Value>(&chosen,timed.as_deref(),if title.is_empty(){"Untitled interview"}else{&title},manual).await;state.write().busy=false;match result {Ok(data)=>{if let Some(id)=data["projectId"].as_str(){navigate(state,Destination::Project(id.into()));}},Err(e)=>state.write().error=e}});
                     },if s.busy {"Importing…"}else{"Make my story"}}
-                    button {disabled:s.busy,onclick:move |_|{let api=demo_api.clone();state.write().busy=true;spawn(async move {let result=api.send::<Value>(Method::POST,"/projects/sample",None).await;state.write().busy=false;match result {Ok(data)=>{if let Some(id)=data["projectId"].as_str(){go(state,Destination::Project(id.into()));}},Err(e)=>state.write().error=e}});},"Try the sample"}
+                    button {disabled:s.busy,onclick:move |_|{let api=demo_api.clone();state.write().busy=true;spawn(async move {let result=api.send::<Value>(Method::POST,"/projects/sample",None).await;state.write().busy=false;match result {Ok(data)=>{if let Some(id)=data["projectId"].as_str(){navigate(state,Destination::Project(id.into()));}},Err(e)=>state.write().error=e}});},"Try the sample"}
                 }
-            }
-            section {class:"interviews",h2 {"Pick up a conversation"}
-                if s.library.is_empty() {p {class:"hint","Your interviews will appear here. The synthetic sample is a quick way to explore the editor."}}
-                div {class:"project-grid",for project in s.library {
-                    button {class:"project-card",onclick:move |_|navigate(state,Destination::Project(project.id.clone())),
-                        span {class:"eyebrow","{project.status}"}strong {"{project.name}"}span {"{project.sentences} sentences"}}
-                }}
             }
         }
     }
@@ -459,7 +507,7 @@ fn Processing(state: Signal<State>) -> Element {
             div {class:"actions",
                 if project.status=="error" {button {class:"primary",disabled:state.read().busy,onclick:move |_|{let api=api.clone();let id=id.clone();state.write().busy=true;spawn(async move {let result=api.send::<Value>(Method::POST,&format!("/projects/{id}/resume"),None).await;state.write().busy=false;match result {Ok(_)=>state.write().current=None,Err(e)=>state.write().error=e}});},"Resume processing"}}
                 else {button {disabled:state.read().busy,onclick:move |_|{let api=cancel_api.clone();let id=cancel_id.clone();state.write().busy=true;spawn(async move {let result=api.send::<Value>(Method::POST,&format!("/projects/{id}/cancel"),None).await;state.write().busy=false;if let Err(e)=result{state.write().error=e;}});},"Cancel processing"}}
-                button {onclick:move |_|navigate(state,Destination::Page(Page::Library)),"Back to interviews"}
+                button {onclick:move |_|navigate(state,Destination::Page(Page::Projects)),"Back to projects"}
             }
         }
     }
@@ -468,6 +516,62 @@ fn Processing(state: Signal<State>) -> Element {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn startup_is_new_project_even_when_saved_projects_exist() {
+        let state = State {
+            library: vec![Summary {
+                id: "old-interview".into(),
+                ..Default::default()
+            }],
+            recording_library: vec![RecordingSession {
+                id: "old-recording".into(),
+                ..Default::default()
+            }],
+            ..Default::default()
+        };
+        assert_eq!(state.page, Page::Library);
+        assert!(state.current.is_none());
+        assert!(state.active_id.is_empty());
+        assert!(state.recording_request.is_none());
+        assert!(!state.recording_capture);
+    }
+
+    #[test]
+    fn new_and_open_recording_confirm_dirty_studio_but_tabs_retain_drafts() {
+        let state = State {
+            recording_dirty: true,
+            ..Default::default()
+        };
+        assert!(state.needs_confirmation(&Destination::Recording(None)));
+        assert!(state.needs_confirmation(&Destination::Recording(Some("saved".into()))));
+        assert!(state.needs_confirmation(&Destination::Quit));
+        assert!(!state.needs_confirmation(&Destination::Page(Page::Projects)));
+        assert!(!state.needs_confirmation(&Destination::Page(Page::Library)));
+        assert!(!State::default().needs_confirmation(&Destination::Recording(None)));
+    }
+
+    #[test]
+    fn interview_replace_still_confirms_and_keeps_existing_project_when_switching_tabs() {
+        let mut draft = Draft::new(Project {
+            id: "current".into(),
+            ..Default::default()
+        });
+        draft.change(|p| p.name = "Unsaved words".into());
+        let state = State {
+            active_id: "current".into(),
+            current: Some(draft),
+            ..Default::default()
+        };
+        assert!(state.needs_confirmation(&Destination::Project("different".into())));
+        assert!(state.needs_confirmation(&Destination::Reload));
+        assert!(!state.needs_confirmation(&Destination::Project("current".into())));
+        assert!(!state.needs_confirmation(&Destination::Page(Page::Projects)));
+        assert_eq!(
+            state.current.as_ref().unwrap().project.name,
+            "Unsaved words"
+        );
+    }
+
     #[test]
     fn native_library_renders_accessible_import_actions() {
         fn Preview() -> Element {

@@ -14,8 +14,9 @@ it does not assert that the full studio has been implemented.
   the new studio has feature parity; an empty foundation does not replace it.
 - Ryan chose **local AI** for Record’s overlay builder. This supersedes the
   reference’s paid Claude/ChatGPT provider and paid API budget gate. No paid
-  provider fallback. Local runtime/model and a real search source still need
-  verification before the AI milestone; no provider calls occur in milestone 1.
+  provider fallback. Ollama is available locally with installed Qwen and LLaVA models. Vision/text
+  inference and a real search source still need verification at the AI milestone;
+  no inference calls occur in milestone 1.
 - Live YouTube publishing requires Ryan’s Google Desktop OAuth client and
   consent. An app-side connection control or mocked upload is not that consent.
 
@@ -76,14 +77,14 @@ Windows compile and runtime validation status.
 
 | Step | Deliverable | Current status |
 | --- | --- | --- |
-| 1 | Workspace/window foundation; architecture, security, decisions | egui/eframe confirmed; native foundation in progress in Catalyst Solo. Existing Dioxus studio remains usable. |
-| 2 | Core project/timeline model and every cue/save invariant test | Partial existing clip/take model; new cue model and full invariant suite pending. |
-| 3 | Ordered bin/sequence, drag, playhead tools, shape, Removed, Undo | Existing move/split/trim/shape; remaining operations pending. |
-| 4 | Persistent segmented capture and hardware acceptance | Current per-take capture has HD mode selection and streamed preview fixes; segmented session capture and hardware timing checks pending. |
-| 5 | Shared renderer, six overlay types, nine slots and playback | Nine slots/keys and four text card types with ASS export are implemented; shared renderer/images/animation pending. |
-| 6 | Search/screenshot/AI review, HTML, budget and usage | Pending; local AI confirmed, runtime/model and search source need verification. |
+| 1 | Workspace/window foundation; architecture, security, decisions | Linux foundation built and validated (14 tests, lint, native screenshots), Catalyst Solo commit a084433. Windows acceptance remains unverified. |
+| 2 | Core project/timeline model and every cue/save invariant test | Implemented and verified on Linux in Catalyst Solo commit922ec11: typed edits, clip-relative cues,100-snapshot history, safe local saves/Git. |
+| 3 | Ordered bin/sequence, drag, playhead tools, shape, Removed, Undo | Implemented egui ordered bin/sequence, drag/buttons, playhead, both-end frame/second trim, Removed/Restore, Undo/Redo and shape switch. Linux native layout and38 workspace tests passed. |
+| 4 | Persistent segmented capture and hardware acceptance | Segmented session core implemented in Catalyst Solo commit19f3fd8;50 workspace tests plus two gated generated-media checks passed. Native studio integration and physical timing/drift/unplug acceptance remain pending. |
+| 5 | Shared renderer, six overlay types, nine slots and playback | Shared tiny-skia/cosmic-text renderer is in progress. Installed recorder retains nine slots/keys and four text card types with ASS export. |
+| 6 | Search/screenshot/local AI review, HTML and usage | Pending; Ollama discovered, inference protocol and search source unverified. |
 | 7 | Media inserts and matching zoom preview/export | Pending. |
-| 8 | 1080p MP4 in both shapes, progress/cancel | HD render/preview/export repair in validation; cancellation and full specification acceptance pending. |
+| 8 | 1080p MP4 in both shapes, progress/cancel | HD render/preview/export repair installed and validated; cancellation and full specification acceptance pending. |
 | 9 | Keychain OAuth/PKCE resumable upload, Unlisted default | Existing explicit Private upload flow is partial; keychain migration/new default pending. No live publishing acceptance claimed. |
 | 10 | Ubuntu .deb, icon, clean-install acceptance | Existing local launcher; package and clean-install acceptance pending. |
 

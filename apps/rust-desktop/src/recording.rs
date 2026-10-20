@@ -1,5 +1,5 @@
 //! Native, local camera studio. Device capture is always an explicit user action.
-use crate::{Destination, Page, State, api::Api, dom, navigate};
+use crate::{Destination, Page, RecordingRequest, State, api::Api, dom, navigate};
 use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
 use reqwest::Method;
@@ -88,6 +88,11 @@ struct Studio {
     preview_export: bool,
     sequence_status: String,
     sequence_error: String,
+    sequence_busy: bool,
+    sequence_file_pct: Option<f64>,
+    preview_loading: bool,
+    preview_error: String,
+    preview_expanded: bool,
     split_at: f64,
     manual: bool,
     epoch: u64,
@@ -104,6 +109,18 @@ fn edit(session: &RecordingSession) -> RecordingEdit {
     }
 }
 impl Studio {
+    fn update_sessions(&mut self, mut sessions: Vec<RecordingSession>) {
+        // A list request may have started before an explicit New/Open response.
+        // Keep that selection and its newer local draft instead of adopting a list row.
+        if let Some(current) = &self.session {
+            if let Some(row) = sessions.iter_mut().find(|s| s.id == current.id) {
+                *row = current.clone();
+            } else {
+                sessions.insert(0, current.clone());
+            }
+        }
+        self.sessions = sessions;
+    }
     fn update_devices(&mut self, devices: RecordingDevices, initial: bool) {
         if self.capture() {
             return;
@@ -177,6 +194,8 @@ impl Studio {
         self.selected = clip.id.clone();
         self.split_at = (clip.r#in + clip.out) / 2.;
         self.preview_export = false;
+        self.preview_loading = false;
+        self.preview_error.clear();
     }
     fn selected_clip(&self) -> Option<RecordingClip> {
         self.session
@@ -207,6 +226,8 @@ fn change(mut studio: Signal<Studio>, f: impl FnOnce(&mut RecordingSession)) {
             f(session);
             s.epoch = s.epoch.wrapping_add(1);
             s.preview_export = false;
+            s.preview_loading = false;
+            s.preview_error.clear();
             s.sequence_status.clear();
             s.sequence_error.clear();
         }
@@ -287,51 +308,56 @@ fn save(mut studio: Signal<Studio>, api: Api) {
         }
     });
 }
-fn create(mut studio: Signal<Studio>, api: Api) {
+fn request_session(
+    mut studio: Signal<Studio>,
+    mut state: Signal<State>,
+    api: Api,
+    request: RecordingRequest,
+) {
     if studio.peek().locked() {
+        state.write().error =
+            "Wait for the studio request or export to finish before opening another recording."
+                .into();
         return;
     }
-    if studio.peek().dirty() {
-        studio.write().error =
-            "Save or reload your studio changes before starting another recording.".into();
-        return;
-    }
+    // navigate() already obtained any required discard confirmation. Lock edits
+    // while loading, and reject late responses from superseded open requests.
     studio.write().request = true;
+    let epoch = {
+        let mut s = studio.write();
+        s.epoch = s.epoch.wrapping_add(1);
+        s.epoch
+    };
     spawn(async move {
-        let result = api
-            .send::<RecordingSession>(
+        let result = if let Some(id) = request.id {
+            api.get::<RecordingSession>(&format!("/recordings/{id}"))
+                .await
+        } else {
+            api.send::<RecordingSession>(
                 Method::POST,
                 "/recordings",
                 Some(json!({"name":"Untitled recording","orientation":"16:9"})),
             )
-            .await;
-        studio.write().request = false;
+            .await
+        };
+        if state.peek().recording_request_nonce != request.nonce || studio.peek().epoch != epoch {
+            return;
+        }
+        let mut s = studio.write();
+        s.request = false;
         match result {
             Ok(session) => {
-                studio.write().accept(session);
+                let active = session.active.is_some();
+                s.accept(session);
+                s.preview_export = false;
+                s.sequence_status.clear();
+                s.sequence_error.clear();
+                s.gesture = CaptureGesture::default();
+                if active {
+                    s.gesture.phase = CapturePhase::Recording;
+                }
             }
-            Err(error) => studio.write().error = error,
-        }
-    });
-}
-fn open_session(mut studio: Signal<Studio>, api: Api, id: String) {
-    if studio.peek().locked() || id.is_empty() {
-        return;
-    }
-    if studio.peek().dirty() {
-        studio.write().error =
-            "Save or reload your studio changes before opening another recording.".into();
-        return;
-    }
-    studio.write().request = true;
-    spawn(async move {
-        let result = api
-            .get::<RecordingSession>(&format!("/recordings/{id}"))
-            .await;
-        studio.write().request = false;
-        match result {
-            Ok(session) => studio.write().accept(session),
-            Err(error) => studio.write().error = error,
+            Err(error) => s.error = error,
         }
     });
 }
@@ -592,15 +618,19 @@ async fn prepare_current_sequence(
     }
 }
 
-async fn play_sequence(id: String) {
+async fn play_sequence(id: String) -> Result<bool, String> {
     // Transport only: all revision, preparation and selection decisions are Rust.
     for _ in 0..40 {
-        let result=dom::eval("const id=await dioxus.recv();const studio=document.querySelector('.record-studio');if(!studio||studio.closest('[hidden]'))return true;const v=document.getElementById('record-sequence-preview');if(!v||!v.src.includes('/exports/'+id))return false;try{v.currentTime=0;v.play().catch(()=>{});}catch(_){}return true;",Some(json!(id))).await;
-        if result.ok() == Some(json!(true)) {
-            break;
+        let result=dom::eval("const id=await dioxus.recv();const studio=document.querySelector('.record-studio');if(!studio||studio.closest('[hidden]'))return 'hidden';const v=document.getElementById('record-sequence-preview');if(!v||!v.src.includes('/exports/'+id))return 'mounting';try{v.currentTime=0;await v.play();return 'playing';}catch(e){if(e.name==='NotAllowedError')return 'play-required';return 'failed';}",Some(json!(id))).await?;
+        match result.as_str() {
+            Some("playing" | "hidden") => return Ok(true),
+            Some("play-required") => return Ok(false),
+            Some("failed") => return Err("The native player could not play this sequence. Retry loading the preview, or export the MP4 to open it in your video player.".into()),
+            _ => {}
         }
         tokio::time::sleep(Duration::from_millis(50)).await;
     }
+    Err("The sequence player did not open. Retry loading the preview.".into())
 }
 
 fn sequence_action(mut studio: Signal<Studio>, api: Api, action: SequenceAction) {
@@ -613,6 +643,8 @@ fn sequence_action(mut studio: Signal<Studio>, api: Api, action: SequenceAction)
         return;
     }
     studio.write().request = true;
+    studio.write().sequence_busy = true;
+    studio.write().sequence_file_pct = None;
     studio.write().preview_export = false;
     studio.write().sequence_error.clear();
     studio.write().sequence_status = if action == SequenceAction::Export {
@@ -626,6 +658,7 @@ fn sequence_action(mut studio: Signal<Studio>, api: Api, action: SequenceAction)
             let Some(path) = export_destination().await else {
                 let mut s = studio.write();
                 s.request = false;
+                s.sequence_busy = false;
                 s.sequence_status.clear();
                 return;
             };
@@ -635,6 +668,8 @@ fn sequence_action(mut studio: Signal<Studio>, api: Api, action: SequenceAction)
         };
         let result = async {
             let job = prepare_current_sequence(studio, &api).await?;
+            studio.write().preview_loading = true;
+            studio.write().preview_error.clear();
             studio.write().preview_export = true;
             if let Some(destination) = destination {
                 studio.write().sequence_status = "Saving your MP4…".into();
@@ -645,9 +680,14 @@ fn sequence_action(mut studio: Signal<Studio>, api: Api, action: SequenceAction)
                     .ok_or("This recording is no longer open.")?
                     .id
                     .clone();
-                api.download(
+                api.download_with_progress(
                     &format!("/recordings/{id}/media/exports/{}", job.id),
                     &destination,
+                    move |received, total| {
+                        studio.write().sequence_file_pct = total
+                            .filter(|total| *total > 0)
+                            .map(|total| (received as f64 / total as f64 * 100.).clamp(0., 100.));
+                    },
                 )
                 .await?;
                 studio.write().sequence_status =
@@ -655,12 +695,24 @@ fn sequence_action(mut studio: Signal<Studio>, api: Api, action: SequenceAction)
             } else {
                 studio.write().sequence_status =
                     "Your full sequence is ready. Use the player controls to watch it.".into();
-                play_sequence(job.id).await;
+                match play_sequence(job.id).await {
+                    Ok(true) => {}
+                    Ok(false) => {
+                        studio.write().sequence_status =
+                            "Sequence ready. Press Play in the preview to start video and sound."
+                                .into()
+                    }
+                    Err(error) => {
+                        studio.write().preview_loading = false;
+                        studio.write().preview_error = error;
+                    }
+                }
             }
             Ok::<_, String>(())
         }
         .await;
         studio.write().request = false;
+        studio.write().sequence_busy = false;
         if let Err(error) = result {
             let mut s = studio.write();
             s.sequence_status.clear();
@@ -682,9 +734,15 @@ fn sequence_actions(studio: Signal<Studio>, api: Api, viewer: bool) -> Element {
                 button {id:"{prefix}-export-mp4",disabled:blocked,onclick:move |_|sequence_action(studio,api.clone(),SequenceAction::Export),"Export MP4…"}
             }
             if let Some(reason)=unavailable {p {class:"hint",role:"status","{reason}"}}
+            if s.sequence_busy {
+                div {class:"sequence-busy-inline",role:"status","aria-live":"polite",
+                    span {class:"busy-spinner","aria-hidden":"true"}
+                    strong {"{s.sequence_status}"}
+                }
+            }
             if let Some(job)=s.session.as_ref().and_then(|s|s.export.as_ref()).filter(|j|j.status=="rendering") {
                 progress {max:100,value:job.pct,"aria-label":"Preparing sequence progress"}
-                p {class:"hint",role:"status","Preparing your sequence · {job.pct:.0}%"}
+                p {class:"hint",role:"status","{job.detail} · {job.pct:.0}%"}
             } else if !s.sequence_status.is_empty() {p {class:"hint",role:"status","{s.sequence_status}"}}
             if !s.sequence_error.is_empty(){p {class:"error",role:"alert","{s.sequence_error}"}}
         }
@@ -809,16 +867,8 @@ pub fn RecordingStudio(mut state: Signal<State>, active: bool) -> Element {
                                 // Discovery reads capabilities; Record is the explicit capture action.
                                 s.update_devices(devices, true);
                                 next_discovery = Instant::now() + Duration::from_secs(3);
-                                s.sessions = sessions;
-                                if !s.request
-                                    && s.session.is_none()
-                                    && let Some(session) = s.sessions.first().cloned()
-                                {
-                                    if session.active.is_some() {
-                                        s.gesture.phase = CapturePhase::Recording;
-                                    }
-                                    s.accept(session);
-                                }
+                                s.update_sessions(sessions);
+                                // Listing saved projects never selects old footage.
                                 s.loaded = true;
                             }
                             (Err(error), _) | (_, Err(error)) => studio.write().error = error,
@@ -869,14 +919,27 @@ pub fn RecordingStudio(mut state: Signal<State>, active: bool) -> Element {
             }
         }
     });
+    let request_api = api.clone();
+    use_effect(move || {
+        let request = state.read().recording_request.clone();
+        if let Some(request) = request {
+            state.write().recording_request = None;
+            request_session(studio, state, request_api.clone(), request);
+        }
+    });
     use_effect(move || {
         let s = studio.read();
         let dirty = s.dirty();
         let capture = s.capture();
-        if state.peek().recording_dirty != dirty || state.peek().recording_capture != capture {
+        let busy = s.request || s.exporting() || s.external_job;
+        if state.peek().recording_dirty != dirty
+            || state.peek().recording_capture != capture
+            || state.peek().recording_busy != busy
+        {
             let mut app = state.write();
             app.recording_dirty = dirty;
             app.recording_capture = capture;
+            app.recording_busy = busy;
         }
     });
     use_effect(move || {
@@ -893,15 +956,15 @@ pub fn RecordingStudio(mut state: Signal<State>, active: bool) -> Element {
                     if (!window.storyfoldRecordPointer) {
                         window.storyfoldRecordPointer=true;
                         document.addEventListener('pointerdown', e=>{
-                            if(e.target.closest?.('.record-studio') && !e.target.closest?.('video')) pause();
+                            if(e.target.closest?.('.record-studio') && !e.target.closest?.('video,[data-record-player-control]')) pause();
                             const b=e.target.closest?.('#record-gesture');
                             if(b && !b.disabled && e.isPrimary && e.button===0) { try { b.setPointerCapture(e.pointerId); } catch (_) {} }
                         },true);
                         document.addEventListener('click',e=>{
-                            if(e.target.closest?.('.record-studio') && !e.target.closest?.('video')) pause();
+                            if(e.target.closest?.('.record-studio') && !e.target.closest?.('video,[data-record-player-control]')) pause();
                         },true);
                         document.addEventListener('input',e=>{
-                            if(e.target.closest?.('.record-studio') && !e.target.closest?.('video')) pause();
+                            if(e.target.closest?.('.record-studio') && !e.target.closest?.('video,[data-record-player-control]')) pause();
                         },true);
                         document.addEventListener('keydown',e=>{
                             if((e.key==='Enter'||e.key===' ') && e.target.closest?.('#record-gesture')) pause();
@@ -932,6 +995,9 @@ fn studio_view(state: Signal<State>, mut studio: Signal<Studio>, api: Api) -> El
             onpointerup:move |_|release(studio,state,release_api.clone(),false),
             onpointercancel:move |_|release(studio,state,cancel_api.clone(),true),
             onkeydown:move |e| {
+                if e.key()==Key::Escape && studio.peek().preview_expanded {
+                    e.prevent_default();e.stop_propagation();studio.write().preview_expanded=false;return;
+                }
                 if e.is_auto_repeating() || e.modifiers().ctrl() || e.modifiers().meta() || e.modifiers().alt() {return;}
                 if let Key::Character(key) = e.key()
                     && let Ok(index) = key.parse::<usize>()
@@ -947,15 +1013,31 @@ fn studio_view(state: Signal<State>, mut studio: Signal<Studio>, api: Api) -> El
                     }
                 }
             },
+            if s.sequence_busy {
+                aside {id:"record-sequence-progress",class:"sequence-progress-float","aria-label":"Sequence preparation progress","aria-busy":"true",
+                    h2 {span {class:"busy-spinner","aria-hidden":"true"} "Preparing your sequence"}
+                    if let Some(job)=session.as_ref().and_then(|s|s.export.as_ref()).filter(|j|j.status=="rendering") {
+                        p {role:"status","{job.detail} · {job.pct:.0}%"}
+                        progress {max:100,value:job.pct,"aria-label":"Rendering sequence"}
+                    } else if let Some(pct)=s.sequence_file_pct {
+                        p {role:"status","Writing MP4 to your folder · {pct:.0}%"}
+                        progress {max:100,value:pct,"aria-label":"Writing exported MP4"}
+                    } else {
+                        p {role:"status","{s.sequence_status}"}
+                        progress {"aria-label":"Preparing sequence"}
+                    }
+                }
+            }
             div {class:"record-heading",
                 div {span {class:"eyebrow","YOUR CAMERA. YOUR WORDS."}h1 {"A space to record."}}
                 div {class:"record-session-picker",
                     label {r#for:"record-session","Saved recordings"}
-                    select {id:"record-session",disabled:locked,value:session.as_ref().map(|s|s.id.clone()).unwrap_or_default(),onkeydown:move |e|e.stop_propagation(),onchange:{let api=api.clone();move |e|open_session(studio,api.clone(),e.value())},
+                    select {id:"record-session",disabled:locked,value:session.as_ref().map(|s|s.id.clone()).unwrap_or_default(),onkeydown:move |e|e.stop_propagation(),onchange:move |e|if !e.value().is_empty(){navigate(state,Destination::Recording(Some(e.value())));},
                         option {value:"","Choose a recording"}
                         for item in &s.sessions {option {value:"{item.id}","{item.name}"}}
                     }
-                    button {disabled:locked,onclick:{let api=api.clone();move |_|create(studio,api.clone())},"New recording"}
+                    button {disabled:locked,onclick:move |_|navigate(state,Destination::Recording(None)),"New recording"}
+                    button {disabled:capture,onclick:move |_|navigate(state,Destination::Page(Page::Projects)),"Projects"}
                 }
             }
             if !s.error.is_empty() {div {class:"record-alert",role:"alert",span {"{s.error}"}button {"aria-label":"Dismiss studio error",onclick:move |_|studio.write().error.clear(),"×"}}}
@@ -1004,18 +1086,25 @@ fn studio_view(state: Signal<State>, mut studio: Signal<Studio>, api: Api) -> El
                             }}
                             button {disabled:capture||s.discovering,onclick:{let api=api.clone();move |_|refresh_devices(studio,api.clone())},if s.discovering {"Checking cameras…"}else{"Refresh devices"}}
                         }
-                        div {class:"record-camera-card",
-                            div {class:if session.orientation=="9:16" {"record-frame portrait"}else{"record-frame"},
+                        div {class:if s.preview_expanded {"record-camera-card record-preview-expanded"}else{"record-camera-card"},
+                            div {id:"record-preview-frame",class:if session.orientation=="9:16" {"record-frame portrait"}else{"record-frame"},
                                 if session.active.is_some() {
                                     if let Some(active)=&session.active {img {key:"{active.take_id}",class:"record-live-image",src:"{preview_url(&api,&session.id)}",alt:"Live camera preview while recording"}}
                                 } else if s.preview_export && fresh_export.is_some() {
-                                    if let Some(job)=&fresh_export {video {key:"export-{job.id}",id:"record-sequence-preview",class:"record-clip-preview",src:media_url(&api,&session.id,&format!("exports/{}",job.id)),controls:true,preload:"auto","aria-label":"Full sequence preview"}}
+                                    if let Some(job)=&fresh_export {video {key:"export-{job.id}",id:"record-sequence-preview",class:"record-clip-preview",src:media_url(&api,&session.id,&format!("exports/{}",job.id)),controls:true,"controlslist":"nofullscreen",playsinline:true,preload:"auto","aria-label":"Full sequence preview",
+                                        onloadstart:move |_|{studio.write().preview_loading=true;},
+                                        onloadeddata:move |_|{studio.write().preview_loading=false;studio.write().preview_error.clear();},
+                                        onerror:move |_|{studio.write().preview_loading=false;studio.write().preview_error="The native video player could not load this sequence. Retry the preview, or export the MP4 and open it with your video player.".into();}
+                                    }}
                                 } else if let Some(clip)=&selected {
-                                    video {key:"clip-{clip.id}-{clip.r#in}-{clip.out}",class:"record-clip-preview",src:format!("{}#t={},{}",media_url(&api,&session.id,&format!("takes/{}",clip.take_id)),clip.r#in,clip.out),controls:true,preload:"metadata","aria-label":"Selected source take preview"}
+                                    video {key:"clip-{clip.id}-{clip.r#in}-{clip.out}",class:"record-clip-preview",src:format!("{}#t={},{}",media_url(&api,&session.id,&format!("takes/{}",clip.take_id)),clip.r#in,clip.out),controls:true,"controlslist":"nofullscreen",playsinline:true,preload:"metadata","aria-label":"Selected source take preview"}
                                 } else {
                                     div {class:"record-camera-empty",span {class:"record-empty-icon","◉"}strong {if s.devices.cameras.is_empty(){"Connect a camera to begin."}else{"Ready when you are."}}p {if s.devices.cameras.is_empty(){"Connect a webcam, refresh devices, then choose your camera and microphone."}else{"Your camera and microphone open only when you press Record. Your video stays on this computer."}}}
                                 }
                                 if capture {span {class:"record-live-badge",role:"status",span {class:"record-dot"}match s.gesture.phase {CapturePhase::Starting=>"Opening camera…".to_string(),CapturePhase::Stopping=>"Saving take…".to_string(),_=>format!("REC {} · {}",fmt(session.active.as_ref().map(|a|a.seconds).unwrap_or_default()),if s.gesture.long_take{"long take"}else{"hold"})}}}
+                                if capture || selected.is_some() || s.preview_export {
+                                    button {id:"record-expand-preview",class:"preview-expand","data-record-player-control":"true","aria-controls":"record-preview-frame","aria-expanded":s.preview_expanded,onclick:move |_|{let expanded=studio.peek().preview_expanded;studio.write().preview_expanded = !expanded;},if s.preview_expanded {"Exit expanded view"}else{"Expand preview"}}
+                                }
                                 if capture || (selected.is_none()&&!s.preview_export) {
                                     if let Some(card)=session.overlays.iter().find(|o|Some(&o.id)==session.active_overlay.as_ref()) {
                                         div {class:format!("record-overlay-preview {}",card.kind),strong {"{card.text}"}if !card.secondary.is_empty(){span {"{card.secondary}"}}}
@@ -1023,6 +1112,8 @@ fn studio_view(state: Signal<State>, mut studio: Signal<Studio>, api: Api) -> El
                                 }
                             }
                         }
+                        if s.preview_export && s.preview_loading {p {class:"preview-load-status",role:"status",span {class:"busy-spinner","aria-hidden":"true"}"Loading sequence video…"}}
+                        if !s.preview_error.is_empty() {div {class:"record-preview-error",role:"alert",p {"{s.preview_error}"}button {id:"record-preview-retry",onclick:move |_|{studio.write().preview_error.clear();studio.write().preview_loading=true;spawn(async move {let _=dom::eval("const v=document.getElementById('record-sequence-preview');if(v){v.load();return true;}return false;",None).await;});},"Retry loading video"}}}
                         {sequence_actions(studio,api.clone(),true)}
                         if s.preview_export && fresh_export.is_some(){p {class:"hint record-preview-label","Full sequence preview · {session.clips.len()} clips · {fmt(session.clips.iter().map(|c|(c.out-c.r#in).max(0.)).sum())}"}}
                         if !s.devices.message.is_empty(){p {class:"hint record-device-message","{s.devices.message}"}}
@@ -1126,7 +1217,7 @@ fn studio_view(state: Signal<State>, mut studio: Signal<Studio>, api: Api) -> El
                     }
                 }
             } else {
-                section {class:"record-welcome card",span {class:"record-empty-icon","◉"}h2 {"Make room for a fresh take."}p {"Create a recording, choose your camera, and speak in short clips or one long take. Bring on-screen cards into the moment, then shape your sequence."}button {class:"primary",disabled:s.request,onclick:{let api=api.clone();move |_|create(studio,api.clone())},"Create a recording"}p {class:"hint","Camera and microphone access starts only when you press Record."}
+                section {class:"record-welcome card",span {class:"record-empty-icon","◉"}h2 {"Make room for a fresh take."}p {"Start a new recording project, or open saved work from Projects. Choose your camera and record when you are ready."}button {class:"primary",disabled:s.request,onclick:move |_|navigate(state,Destination::Recording(None)),if s.request {"Creating project…"}else{"Create a recording"}}p {class:"hint","Camera and microphone access starts only when you press Record."}
                     if s.devices.cameras.is_empty()&&s.loaded{p {class:"hint","No camera is connected. You can prepare your cards now and connect a camera later."}}
                 }
             }
@@ -1137,6 +1228,46 @@ fn studio_view(state: Signal<State>, mut studio: Signal<Studio>, api: Api) -> El
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn saved_recordings_list_does_not_implicitly_open_or_play_old_media() {
+        fn Preview() -> Element {
+            let state = use_signal(State::default);
+            let studio = use_signal(|| Studio {
+                loaded: true,
+                sessions: vec![session()],
+                ..Default::default()
+            });
+            studio_view(state, studio, Api::new("http://127.0.0.1:4311").unwrap())
+        }
+        let html = dioxus_ssr::render_element(rsx! {Preview {}});
+        assert!(html.contains("Make room for a fresh take"));
+        assert!(html.contains("Create a recording"));
+        assert!(html.contains("Choose a recording"));
+        assert!(html.contains("Projects"));
+        assert!(!html.contains("<video"));
+        assert!(!html.contains("record-gesture"));
+        assert!(!html.contains("/media/takes/"));
+    }
+
+    #[test]
+    fn listing_never_selects_old_work_or_overwrites_newer_open_and_draft() {
+        let saved = session();
+        let mut studio = Studio::default();
+        studio.update_sessions(vec![saved.clone()]);
+        assert!(studio.session.is_none());
+        assert!(!studio.capture());
+        assert!(!studio.dirty());
+
+        let mut created = saved.clone();
+        created.id = "new-project".into();
+        studio.accept(created);
+        studio.session.as_mut().unwrap().name = "Unsaved new project".into();
+        studio.update_sessions(vec![saved]);
+        assert_eq!(studio.session.as_ref().unwrap().id, "new-project");
+        assert_eq!(studio.sessions[0].name, "Unsaved new project");
+        assert!(studio.dirty());
+    }
+
     #[test]
     fn hotplug_updates_choices_preserves_selection_off_and_drafts() {
         fn devices(ids: &[&str]) -> RecordingDevices {
@@ -1343,6 +1474,25 @@ mod tests {
             s.session.as_mut().unwrap().export.as_mut().unwrap().status = status.into();
             assert!(current_export(&s).is_none());
         }
+    }
+    #[test]
+    fn export_busy_state_is_visible_before_a_render_job_exists() {
+        fn Preview() -> Element {
+            let state = use_signal(State::default);
+            let studio = use_signal(|| {
+                let mut s = Studio::default();
+                s.accept(session());
+                s.sequence_busy = true;
+                s.sequence_status = "Choose where to save your MP4…".into();
+                s
+            });
+            studio_view(state, studio, Api::new("http://127.0.0.1:4311").unwrap())
+        }
+        let html = dioxus_ssr::render_element(rsx! {Preview{}});
+        assert!(html.contains("record-sequence-progress"));
+        assert!(html.contains("Choose where to save your MP4"));
+        assert!(html.contains("busy-spinner"));
+        assert!(html.contains("aria-busy=\"true\""));
     }
     #[test]
     fn preview_and_export_controls_exist_before_the_first_preparation() {

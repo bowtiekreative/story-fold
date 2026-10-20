@@ -1,0 +1,87 @@
+{
+  "generatedOnly": true,
+  "ok": true,
+  "realIntermediateProgress": true,
+  "updates": [
+    {
+      "pct": 0.0,
+      "stage": "Waiting for the export worker"
+    },
+    {
+      "pct": 0.0,
+      "stage": "Rendering clip 1 of 3"
+    },
+    {
+      "pct": 6.8449813524590155,
+      "stage": "Rendering clip 1 of 3"
+    },
+    {
+      "pct": 13.4548137295082,
+      "stage": "Rendering clip 1 of 3"
+    },
+    {
+      "pct": 21.599076024590165,
+      "stage": "Rendering clip 1 of 3"
+    },
+    {
+      "pct": 27.25727274590164,
+      "stage": "Rendering clip 2 of 3"
+    },
+    {
+      "pct": 33.867110655737704,
+      "stage": "Rendering clip 2 of 3"
+    },
+    {
+      "pct": 41.30317622950819,
+      "stage": "Rendering clip 2 of 3"
+    },
+    {
+      "pct": 49.44743852459017,
+      "stage": "Rendering clip 2 of 3"
+    },
+    {
+      "pct": 56.29333831967213,
+      "stage": "Rendering clip 2 of 3"
+    },
+    {
+      "pct": 64.20153872950819,
+      "stage": "Rendering clip 2 of 3"
+    },
+    {
+      "pct": 67.2703875,
+      "stage": "Rendering clip 2 of 3"
+    },
+    {
+      "pct": 69.08652479508197,
+      "stage": "Rendering clip 3 of 3"
+    },
+    {
+      "pct": 75.814393647541,
+      "stage": "Rendering clip 3 of 3"
+    },
+    {
+      "pct": 82.66029897540984,
+      "stage": "Rendering clip 3 of 3"
+    },
+    {
+      "pct": 89.86029713114755,
+      "stage": "Rendering clip 3 of 3"
+    },
+    {
+      "pct": 93.4673975409836,
+      "stage": "Combining video and audio"
+    },
+    {
+      "pct": 97.94895491803278,
+      "stage": "Combining video and audio"
+    },
+    {
+      "pct": 98.28092213114756,
+      "stage": "Combining video and audio"
+    },
+    {
+      "pct": 100.0,
+      "stage": "Sequence ready"
+    }
+  ]
+}

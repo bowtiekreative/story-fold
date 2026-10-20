@@ -1,8 +1,8 @@
 {
   "name": "Storyfold",
-  "milestone": "Preview/export repaired; egui Record foundation in progress",
-  "updatedAt": "2026-10-20T04:31:09.873600+00:00",
-  "message": "Installed continuous HD preview, supported 1080p30 camera modes, visible Preview sequence and Export MP4, and nine sidebar slots. 59 tests, native generated playback/export and release passed; saved files unchanged. Building the confirmed egui Record studio with local AI in Catalyst Solo.",
+  "milestone": "Installed preview feedback repaired; native recording studio in progress",
+  "updatedAt": "2026-10-20T05:28:31.780147+00:00",
+  "message": "Installed Rust app updated: fresh New project startup, Projects list, explicit video loading/error/retry, Expand/Escape, immediate loader and real export progress. Actual desktop generated-media flow and68 workspace tests passed. Segmented egui capture core verified in Catalyst Solo19f3fd8; UI integration and shared renderer in progress. Physical timing/drift acceptance remains pending.",
   "tasks": [
     {
       "id": "foundation",
@@ -252,10 +252,144 @@
       "title": "Apply the new Record section specification",
       "acceptance": "Keep Storyfold branding; add the specified egui/eframe foundation and video-core to Catalyst Solo, preserve its code paths, record actual validation. Record overlay AI uses local models with no paid fallback.",
       "lane": "Now",
-      "status": "doing",
+      "status": "done",
       "evidence": [
         "docs/RECORDING-SPEC.md",
-        "docs/reference/recording-studio-build-brief.txt"
+        "docs/VALIDATION.md"
+      ]
+    },
+    {
+      "id": "record-core",
+      "title": "Build recording timeline and safe project core",
+      "acceptance": "Clip-relative cue invariants, move/split/trim/remove/restore,100-snapshot undo, exact save/load and atomic crash safety; local Git only.",
+      "status": "done",
+      "lane": "Now",
+      "evidence": [
+        "docs/RECORDING-SPEC.md",
+        "docs/VALIDATION.md"
+      ]
+    },
+    {
+      "id": "record-timeline-ui",
+      "title": "Connect the native studio timeline",
+      "acceptance": "Ordered clips, drag/keyboard tools, both-end frame/second trim, Removed, playhead, undo/redo and shape switch.",
+      "status": "done",
+      "lane": "Now",
+      "evidence": [
+        "docs/RECORDING-SPEC.md",
+        "docs/VALIDATION.md"
+      ]
+    },
+    {
+      "id": "record-continuous",
+      "title": "Keep camera capture continuous between clips",
+      "acceptance": "One FFmpeg sidecar per Studio session; one-second buffer segments, raw RGBA preview, hold/tap intervals, protected pruning, lost-device recovery and generated timing checks.",
+      "status": "doing",
+      "lane": "Now",
+      "evidence": [
+        "docs/RECORDING-SPEC.md"
+      ]
+    },
+    {
+      "id": "record-renderer",
+      "title": "Render matching native overlay frames",
+      "acceptance": "Six overlay types,nine slots and shared tiny-skia/cosmic-text RGBA rendering for preview and exports.",
+      "status": "doing",
+      "lane": "Now",
+      "evidence": [
+        "docs/RECORDING-SPEC.md"
+      ]
+    },
+    {
+      "id": "record-local-ai",
+      "title": "Build reviewed overlays with local AI",
+      "acceptance": "Real search and screenshots, dropped images, strict proposals, exact-text review/apply, HTML export, usage; local model only, no paid fallback.",
+      "status": "todo",
+      "lane": "Next",
+      "evidence": [
+        "docs/RECORDING-SPEC.md"
+      ]
+    },
+    {
+      "id": "record-inserts",
+      "title": "Add photo and video zoom inserts",
+      "acceptance": "Start/end boxes,100\u2013250% zoom, duration/easing/placement, preview/export matching at0,2.5,5seconds.",
+      "status": "todo",
+      "lane": "Next",
+      "evidence": [
+        "docs/RECORDING-SPEC.md"
+      ]
+    },
+    {
+      "id": "record-native-export",
+      "title": "Finish native sequence export",
+      "acceptance": "1080p horizontal/vertical H264/AAC with overlays, actual progress/cancel and Shorts notice.",
+      "status": "todo",
+      "lane": "Next",
+      "evidence": [
+        "docs/RECORDING-SPEC.md"
+      ]
+    },
+    {
+      "id": "record-native-youtube",
+      "title": "Move publishing into native studio",
+      "acceptance": "Keychain credentials, Google client setup/consent, PKCE/resumable upload, reviewed Unlisted default; no upload without explicit action.",
+      "status": "todo",
+      "lane": "Next",
+      "evidence": [
+        "docs/RECORDING-SPEC.md"
+      ]
+    },
+    {
+      "id": "record-package",
+      "title": "Package and validate the native studio",
+      "acceptance": "Ubuntu deb/icon/integration, fresh install acceptance; report Windows/hardware checks actually performed.",
+      "status": "todo",
+      "lane": "Next",
+      "evidence": [
+        "docs/RECORDING-SPEC.md"
+      ]
+    },
+    {
+      "id": "project-navigation",
+      "title": "Start fresh and list saved projects",
+      "acceptance": "Startup fresh; Projects lists interviews/recordings; explicit Open and New preserve drafts and all saved media.",
+      "status": "done",
+      "lane": "Now",
+      "evidence": [
+        "docs/VALIDATION.md",
+        "docs/validation/recording-feedback-native.json",
+        "docs/validation/recording-feedback-playback.json",
+        "docs/validation/recording-feedback-progress.json",
+        "docs/validation/recording-feedback-release.json"
+      ]
+    },
+    {
+      "id": "export-progress-feedback",
+      "title": "Show export loading and real progress",
+      "acceptance": "Immediate loading state, FFmpeg stage/time progress, final MP4 write progress and errors are visible.",
+      "status": "done",
+      "lane": "Now",
+      "evidence": [
+        "docs/VALIDATION.md",
+        "docs/validation/recording-feedback-native.json",
+        "docs/validation/recording-feedback-playback.json",
+        "docs/validation/recording-feedback-progress.json",
+        "docs/validation/recording-feedback-release.json"
+      ]
+    },
+    {
+      "id": "sequence-preview-feedback",
+      "title": "Restore visible sequence playback and expanded preview",
+      "acceptance": "Completed sequence displays video; loading/errors are explicit; expanded view and Escape preserve playback.",
+      "status": "done",
+      "lane": "Now",
+      "evidence": [
+        "docs/VALIDATION.md",
+        "docs/validation/recording-feedback-native.json",
+        "docs/validation/recording-feedback-playback.json",
+        "docs/validation/recording-feedback-progress.json",
+        "docs/validation/recording-feedback-release.json"
       ]
     }
   ]

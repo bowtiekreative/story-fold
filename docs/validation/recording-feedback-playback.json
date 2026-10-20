@@ -1,0 +1,23 @@
+{
+  "directExistingMp4": true,
+  "muted": true,
+  "ok": true,
+  "player": {
+    "displayHeight": 854,
+    "displayWidth": 1360,
+    "error": 0,
+    "frames": 6,
+    "height": 1080,
+    "hidden": false,
+    "mounted": true,
+    "network": 1,
+    "opacity": "1",
+    "paused": false,
+    "ready": 4,
+    "time": 0.215969,
+    "width": 1920
+  },
+  "readOnly": true,
+  "originalMediaPreserved": true,
+  "scope": "Read-only direct playback of an existing completed MP4; its older revision was not rebuilt by this diagnostic."
+}

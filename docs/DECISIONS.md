@@ -36,15 +36,16 @@
   mapping are in `docs/reference/recording-studio-build-brief.txt` and
   `docs/RECORDING-SPEC.md`.
 - Finish the reported live-preview and sequence-action repairs in the installed
-  Rust/Dioxus app while clarifying the requested egui recording architecture.
+  Rust/Dioxus app while building the confirmed egui recording architecture.
   This repair is not the complete segmented-capture/overlay-renderer migration.
 - New takes negotiate supported Linux HD modes instead of accepting camera
   defaults. Continuous 720p30 preview replaces 640px snapshot polling; sources
   and exports support 1080p30. Existing low-resolution sources are preserved.
 - Preview and MP4 export automatically save/prepare the current sequence, reuse
   only a current completed revision and invalidate previews after edits.
-- The new overlay AI feature requires Ryan’s explicit monthly budget/currency.
-  Keep it unavailable until configured; no budget amount is assumed.
+- The supplied reference originally required a paid AI budget STOP. Ryan later
+  chose local AI (see the confirmed decision below); no paid requests or paid
+  fallback are enabled.
 - The new spec’s keychain storage, Unlisted default, per-project Git and shared
   native renderer are pending work, not properties of the current implementation.
 - Ryan explicitly removed Doberman. That later instruction supersedes its old

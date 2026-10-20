@@ -157,6 +157,15 @@ impl Api {
         .await
     }
     pub async fn download(&self, path: &str, destination: &Path) -> Result<(), String> {
+        self.download_with_progress(path, destination, |_, _| {})
+            .await
+    }
+    pub async fn download_with_progress(
+        &self,
+        path: &str,
+        destination: &Path,
+        mut progress: impl FnMut(u64, Option<u64>),
+    ) -> Result<(), String> {
         let mut response = self
             .client
             .get(self.url(path))
@@ -167,6 +176,10 @@ impl Api {
             let _: Value = decode(response).await?;
             return Err("The export is unavailable.".into());
         }
+        let total = response.content_length();
+        let mut received = 0_u64;
+        let mut reported = 0_u64;
+        progress(0, total);
         use tokio::io::AsyncWriteExt;
         let temporary = tempfile::NamedTempFile::new_in(
             destination.parent().ok_or("Choose an export folder.")?,
@@ -182,6 +195,14 @@ impl Api {
                 .write_all(&chunk)
                 .await
                 .map_err(|_| "Could not finish writing the export.")?;
+            received = received.saturating_add(chunk.len() as u64);
+            let step = total.map_or(received / 1_048_576, |n| {
+                received.saturating_mul(100) / n.max(1)
+            });
+            if step != reported {
+                reported = step;
+                progress(received, total);
+            }
         }
         output
             .flush()
@@ -195,6 +216,7 @@ impl Api {
         temporary
             .persist(destination)
             .map_err(|_| "Could not replace the chosen export file.")?;
+        progress(received, total);
         Ok(())
     }
 }
@@ -314,6 +336,31 @@ mod tests {
             result.unwrap_err(),
             "This project changed in another window. Reload before saving."
         );
+        server.await.unwrap();
+    }
+    #[tokio::test]
+    async fn download_reports_real_bytes_and_atomically_publishes_the_file() {
+        let folder = tempfile::tempdir().unwrap();
+        let destination = folder.path().join("story.mp4");
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let api = Api::new(&format!("http://{}", listener.local_addr().unwrap())).unwrap();
+        let server = tokio::spawn(async move {
+            request(
+                &listener,
+                "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 4\r\n\r\nfilm",
+            )
+            .await;
+        });
+        let mut reports = Vec::new();
+        api.download_with_progress("/media/fixture", &destination, |received, total| {
+            reports.push((received, total))
+        })
+        .await
+        .unwrap();
+        assert_eq!(reports.first(), Some(&(0, Some(4))));
+        assert_eq!(reports.last(), Some(&(4, Some(4))));
+        assert!(reports.windows(2).all(|pair| pair[0].0 <= pair[1].0));
+        assert_eq!(tokio::fs::read(destination).await.unwrap(), b"film");
         server.await.unwrap();
     }
     #[tokio::test]

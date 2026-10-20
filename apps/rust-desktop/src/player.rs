@@ -39,6 +39,7 @@ pub fn Player(
     mut playback: Signal<Playback>,
 ) -> Element {
     let api = use_context::<Api>();
+    let mut expanded = use_signal(|| false);
     let latest = use_hook(|| {
         Rc::new(RefCell::new((
             project.clone(),
@@ -225,8 +226,9 @@ pub fn Player(
             .zip(video_clip)
             .is_some_and(|(a, v)| a.a_start != v.a_start || a.item_index != v.item_index);
     rsx! {
-        section {class:"player","aria-label":"Story preview",
-            div {class:"viewer",style:format!("aspect-ratio:{}",project.export_settings.ratio.replace(':',"/")),
+        section {class:if *expanded.read(){"player preview-expanded"}else{"player"},"aria-label":"Story preview",onkeydown:move |e|if e.key()==Key::Escape&&*expanded.peek(){e.prevent_default();expanded.set(false);},
+            div {id:"story-preview-frame",class:"viewer",style:format!("aspect-ratio:{}",project.export_settings.ratio.replace(':',"/")),
+                button {id:"story-expand-preview",class:"preview-expand","aria-controls":"story-preview-frame","aria-expanded":*expanded.read(),onclick:move |_|expanded.toggle(),if *expanded.read(){"Exit expanded view"}else{"Expand preview"}}
                 video {id:"camera-0",muted:true,playsinline:true,preload:"auto","aria-label":"Camera preview"}
                 video {id:"camera-1",muted:true,playsinline:true,preload:"auto","aria-hidden":"true"}
                 audio {id:"master-audio",preload:"auto"}

@@ -6,7 +6,9 @@ use std::{path::PathBuf, time::Duration};
 use storyfold_core::recording::{RecordingDevices, RecordingSession};
 
 pub async fn run(mut state: Signal<State>, destination: PathBuf) {
-    let result = exercise().await;
+    let result = tokio::time::timeout(Duration::from_secs(130), exercise())
+        .await
+        .unwrap_or_else(|_| Err("Native recording check timed out.".into()));
     let artifact = match result {
         Ok(checks) => json!({"ok":true,"runtime":"Rust/Dioxus desktop","checks":checks}),
         Err(error) => json!({"ok":false,"runtime":"Rust/Dioxus desktop","error":error}),
@@ -184,7 +186,21 @@ async fn exercise() -> Result<Value, String> {
     {
         return Err("Native recording test requires an isolated backend with only the debug synthetic camera. No hardware was opened.".into());
     }
+    eprintln!("Storyfold native check: startup");
     tokio::time::sleep(Duration::from_millis(700)).await;
+    if !js_bool("return document.querySelector('.header nav button.active')?.textContent.trim()==='New project'&&!document.querySelector('.editor');").await?{return Err("Startup did not show a fresh workspace.".into());}
+    let _seed: RecordingSession = api
+        .send(
+            reqwest::Method::POST,
+            "/recordings",
+            Some(json!({"name":"Previous generated recording","orientation":"16:9"})),
+        )
+        .await?;
+    click("Array.from(document.querySelectorAll('.header nav button')).find(b=>b.textContent.trim()==='Projects')").await?;
+    wait("return !!document.querySelector('.projects-page [aria-label=\"Saved recordings\"] .project-card');",100).await?;
+    if !js_bool("return !document.querySelector('.projects-page video');").await? {
+        return Err("Projects unexpectedly opened media.".into());
+    }
     click("Array.from(document.querySelectorAll('.header nav button')).find(b=>b.textContent.trim()==='Record')").await?;
     wait(
         "return !document.querySelector('.record-studio').closest('[hidden]');",
@@ -192,6 +208,7 @@ async fn exercise() -> Result<Value, String> {
     )
     .await?;
     wait("return Array.from(document.querySelectorAll('#record-camera option')).some(o=>o.value==='synthetic')||!!document.querySelector('.record-welcome');",100).await?;
+    if !js_bool("return !!document.querySelector('.record-welcome')&&!document.getElementById('record-sequence-preview');").await?{return Err("Record implicitly opened a saved recording.".into());}
     let before: Vec<RecordingSession> = api.get("/recordings").await?;
     click("Array.from(document.querySelectorAll('.record-session-picker button')).find(b=>b.textContent.trim()==='New recording')").await?;
     let mut created = false;
@@ -205,6 +222,7 @@ async fn exercise() -> Result<Value, String> {
     if !created {
         return Err("Native New recording did not open a fresh synthetic session.".into());
     }
+    eprintln!("Storyfold native check: fresh recording created");
     let id = current_id().await?;
     if before.iter().any(|s| s.id == id) {
         return Err("Native recording test refused to alter a pre-existing session.".into());
@@ -224,10 +242,12 @@ async fn exercise() -> Result<Value, String> {
     click("document.querySelector('.record-add-card')").await?;
     click("Array.from(document.querySelectorAll('.record-toolbar button')).find(b=>b.textContent.trim()==='Save changes')").await?;
     wait("return !document.querySelector('.record-toolbar .save-status').classList.contains('dirty');",100).await?;
+    eprintln!("Storyfold native check: hold recording");
     // Hold and release saves one short clip; release is delivered through native IPC.
     pointer("pointerdown").await?;
     tokio::time::sleep(Duration::from_millis(850)).await;
     pointer("pointerup").await?;
+    eprintln!("Storyfold native check: first take finalizing");
     let first = wait_takes(&api, &id, 1).await?;
     if first.clips.len() != 1 || first.takes[0].duration <= 0.1 {
         return Err("Hold did not create one valid sequence clip.".into());
@@ -264,13 +284,14 @@ async fn exercise() -> Result<Value, String> {
         100,
     )
     .await?;
-    click("Array.from(document.querySelectorAll('.header nav button')).find(b=>b.textContent.trim()==='Interviews')").await?;
+    click("Array.from(document.querySelectorAll('.header nav button')).find(b=>b.textContent.trim()==='New project')").await?;
     if !js_bool("return document.querySelector('.header nav button.active')?.textContent.trim()==='Record';").await?{return Err("Native recording could be hidden by navigation.".into());}
     tokio::time::sleep(Duration::from_millis(500)).await;
     if session(&api, &id).await?.active.is_none() {
         return Err("A tap incorrectly stopped the long take on release.".into());
     }
     click("document.getElementById('record-explicit-stop')").await?;
+    eprintln!("Storyfold native check: second take finalizing");
     let second = wait_takes(&api, &id, 2).await?;
     if !second.takes[1].marks.iter().any(|m| m.overlay_id.is_some()) {
         return Err("Native overlay trigger did not save a timing mark.".into());
@@ -293,6 +314,7 @@ async fn exercise() -> Result<Value, String> {
     .await?;
     click("Array.from(document.querySelectorAll('.record-clip-tools button')).find(b=>b.textContent.trim()==='Move left')").await?;
     wait("return document.querySelector('.record-toolbar .save-status').classList.contains('dirty');",30).await?;
+    eprintln!("Storyfold native check: preparing sequence");
     let before_preview = session(&api, &id).await?;
     if before_preview.export.is_some() {
         return Err(
@@ -300,6 +322,12 @@ async fn exercise() -> Result<Value, String> {
         );
     }
     click("document.getElementById('record-preview-sequence')").await?;
+    wait(
+        "return !!document.getElementById('record-sequence-progress');",
+        30,
+    )
+    .await?;
+    eprintln!("Storyfold native check: waiting for render");
     let rendered = wait_prepared(&api, &id, None).await?;
     if rendered.clips.len() != 3
         || rendered.takes.len() != 2
@@ -312,6 +340,25 @@ async fn exercise() -> Result<Value, String> {
     }
     wait("const v=document.getElementById('record-sequence-preview');return !!v&&v.currentSrc.includes('/exports/')&&v.readyState>=2&&v.duration>0;",100).await?;
     wait("const v=document.getElementById('record-sequence-preview');return !!v&&!v.paused&&v.currentTime>0.05;",100).await?;
+    click("document.getElementById('record-expand-preview')").await?;
+    wait("return !!document.querySelector('.record-preview-expanded')&&document.getElementById('record-sequence-preview')?.readyState>=2;",30).await?;
+    let expanded_width = dom::eval(
+        "return document.getElementById('record-sequence-preview').getBoundingClientRect().width;",
+        None,
+    )
+    .await?
+    .as_f64()
+    .unwrap_or(0.);
+    if expanded_width < 900. {
+        return Err("Expanded sequence preview did not grow.".into());
+    }
+    if !js_bool("const b=document.getElementById('record-expand-preview');b.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));return true;").await?{return Err("Expanded Escape unavailable.".into());}
+    wait(
+        "return !document.querySelector('.record-preview-expanded');",
+        30,
+    )
+    .await?;
+    eprintln!("Storyfold native check: sequence playing");
     let first_export = rendered.export.as_ref().unwrap().id.clone();
     wait(
         "return !document.getElementById('record-preview-sequence').disabled;",
@@ -376,6 +423,6 @@ async fn exercise() -> Result<Value, String> {
     }
     click("Array.from(document.querySelectorAll('.record-toolbar button')).find(b=>b.textContent.trim()==='Reload saved')").await?;
     Ok(
-        json!({"syntheticOnly":true,"sessionId":id,"nativeNavigation":true,"titleSaveReadback":true,"holdClip":true,"tapLongTake":true,"explicitStop":true,"overlayTimingMark":true,"captureNavigationGuard":true,"sequenceSplitReorder":true,"sourceTakesPreserved":true,"renderedMp4Ready":true,"previewFirstUseAutoSave":true,"previewCachedCurrent":true,"stalePreviewInvalidated":true,"fullSequenceDuration":duration,"previewNaturalWidth":live_width,"streamFrames":streamed_frames,"exportButtonCovered":export_covered,"draftSurvivesNavigation":true,"youtubeImportControls":true,"youtubePrivateDefault":true,"youtubeUploadGuard":true,"youtubeConnectSetupControls":true,"takes":rendered.takes.len(),"clips":rendered.clips.len()}),
+        json!({"syntheticOnly":true,"freshStartup":true,"projectsTab":true,"savedProjectNotAutoOpened":true,"immediateProgressVisible":true,"expandedPreview":true,"expandedEscape":true,"sessionId":id,"nativeNavigation":true,"titleSaveReadback":true,"holdClip":true,"tapLongTake":true,"explicitStop":true,"overlayTimingMark":true,"captureNavigationGuard":true,"sequenceSplitReorder":true,"sourceTakesPreserved":true,"renderedMp4Ready":true,"previewFirstUseAutoSave":true,"previewCachedCurrent":true,"stalePreviewInvalidated":true,"fullSequenceDuration":duration,"previewNaturalWidth":live_width,"streamFrames":streamed_frames,"exportButtonCovered":export_covered,"draftSurvivesNavigation":true,"youtubeImportControls":true,"youtubePrivateDefault":true,"youtubeUploadGuard":true,"youtubeConnectSetupControls":true,"takes":rendered.takes.len(),"clips":rendered.clips.len()}),
     )
 }

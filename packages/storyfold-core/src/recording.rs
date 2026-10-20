@@ -67,6 +67,8 @@ pub struct RecordingExport {
     pub id: String,
     pub status: String,
     pub pct: f64,
+    #[serde(default)]
+    pub detail: String,
     pub revision: u64,
     pub error: Option<String>,
 }

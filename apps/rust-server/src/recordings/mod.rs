@@ -653,6 +653,7 @@ async fn export(
         id: uuid::Uuid::new_v4().to_string(),
         status: "rendering".into(),
         pct: 0.,
+        detail: "Waiting for the export worker".into(),
         revision: session.revision,
         error: None,
     };
@@ -669,7 +670,29 @@ async fn export(
                 .acquire()
                 .await
                 .map_err(|_| AppError::bad("The export queue stopped."))?;
-            render::render(&s.store, &snapshot, &job.id).await
+            let (tx, mut rx) = watch::channel(render::RenderProgress::default());
+            let operation = render::render(&s.store, &snapshot, &job.id, tx);
+            tokio::pin!(operation);
+            let mut last = tokio::time::Instant::now() - Duration::from_secs(1);
+            loop {
+                tokio::select! {
+                    result = &mut operation => break result,
+                    changed = rx.changed() => {
+                        if changed.is_err() { continue; }
+                        let progress = rx.borrow_and_update().clone();
+                        if last.elapsed() < Duration::from_millis(500) { continue; }
+                        last = tokio::time::Instant::now();
+                        let _guard = s.recordings.lock.lock().await;
+                        if let Ok(mut saved) = read(&s, &id).await
+                            && let Some(export) = saved.export.as_mut().filter(|e| e.id == job.id && e.status == "rendering")
+                        {
+                            export.pct = progress.pct;
+                            export.detail = progress.detail;
+                            save(&s.store, &saved).await?;
+                        }
+                    }
+                }
+            }
         }
         .await;
         let _lock = s.recordings.lock.lock().await;
@@ -682,6 +705,7 @@ async fn export(
                     Ok(()) => {
                         export.status = "done".into();
                         export.pct = 100.;
+                        export.detail = "Sequence ready".into();
                     }
                     Err(e) => {
                         export.status = "error".into();

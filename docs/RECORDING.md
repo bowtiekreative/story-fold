@@ -34,6 +34,17 @@ under the local Storyfold data folder.
    transcribes it with Whisper, and optionally groups its topics with Claude.
    A microphone-enabled take is needed for transcription.
 
+Storyfold starts on **New project**. Open **Projects** to see saved interviews
+and recordings, then explicitly open the one you want. Entering Record starts
+with a new-project choice; it does not select an older recording automatically.
+Switching tabs keeps an unsaved draft. Replacing a draft requires confirmation.
+
+Preview shows a loading message until the finished video has decoded. If loading
+fails, its error and **Retry loading** remain visible. **Expand preview** enlarges
+the same player; use **Escape** to return. Export shows a loader immediately,
+then the current rendering stage and percentage, followed by MP4 download
+progress. The percentage comes from encoded time and transferred bytes.
+
 Interrupted takes are recovered from their local capture container when possible
 and labeled for review. Stop waits for capture to finish before publishing a take
 as complete. Saved revisions reject stale edits rather than overwriting newer
