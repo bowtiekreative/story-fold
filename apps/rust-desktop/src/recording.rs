@@ -93,6 +93,7 @@ struct Studio {
     preview_loading: bool,
     preview_error: String,
     preview_expanded: bool,
+    preview_playing: bool,
     split_at: f64,
     manual: bool,
     epoch: u64,
@@ -194,6 +195,7 @@ impl Studio {
         self.selected = clip.id.clone();
         self.split_at = (clip.r#in + clip.out) / 2.;
         self.preview_export = false;
+        self.preview_playing = false;
         self.preview_loading = false;
         self.preview_error.clear();
     }
@@ -350,6 +352,7 @@ fn request_session(
                 let active = session.active.is_some();
                 s.accept(session);
                 s.preview_export = false;
+                s.preview_playing = false;
                 s.sequence_status.clear();
                 s.sequence_error.clear();
                 s.gesture = CaptureGesture::default();
@@ -961,6 +964,15 @@ pub fn RecordingStudio(mut state: Signal<State>, active: bool) -> Element {
                             if(b && !b.disabled && e.isPrimary && e.button===0) { try { b.setPointerCapture(e.pointerId); } catch (_) {} }
                         },true);
                         document.addEventListener('click',e=>{
+                            const toggle=e.target.closest?.('[data-record-toggle-playback]');
+                            if(toggle && !toggle.disabled) {
+                                const video=toggle.closest('.record-camera-card')?.querySelector('video');
+                                if(video) {
+                                    if(video.paused) video.play().catch(()=>video.dispatchEvent(new Event('error')));
+                                    else video.pause();
+                                }
+                                return;
+                            }
                             if(e.target.closest?.('.record-studio') && !e.target.closest?.('video,[data-record-player-control]')) pause();
                         },true);
                         document.addEventListener('input',e=>{
@@ -1087,24 +1099,39 @@ fn studio_view(state: Signal<State>, mut studio: Signal<Studio>, api: Api) -> El
                             button {disabled:capture||s.discovering,onclick:{let api=api.clone();move |_|refresh_devices(studio,api.clone())},if s.discovering {"Checking cameras…"}else{"Refresh devices"}}
                         }
                         div {class:if s.preview_expanded {"record-camera-card record-preview-expanded"}else{"record-camera-card"},
+                            if capture || selected.is_some() || s.preview_export {
+                                div {class:"record-preview-toolbar","data-record-player-control":"true",
+                                    span {if capture {"Live camera"}else if s.preview_export {"Sequence preview"}else{"Take preview"}}
+                                    if !capture && (selected.is_some() || s.preview_export) {
+                                        button {id:"record-toggle-playback",r#type:"button","data-record-player-control":"true","data-record-toggle-playback":"true","aria-controls":"record-preview-frame",if s.preview_playing {"Ⅱ Pause"}else{"▶ Play"}}
+                                    }
+                                    button {id:"record-expand-preview",class:"preview-expand","data-record-player-control":"true","aria-controls":"record-preview-frame","aria-expanded":s.preview_expanded,onclick:move |_|{let expanded=studio.peek().preview_expanded;studio.write().preview_expanded = !expanded;},if s.preview_expanded {"↙ Exit expanded view"}else{"↗ Expand preview"}}
+                                }
+                            }
                             div {id:"record-preview-frame",class:if session.orientation=="9:16" {"record-frame portrait"}else{"record-frame"},
                                 if session.active.is_some() {
                                     if let Some(active)=&session.active {img {key:"{active.take_id}",class:"record-live-image",src:"{preview_url(&api,&session.id)}",alt:"Live camera preview while recording"}}
                                 } else if s.preview_export && fresh_export.is_some() {
                                     if let Some(job)=&fresh_export {video {key:"export-{job.id}",id:"record-sequence-preview",class:"record-clip-preview",src:media_url(&api,&session.id,&format!("exports/{}",job.id)),controls:true,"controlslist":"nofullscreen",playsinline:true,preload:"auto","aria-label":"Full sequence preview",
-                                        onloadstart:move |_|{studio.write().preview_loading=true;},
+                                        onloadstart:move |_|{studio.write().preview_loading=true;studio.write().preview_playing=false;},
+                                        onplay:move |_|studio.write().preview_playing=true,
+                                        onpause:move |_|studio.write().preview_playing=false,
+                                        onended:move |_|studio.write().preview_playing=false,
                                         onloadeddata:move |_|{studio.write().preview_loading=false;studio.write().preview_error.clear();},
-                                        onerror:move |_|{studio.write().preview_loading=false;studio.write().preview_error="The native video player could not load this sequence. Retry the preview, or export the MP4 and open it with your video player.".into();}
+                                        onerror:move |_|{studio.write().preview_loading=false;studio.write().preview_playing=false;studio.write().preview_error="The native video player could not load this sequence. Retry the preview, or export the MP4 and open it with your video player.".into();}
                                     }}
                                 } else if let Some(clip)=&selected {
-                                    video {key:"clip-{clip.id}-{clip.r#in}-{clip.out}",class:"record-clip-preview",src:format!("{}#t={},{}",media_url(&api,&session.id,&format!("takes/{}",clip.take_id)),clip.r#in,clip.out),controls:true,"controlslist":"nofullscreen",playsinline:true,preload:"metadata","aria-label":"Selected source take preview"}
+                                    video {key:"clip-{clip.id}-{clip.r#in}-{clip.out}",class:"record-clip-preview",src:format!("{}#t={},{}",media_url(&api,&session.id,&format!("takes/{}",clip.take_id)),clip.r#in,clip.out),controls:true,"controlslist":"nofullscreen",playsinline:true,preload:"metadata","aria-label":"Selected source take preview",
+                                        onloadstart:move |_|studio.write().preview_playing=false,
+                                        onplay:move |_|studio.write().preview_playing=true,
+                                        onpause:move |_|studio.write().preview_playing=false,
+                                        onended:move |_|studio.write().preview_playing=false,
+                                        onerror:move |_|{studio.write().preview_playing=false;studio.write().preview_error="The native player could not play this take. Try loading it again or export the sequence.".into();}
+                                    }
                                 } else {
                                     div {class:"record-camera-empty",span {class:"record-empty-icon","◉"}strong {if s.devices.cameras.is_empty(){"Connect a camera to begin."}else{"Ready when you are."}}p {if s.devices.cameras.is_empty(){"Connect a webcam, refresh devices, then choose your camera and microphone."}else{"Your camera and microphone open only when you press Record. Your video stays on this computer."}}}
                                 }
                                 if capture {span {class:"record-live-badge",role:"status",span {class:"record-dot"}match s.gesture.phase {CapturePhase::Starting=>"Opening camera…".to_string(),CapturePhase::Stopping=>"Saving take…".to_string(),_=>format!("REC {} · {}",fmt(session.active.as_ref().map(|a|a.seconds).unwrap_or_default()),if s.gesture.long_take{"long take"}else{"hold"})}}}
-                                if capture || selected.is_some() || s.preview_export {
-                                    button {id:"record-expand-preview",class:"preview-expand","data-record-player-control":"true","aria-controls":"record-preview-frame","aria-expanded":s.preview_expanded,onclick:move |_|{let expanded=studio.peek().preview_expanded;studio.write().preview_expanded = !expanded;},if s.preview_expanded {"Exit expanded view"}else{"Expand preview"}}
-                                }
                                 if capture || (selected.is_none()&&!s.preview_export) {
                                     if let Some(card)=session.overlays.iter().find(|o|Some(&o.id)==session.active_overlay.as_ref()) {
                                         div {class:format!("record-overlay-preview {}",card.kind),strong {"{card.text}"}if !card.secondary.is_empty(){span {"{card.secondary}"}}}

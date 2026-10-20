@@ -1,0 +1,352 @@
+{
+  "ok": true,
+  "verifiedAt": "2026-10-20T07:11:04.888317+00:00",
+  "application": "Rust/Dioxus Record studio; separate from the newer egui studio",
+  "blueRecordId": "pgahz2dy9y9vph8ef1dtnfc4",
+  "physicalCameraOrMicrophoneOpened": false,
+  "baselineExpansionFailureReproduced": false,
+  "changes": {
+    "toolbarOutsideNativeVideoSurface": true,
+    "explicitPlayPause": true,
+    "samePlayerOnExpandAndExit": true,
+    "linuxVideoInputQueuePackets": 2,
+    "linuxPulseQueuePackets": 8,
+    "linuxPulseFragmentBytes": 3840,
+    "previewFpsLookaheadRemoved": true,
+    "previewCadence": "passthrough",
+    "retainedFfmpegStdinForGracefulStop": true
+  },
+  "nativeControls": {
+    "before": {
+      "buttonVisible": true,
+      "controlOutsideVideo": true,
+      "error": 0,
+      "expanded": false,
+      "frames": 6,
+      "height": 462.375,
+      "nativeControls": true,
+      "paused": false,
+      "playButton": "\u2161 Pause",
+      "rawDecodedFrames": 6,
+      "reloads": 0,
+      "sameSource": true,
+      "sameVideo": true,
+      "time": 0.486202,
+      "viewportHeight": 933,
+      "viewportWidth": 1440,
+      "width": 822
+    },
+    "compact": {
+      "buttonVisible": true,
+      "controlOutsideVideo": true,
+      "error": 0,
+      "expanded": false,
+      "frames": 48,
+      "height": 462.375,
+      "nativeControls": true,
+      "paused": false,
+      "playButton": "\u2161 Pause",
+      "rawDecodedFrames": 48,
+      "reloads": 0,
+      "sameSource": true,
+      "sameVideo": true,
+      "time": 1.876477,
+      "viewportHeight": 933,
+      "viewportWidth": 1440,
+      "width": 822
+    },
+    "escape": {
+      "buttonVisible": true,
+      "controlOutsideVideo": true,
+      "error": 0,
+      "expanded": false,
+      "frames": 71,
+      "height": 462.375,
+      "nativeControls": true,
+      "paused": false,
+      "playButton": "\u2161 Pause",
+      "rawDecodedFrames": 12,
+      "reloads": 0,
+      "sameSource": true,
+      "sameVideo": true,
+      "time": 0.743675,
+      "viewportHeight": 933,
+      "viewportWidth": 1440,
+      "width": 822
+    },
+    "expanded": {
+      "buttonVisible": true,
+      "controlOutsideVideo": true,
+      "error": 0,
+      "expanded": true,
+      "frames": 29,
+      "height": 829,
+      "nativeControls": true,
+      "paused": false,
+      "playButton": "\u2161 Pause",
+      "rawDecodedFrames": 29,
+      "reloads": 0,
+      "sameSource": true,
+      "sameVideo": true,
+      "time": 1.2717,
+      "viewportHeight": 933,
+      "viewportWidth": 1440,
+      "width": 1390
+    },
+    "ok": true,
+    "pauseAcknowledged": true,
+    "paused": {
+      "buttonVisible": true,
+      "controlOutsideVideo": true,
+      "error": 0,
+      "expanded": false,
+      "frames": 0,
+      "height": 462.375,
+      "nativeControls": true,
+      "paused": true,
+      "playButton": "\u25b6 Play",
+      "rawDecodedFrames": 0,
+      "reloads": 0,
+      "sameSource": true,
+      "sameVideo": true,
+      "time": 0.292514,
+      "viewportHeight": 933,
+      "viewportWidth": 1440,
+      "width": 822
+    },
+    "pausedStill": {
+      "buttonVisible": true,
+      "controlOutsideVideo": true,
+      "error": 0,
+      "expanded": false,
+      "frames": 0,
+      "height": 462.375,
+      "nativeControls": true,
+      "paused": true,
+      "playButton": "\u25b6 Play",
+      "rawDecodedFrames": 0,
+      "reloads": 0,
+      "sameSource": true,
+      "sameVideo": true,
+      "time": 0.292514,
+      "viewportHeight": 933,
+      "viewportWidth": 1440,
+      "width": 822
+    },
+    "playAcknowledged": true,
+    "pointerHitEnter": {
+      "button": "\u2197 Expand preview",
+      "element": "BUTTON",
+      "hit": true
+    },
+    "pointerHitExit": {
+      "button": "\u2199 Exit expanded view",
+      "element": "BUTTON",
+      "hit": true
+    },
+    "pointerHitPause": {
+      "button": "\u2161 Pause",
+      "element": "BUTTON",
+      "hit": true
+    },
+    "pointerHitPlay": {
+      "button": "\u25b6 Play",
+      "element": "BUTTON",
+      "hit": true
+    },
+    "pointerHitReenter": {
+      "button": "\u2197 Expand preview",
+      "element": "BUTTON",
+      "hit": true
+    },
+    "readOnly": true,
+    "secondExpanded": {
+      "buttonVisible": true,
+      "controlOutsideVideo": true,
+      "error": 0,
+      "expanded": true,
+      "frames": 59,
+      "height": 829,
+      "nativeControls": true,
+      "paused": false,
+      "playButton": "\u2161 Pause",
+      "rawDecodedFrames": 59,
+      "reloads": 0,
+      "sameSource": true,
+      "sameVideo": true,
+      "time": 2.329123,
+      "viewportHeight": 933,
+      "viewportWidth": 1440,
+      "width": 1390
+    },
+    "studioControls": true
+  },
+  "frameAge": {
+    "baseline": {
+      "syntheticOnly": true,
+      "measurement": "Clock burned at generated source; age sampled on receiving complete JPEG through actual continuous HTTP MJPEG stream. OCR runs after capture. Includes source/filter/encode/pipe/server/HTTP; excludes native browser paint and physical sensor/USB.",
+      "competingLoad": "Concurrent 1920x1080 libx264 veryfast encode, two threads",
+      "samples": 31,
+      "discardedOcrSamples": 0,
+      "ageMs": {
+        "min": 141.29,
+        "median": 314.21,
+        "p95": 550.03,
+        "max": 635.53
+      },
+      "firstFrameReadyMs": 285.87,
+      "receivedFrames": 239,
+      "seconds": 8,
+      "fps": 29.88,
+      "recordedTakes": 1,
+      "preview": "1280x720, source1920x1080@30",
+      "sourceSaved": true
+    },
+    "afterBufferChanges": {
+      "syntheticOnly": true,
+      "measurement": "Clock burned at generated source; age sampled on receiving complete JPEG through actual continuous HTTP MJPEG stream. OCR runs after capture. Includes source/filter/encode/pipe/server/HTTP; excludes native browser paint and physical sensor/USB.",
+      "competingLoad": "Concurrent 1920x1080 libx264 veryfast encode, two threads",
+      "samples": 30,
+      "discardedOcrSamples": 0,
+      "ageMs": {
+        "min": 105.55,
+        "median": 145.055,
+        "p95": 160.55,
+        "max": 257.82
+      },
+      "firstFrameReadyMs": 356.0,
+      "receivedFrames": 260,
+      "seconds": 8,
+      "fps": 32.5,
+      "recordedTakes": 1,
+      "preview": "1280x720, source1920x1080@30",
+      "sourceSaved": true
+    },
+    "finalWithConcurrentNativeProbeAndTestCompile": {
+      "syntheticOnly": true,
+      "measurement": "Clock burned at generated source; age sampled on receiving complete JPEG through actual continuous HTTP MJPEG stream. OCR runs after capture. Includes source/filter/encode/pipe/server/HTTP; excludes native browser paint and physical sensor/USB.",
+      "competingLoad": "Concurrent 1920x1080 libx264 veryfast encode, two threads",
+      "samples": 29,
+      "discardedOcrSamples": 1,
+      "ageMs": {
+        "min": 112.68,
+        "median": 172.54,
+        "p95": 257.57,
+        "max": 265.58
+      },
+      "firstFrameReadyMs": 320.32,
+      "receivedFrames": 254,
+      "seconds": 8,
+      "fps": 31.75,
+      "recordedTakes": 1,
+      "stopToSavedMs": 390.32,
+      "normalStopInterrupted": false,
+      "sourceDurationSeconds": 8.660833,
+      "preview": "1280x720, source1920x1080@30",
+      "sourceSaved": true
+    },
+    "method": "Debug-only generated source burns Unix milliseconds before input pacing. Complete MJPEG receive time is recorded; clock OCR runs after capture. The same competing 1080p libx264 encode runs in each measurement.",
+    "limits": "Small samples on a shared machine. Excludes physical sensor/USB/driver and native browser paint; no sensor-to-screen latency claim. Startup readiness did not improve consistently.",
+    "fixtureFilter": "drawbox=x=0:y=0:w=1100:h=150:color=white:t=fill,drawtext=font=monospace:text='%{localtime\\:%s.%3N}':fontsize=90:fontcolor=black:x=24:y=24",
+    "reference": "https://ffmpeg.org/ffmpeg-filters.html#drawtext"
+  },
+  "normalStop": {
+    "previous": "Every normal diagnostic Stop waited for the 8-second forced-kill fallback because Child::wait had closed Child.stdin. Both prior 8-second captures became 15.594167-second interrupted takes.",
+    "retainedControlPipe": true,
+    "generatedIntegrationMs": 281.01,
+    "loadedRunMs": 390.32,
+    "loadedRunInterrupted": false,
+    "loadedSourceDurationSeconds": 8.660833
+  },
+  "sourceQuality": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1"
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "r_frame_rate": "0/0"
+      }
+    ],
+    "format": {
+      "duration": "8.660833"
+    }
+  },
+  "nativeExport": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1"
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "r_frame_rate": "0/0"
+      }
+    ],
+    "format": {
+      "duration": "3.134000"
+    }
+  },
+  "nativeGeneratedFlow": {
+    "captureNavigationGuard": true,
+    "clips": 3,
+    "draftSurvivesNavigation": true,
+    "expandedEscape": true,
+    "expandedPreview": true,
+    "explicitStop": true,
+    "exportButtonCovered": true,
+    "freshStartup": true,
+    "fullSequenceDuration": 3.1215,
+    "holdClip": true,
+    "immediateProgressVisible": true,
+    "nativeNavigation": true,
+    "overlayTimingMark": true,
+    "previewCachedCurrent": true,
+    "previewFirstUseAutoSave": true,
+    "previewNaturalWidth": 1280,
+    "projectsTab": true,
+    "renderedMp4Ready": true,
+    "savedProjectNotAutoOpened": true,
+    "sequenceSplitReorder": true,
+    "sourceTakesPreserved": true,
+    "stalePreviewInvalidated": true,
+    "streamFrames": 3,
+    "syntheticOnly": true,
+    "takes": 2,
+    "tapLongTake": true,
+    "titleSaveReadback": true,
+    "youtubeConnectSetupControls": true,
+    "youtubeImportControls": true,
+    "youtubePrivateDefault": true,
+    "youtubeUploadGuard": true
+  },
+  "validation": {
+    "desktopUnitTestsPassed": 34,
+    "serverUnitTestsPassed": 24,
+    "normalRunIgnored": 3,
+    "generatedCapturePreviewExportRecoveryPassed": true,
+    "generatedFreshPreviewFramesPerSecond": 30,
+    "clippyAllTargetsWarningsDeniedPassed": true,
+    "formattingPassed": true,
+    "existingFixtureFilesCompared": 31,
+    "existingFixtureFilesUnchanged": true,
+    "productionServerRestarted": false,
+    "userWindowsClosed": false
+  },
+  "remainingValidation": [
+    "User retest on actual Logitech/OBSBOT cameras and affected compositor.",
+    "Pulse fragment timing is configured but not measured on physical hardware.",
+    "The user\u2019s newest button report concerns the separate egui studio; this artifact validates Dioxus only."
+  ]
+}

@@ -16,6 +16,15 @@ pub(super) struct Input {
 pub(super) fn test_source() -> bool {
     cfg!(debug_assertions) && std::env::var("STORYFOLD_CAPTURE_TEST").is_ok_and(|s| s == "1")
 }
+fn generated_video() -> &'static str {
+    // An opt-in clock burned into generated frames measures filter-to-view age.
+    // It is never added to physical camera footage or release builds.
+    if cfg!(debug_assertions) && std::env::var("STORYFOLD_CAPTURE_CLOCK").is_ok_and(|s| s == "1") {
+        "testsrc2=size=1920x1080:rate=30,drawbox=x=0:y=0:w=1100:h=150:color=white:t=fill,drawtext=font=monospace:text='%{localtime\\:%s.%3N}':fontsize=90:fontcolor=black:x=24:y=24"
+    } else {
+        "testsrc2=size=1920x1080:rate=30"
+    }
+}
 #[cfg(target_os = "linux")]
 mod linux {
     use std::{
@@ -408,14 +417,18 @@ pub(super) async fn input(camera: &str, microphone: Option<&str>) -> Result<Inpu
     let mut audio_index = 0;
     if camera == "synthetic" && test_source() {
         args = strings(&[
+            "-thread_queue_size",
+            "2",
             "-re",
             "-f",
             "lavfi",
             "-i",
-            "testsrc2=size=1920x1080:rate=30",
+            generated_video(),
         ]);
         if audio.is_some() {
             args.extend(strings(&[
+                "-thread_queue_size",
+                "8",
                 "-re",
                 "-f",
                 "lavfi",
@@ -427,7 +440,9 @@ pub(super) async fn input(camera: &str, microphone: Option<&str>) -> Result<Inpu
     } else {
         #[cfg(target_os = "linux")]
         {
-            args.extend(strings(&["-thread_queue_size", "8", "-f", "v4l2"]));
+            // Two video packets bound demux lookahead to about 67 ms at 30 fps.
+            // A large FIFO makes a fluid preview show increasingly old motion.
+            args.extend(strings(&["-thread_queue_size", "2", "-f", "v4l2"]));
             args.extend(linux::input_args(std::path::Path::new(video)).map_err(|_| {
                 AppError::bad(
                     "Could not query camera quality. Close other camera apps and refresh devices.",
@@ -437,9 +452,11 @@ pub(super) async fn input(camera: &str, microphone: Option<&str>) -> Result<Inpu
             if let Some(audio) = audio {
                 args.extend(strings(&[
                     "-thread_queue_size",
-                    "512",
+                    "8",
                     "-f",
                     "pulse",
+                    "-fragment_size",
+                    "3840",
                     "-i",
                     audio,
                 ]));
@@ -477,6 +494,8 @@ pub(super) async fn input(camera: &str, microphone: Option<&str>) -> Result<Inpu
     }
     if audio.is_none() {
         args.extend(strings(&[
+            "-thread_queue_size",
+            "8",
             "-re",
             "-f",
             "lavfi",
@@ -503,15 +522,18 @@ pub(super) async fn run(
     let mut cmd = Command::new("ffmpeg");
     cmd.args(["-hide_banner","-loglevel","error","-y","-filter_complex_threads","1","-stats_period","0.1","-progress","pipe:2"])
         .args(input.args)
-        .args(["-filter_complex","[0:v]scale=w='min(iw,1920)':h='min(ih,1080)':force_original_aspect_ratio=decrease:force_divisible_by=2,setsar=1,split=2[recorded][p];[p]fps=30,scale=w='min(iw,1280)':h='min(ih,720)':force_original_aspect_ratio=decrease:force_divisible_by=2[preview]","-map","[recorded]","-map",&format!("{}:a:0",input.audio),"-c:v","libx264","-threads","2","-preset","veryfast","-tune","zerolatency","-crf","20","-pix_fmt","yuv420p","-r","30","-c:a","aac","-b:a","160k","-f","matroska"])
+        .args(["-filter_complex","[0:v]scale=w='min(iw,1920)':h='min(ih,1080)':force_original_aspect_ratio=decrease:force_divisible_by=2,setsar=1,split=2[recorded][p];[p]scale=w='min(iw,1280)':h='min(ih,720)':force_original_aspect_ratio=decrease:force_divisible_by=2[preview]","-map","[recorded]","-map",&format!("{}:a:0",input.audio),"-c:v","libx264","-threads","2","-preset","veryfast","-tune","zerolatency","-crf","20","-pix_fmt","yuv420p","-r","30","-c:a","aac","-b:a","160k","-f","matroska"])
         .arg(&raw)
-        .args(["-map","[preview]","-an","-c:v","mjpeg","-threads","2","-q:v","3","-flush_packets","1","-f","image2pipe","pipe:1"])
+        .args(["-map","[preview]","-an","-c:v","mjpeg","-threads","2","-q:v","3","-fps_mode","passthrough","-flush_packets","1","-f","image2pipe","pipe:1"])
         .stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::piped()).kill_on_drop(true);
     #[cfg(windows)]
     cmd.creation_flags(0x08000000);
     let mut child = cmd.spawn().map_err(|_| {
         AppError::bad("FFmpeg could not start. Check that the media tools are installed.")
     })?;
+    // Child::wait closes Child.stdin on its first poll. Retain the control pipe
+    // separately so Stop can still send FFmpeg's graceful q command.
+    let mut control = child.stdin.take();
     let stdout = child
         .stdout
         .take()
@@ -537,9 +559,9 @@ pub(super) async fn run(
     tokio::pin!(limit);
     let result = tokio::select! {
         status=child.wait()=>status.map_err(AppError::from),
-        _=live.cancel.cancelled()=>stop_child(&mut child).await,
-        _=&mut limit=>stop_child(&mut child).await,
-        _=async {loop {tokio::time::sleep(Duration::from_secs(1)).await;if std::fs::metadata(&raw).is_ok_and(|m|m.len()>4*1024*1024*1024-2*1024*1024){break;}}}=>stop_child(&mut child).await,
+        _=live.cancel.cancelled()=>stop_child(&mut child,control.take()).await,
+        _=&mut limit=>stop_child(&mut child,control.take()).await,
+        _=async {loop {tokio::time::sleep(Duration::from_secs(1)).await;if std::fs::metadata(&raw).is_ok_and(|m|m.len()>4*1024*1024*1024-2*1024*1024){break;}}}=>stop_child(&mut child,control.take()).await,
     };
     let _ = frame_task.await;
     let _ = progress_task.await;
@@ -547,8 +569,11 @@ pub(super) async fn run(
     let duration=finalize(store,id,take).await.map_err(|_|AppError::bad("Camera or microphone capture failed. Check permissions and close other camera apps. Any captured source remains in this recording folder."))?;
     Ok((duration, interrupted))
 }
-async fn stop_child(child: &mut tokio::process::Child) -> Result<std::process::ExitStatus> {
-    if let Some(mut stdin) = child.stdin.take() {
+async fn stop_child(
+    child: &mut tokio::process::Child,
+    control: Option<tokio::process::ChildStdin>,
+) -> Result<std::process::ExitStatus> {
+    if let Some(mut stdin) = control {
         let _ = stdin.write_all(b"q\n").await;
         let _ = stdin.shutdown().await;
     }

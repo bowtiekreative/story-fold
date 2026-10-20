@@ -1151,12 +1151,26 @@ mod tests {
         .await
         .unwrap();
         tokio::time::sleep(Duration::from_millis(1400)).await;
+        let stopping = std::time::Instant::now();
         let finished = stop(State(state.clone()), Path(id.clone()))
             .await
             .unwrap()
             .0;
         assert!(finished.active.is_none(), "{:?}", finished.error);
         assert_eq!(finished.takes.len(), 1, "{:?}", finished.error);
+        assert!(
+            !finished.takes[0].interrupted,
+            "Explicit Stop must gracefully finish FFmpeg"
+        );
+        assert!(
+            stopping.elapsed() < Duration::from_secs(4),
+            "Explicit Stop took {:?}",
+            stopping.elapsed()
+        );
+        println!(
+            "Graceful generated Stop completed in {:?}",
+            stopping.elapsed()
+        );
         assert!(finished.takes[0].duration > 1.);
         assert!(
             finished.takes[0]
