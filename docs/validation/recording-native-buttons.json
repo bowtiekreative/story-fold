@@ -60,5 +60,23 @@
     "project_menu_opens": true,
     "isolated_only": true
   },
-  "current_release_proof": "record-studio-0.1.2.json"
+  "current_release_proof": "record-studio-0.1.3.json",
+  "desktop_project_menu_accepted": true,
+  "latest_user_feedback": "Project and live camera work; original Record failure unresolved pending0.1.3 retest",
+  "actual_native_player_os_input": {
+    "isolated_xvfb": true,
+    "real_x11_xtest": true,
+    "ipc_observation_only": true,
+    "play_pause_clock_fullscreen_escape_natural_eof_replay": true,
+    "original_mp4_unchanged": true,
+    "passed_seconds": 10.56
+  },
+  "additional_recording_control_version": "0.1.3",
+  "real_os_generated_record_controls": {
+    "both_window_sizes": true,
+    "hold_release_outside": true,
+    "tap_tap": true,
+    "standard_start_stop": true,
+    "saved_clips_per_size": 3
+  }
 }

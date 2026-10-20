@@ -17,7 +17,13 @@
     "project_menu_opens": true,
     "real_xtest_pointer_delivery": true
   },
-  "desktop_input_acceptance": "Pending user Project-menu check in Input check window",
+  "desktop_input_acceptance": {
+    "project_menu_opens": "Confirmed by Ryan on2026-10-20",
+    "whole_window_freeze": "Not established by latest retest",
+    "other_controls": "Under verification",
+    "live_camera_picture": "Confirmed by Ryan on2026-10-20",
+    "record": "Ryan reports Record does nothing despite live picture; unresolved"
+  },
   "installed_binary_hash_matches": true,
   "workspace_commit": "b233e2f",
   "diagnostic_window_title": "Storyfold \u00b7 Record studio (0.1.2) \u00b7 Input check",

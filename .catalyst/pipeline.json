@@ -1,8 +1,8 @@
 {
   "name": "Storyfold",
-  "milestone": "Native0.1.2 startup repair installed; desktop input check pending",
-  "updatedAt": "2026-10-20T08:02:24.269910+00:00",
-  "message": "Added clear Create/Open actions, a grey inactive Record button and attached project folder dialogs. Real OS-pointer fixture opens Project; actual Input check window awaits one Project click. Your reported all-click failure remains open.",
+  "milestone": "Native0.1.3 installed; awaiting desktop Record retest",
+  "updatedAt": "2026-10-20T19:03:31.965165+00:00",
+  "message": "Version0.1.3 is installed and open. Standard Start recording/Stop & save and circular gestures pass real OS tests with generated video at both window sizes. Camera errors stay visible above video. Actual desktop Record acceptance remains open.",
   "tasks": [
     {
       "id": "foundation",
@@ -314,7 +314,7 @@
     {
       "id": "record-inserts",
       "title": "Add photo and video zoom inserts",
-      "acceptance": "Start/end boxes,100–250% zoom, duration/easing/placement, preview/export matching at0,2.5,5seconds.",
+      "acceptance": "Start/end boxes,100\u2013250% zoom, duration/easing/placement, preview/export matching at0,2.5,5seconds.",
       "status": "doing",
       "lane": "Now",
       "evidence": [
@@ -343,7 +343,7 @@
         "docs/validation/record-native-youtube.json",
         "docs/validation/record-studio-0.1.1.json"
       ],
-      "description": "Native keychain/PKCE/resumable upload, public clip importer and Project → YouTube panel integrated. All17 protocol and7 panel tests pass; real Google client/consent, keychain and publishing acceptance remain."
+      "description": "Native keychain/PKCE/resumable upload, public clip importer and Project \u2192 YouTube panel integrated. All17 protocol and7 panel tests pass; real Google client/consent, keychain and publishing acceptance remain."
     },
     {
       "id": "record-package",
@@ -405,7 +405,7 @@
       "title": "Make native preview buttons responsive and reduce camera delay",
       "status": "doing",
       "owner": "Codex",
-      "description": "Your0.1.1 retest reported the whole studio ignores clicks. Native0.1.2 adds visible Create/Open actions and attached folder dialogs;23 focused tests, strict lint and real isolated X11-pointer Project-menu opening pass. Installed0.1.2 hash matches package. A bounded Input check window is open; actual desktop Project-click result is still pending, so this task remains open.",
+      "description": "Ryan confirms Project opens in the actual Input check window. Probe recorded pointer events and a successful project-open transition; a whole-app input freeze is not established. Startup repair0.1.2 is installed. Remaining camera/record/sequence step is being localized; actual OS-player clicks are replacing IPC-only test input. Physical timing remains unverified.",
       "evidence": [
         "docs/validation/recording-preview-responsiveness.json",
         "docs/validation/recording-native-buttons.json",

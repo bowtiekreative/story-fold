@@ -1,0 +1,30 @@
+{
+  "checked_at": "2026-10-20",
+  "scope": "Physical backend startup only; does not establish GUI Record acceptance or sensor-to-screen latency",
+  "microphone": "off",
+  "frames_viewed": false,
+  "takes_created": 0,
+  "temporary_buffer_removed": true,
+  "cameras": [
+    {
+      "name": "OBSBOT Tiny 2",
+      "device": "/dev/video0",
+      "capture": "1920x1080 MJPEG at30fps",
+      "preview": "1280x720",
+      "first_preview_ms": 2019,
+      "last_sequence": 60,
+      "stopped": true,
+      "error": null
+    },
+    {
+      "name": "Logitech C922",
+      "device": "/dev/video2",
+      "capture": "1920x1080 MJPEG at30fps",
+      "preview": "1280x720",
+      "first_preview_ms": 601,
+      "last_sequence": 60,
+      "stopped": true,
+      "error": null
+    }
+  ]
+}

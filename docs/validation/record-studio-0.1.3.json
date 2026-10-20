@@ -1,0 +1,75 @@
+{
+  "checked_at": "2026-10-20",
+  "version": "0.1.3",
+  "real_desktop_record_acceptance": false,
+  "latest_user_report": "Live picture works, but Record does nothing",
+  "changes": [
+    "Standard Start recording / Stop & save action above video",
+    "Recording errors visible above stage",
+    "Visible camera choice and startup progress",
+    "State-only input diagnostics retain quota for actual changes and clicks"
+  ],
+  "tests": {
+    "studio_unit_passed": 25,
+    "studio_opt_in_ignored": 3,
+    "strict_app_and_core_clippy": true,
+    "generated_egui_capture_preview_recovery_seconds": 16.02,
+    "native_os_record_runs": [
+      {
+        "isolated_xvfb": true,
+        "real_x11_xtest_events": true,
+        "matched_child_pid": true,
+        "size": "default1480x1000",
+        "generated_source_only": true,
+        "live_preview_present": true,
+        "record_pointer_down_received": true,
+        "held_release_outside_saved_clip": true,
+        "tap_started_long_take": true,
+        "second_tap_saved_long_take": true,
+        "normal_button_started_recording": true,
+        "normal_button_stopped_and_saved": true,
+        "normal_button_clicked_responses": 2,
+        "saved_clip_count": 3,
+        "first_clip_ready_ms": 3148
+      },
+      {
+        "isolated_xvfb": true,
+        "real_x11_xtest_events": true,
+        "matched_child_pid": true,
+        "size": "minimum1160x800",
+        "generated_source_only": true,
+        "live_preview_present": true,
+        "record_pointer_down_received": true,
+        "held_release_outside_saved_clip": true,
+        "tap_started_long_take": true,
+        "second_tap_saved_long_take": true,
+        "normal_button_started_recording": true,
+        "normal_button_stopped_and_saved": true,
+        "normal_button_clicked_responses": 2,
+        "saved_clip_count": 3,
+        "first_clip_ready_ms": 2887
+      }
+    ],
+    "native_player_real_os_input": true
+  },
+  "limitations": [
+    "Generated-source OS tests run only on isolated Xvfb",
+    "Actual GNOME desktop Record retest pending",
+    "Sensor-to-screen timing, 10minute A/V drift and unplug acceptance pending"
+  ],
+  "physical_startup_proof": "recording-camera-startup.json",
+  "package": "storyfold-record_0.1.3~preview.1_amd64.deb",
+  "package_sha256": "428bb2dc3cc055d9f0d2da8c4f5511d9621861f1b95936ad23c73dbc59094b1a",
+  "binary_sha256": "ea559d9cb8e9545c8a4263f8cd94b670bf38bc73d450795fa026f0fa42a030c5",
+  "test_features_enabled": false,
+  "startup_alive_for_8_seconds": true,
+  "startup_stderr": "",
+  "libraries_available": true,
+  "desktop_file_valid": true,
+  "fresh_os_install_tested": false,
+  "user_install": true,
+  "installed_binary_hash_matches": true,
+  "normal_release_launched_on_desktop": true,
+  "desktop_retest_pending": true,
+  "workspace_commit": "80edd7b"
+}

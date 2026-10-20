@@ -162,3 +162,22 @@ initial desktop probe received no pointer events before its unused window was
 replaced with the0.1.2probe; its absence of events is not evidence of the cause.
 Ryan's Project-menu result is pending. This input repair stays open. Native folder
 picker foreground behavior and physical camera timing remain unverified.
+
+## Native Record follow-up · 2026-10-20
+
+Ryan subsequently confirmed that Project opens and the live camera picture
+works, but Record does nothing. Desktop Record acceptance remains open. Both
+physical cameras passed brief backend-only startup checks at1080p30 with the
+microphone off: first preview at2019ms for OBSBOT Tiny2 and601ms for Logitech
+C922. No take was made or image viewed, and temporary buffers were removed.
+[Camera startup evidence](validation/recording-camera-startup.json).
+
+Version0.1.3 adds a standard Start recording / Stop & save action above the video,
+keeps recording errors above the stage, and shows explicit camera selection and
+startup progress. The isolated native OS test now drives actual X11/XTest
+pointer gestures with generated live video at1480×1000 and1160×800. At each size,
+hold/release and tap/tap save two clips; the standard action starts and saves a
+third clip.25studio tests and strict app/core Clippy passed. The separate native
+player test now uses real OS Play/Pause/fullscreen/Escape/EOF/replay actions;
+local IPC only observes state. These checks do not establish the real-desktop
+Record result. [0.1.3 evidence](validation/record-studio-0.1.3.json).
