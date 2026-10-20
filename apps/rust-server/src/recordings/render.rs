@@ -30,7 +30,7 @@ fn wrap(text: &str, columns: usize) -> String {
 }
 fn overlays(session: &RecordingSession, clip: &RecordingClip, w: u32, h: u32) -> String {
     let mut ass = format!(
-        "[Script Info]\nScriptType: v4.00+\nPlayResX: {w}\nPlayResY: {h}\nWrapStyle: 2\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\nStyle: Card,Arial,32,&H003B2632,&H003B2632,&H00FFFFFF,&H28FFFFFF,0,0,0,0,100,100,0,0,3,18,0,7,48,48,40,1\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n"
+        "[Script Info]\nScriptType: v4.00+\nPlayResX: {w}\nPlayResY: {h}\nWrapStyle: 2\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\nStyle: Card,Arial,48,&H003B2632,&H003B2632,&H00FFFFFF,&H28FFFFFF,0,0,0,0,100,100,0,0,3,27,0,7,72,72,60,1\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n"
     );
     let Some(take) = session.takes.iter().find(|t| t.id == clip.take_id) else {
         return ass;
@@ -54,8 +54,8 @@ fn overlays(session: &RecordingSession, clip: &RecordingClip, w: u32, h: u32) ->
         };
         let (alignment, x, y) = match card.kind.as_str() {
             "quote" => (2, w / 2, h * 85 / 100),
-            "list" => (3, w.saturating_sub(48), h.saturating_sub(48)),
-            _ => (1, 48, h.saturating_sub(48)),
+            "list" => (3, w.saturating_sub(72), h.saturating_sub(72)),
+            _ => (1, 72, h.saturating_sub(72)),
         };
         let columns = if card.kind == "list" {
             if w > h { 30 } else { 20 }
@@ -64,13 +64,13 @@ fn overlays(session: &RecordingSession, clip: &RecordingClip, w: u32, h: u32) ->
         } else {
             28
         };
-        let size = if card.kind == "stat" { 54 } else { 32 };
+        let size = if card.kind == "stat" { 81 } else { 48 };
         let text = wrap(&card.text, columns);
         let secondary = wrap(&card.secondary, columns);
         let text = if secondary.is_empty() {
             text
         } else {
-            format!("{text}\\N{{\\fs24}}{secondary}")
+            format!("{text}\\N{{\\fs36}}{secondary}")
         };
         ass.push_str(&format!(
             "Dialogue: 0,{},{},Card,,0,0,0,,{{\\an{alignment}\\pos({x},{y})\\fs{size}}}{text}\n",
@@ -104,16 +104,16 @@ pub(super) async fn render(store: &Store, session: &RecordingSession, job: &str)
     let base = directory(store, &session.id)?;
     let temp = tempfile::tempdir_in(&base)?;
     let (width, height) = if session.orientation == "16:9" {
-        (1280, 720)
+        (1920, 1080)
     } else {
-        (720, 1280)
+        (1080, 1920)
     };
     let mut concat = String::new();
     let mut expected = 0.;
     for (i, clip) in session.clips.iter().enumerate() {
         identifier(&clip.take_id)?;
-        let frames = ((clip.out - clip.r#in) * 25.).round().max(1.) as u64;
-        let duration = frames as f64 / 25.;
+        let frames = ((clip.out - clip.r#in) * 30.).round().max(1.) as u64;
+        let duration = frames as f64 / 30.;
         expected += duration;
         let take = asset(store, &session.id, &format!("take-{}.mp4", clip.take_id))?;
         tokio::fs::write(
@@ -123,7 +123,7 @@ pub(super) async fn render(store: &Store, session: &RecordingSession, job: &str)
         .await?;
         let output = format!("segment-{i}.mkv");
         let filter = format!(
-            "scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height},setsar=1,fps=25,tpad=stop_mode=clone:stop_duration={duration},trim=end_frame={frames},ass=filename=overlay.ass"
+            "scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height},setsar=1,fps=30,tpad=stop_mode=clone:stop_duration={duration},trim=end_frame={frames},ass=filename=overlay.ass"
         );
         ff(vec!["-filter_threads".into(),"1".into(),"-ss".into(),clip.r#in.to_string(),"-i".into(),take.to_string_lossy().into(),"-t".into(),duration.to_string(),"-map".into(),"0:v:0".into(),"-map".into(),"0:a:0".into(),"-vf".into(),filter,"-af".into(),format!("aresample=48000,aformat=channel_layouts=stereo,apad,atrim=duration={duration},afade=t=in:d=0.005,afade=t=out:st={}:d=0.005",(duration-0.005).max(0.)),"-c:v".into(),"libx264".into(),"-threads".into(),"2".into(),"-preset".into(),"veryfast".into(),"-crf".into(),"20".into(),"-pix_fmt".into(),"yuv420p".into(),"-c:a".into(),"pcm_s16le".into(),output.clone()],temp.path()).await?;
         concat.push_str(&format!("file '{output}'\n"));

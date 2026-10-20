@@ -20,13 +20,17 @@ under the local Storyfold data folder.
    move, remove, and add-again controls. These operations preserve source files.
    **Save changes** persists edits; **Reload saved** discards only the current
    studio draft. Unsaved drafts survive navigation to other app sections.
-4. Add manual lower thirds, quotes, lists, or statistic cards. Choose **Show**
+4. Use up to nine slots (keys **1–9**) for manual lower thirds, quotes, lists, or statistic cards. Choose **Show**
    while recording and **Hide** when finished. Saved source-time marks follow
    trims and repeated clips. Cards are text-based in this release. Review the
    rendered preview to see the final sequence and burned-in cards.
-5. **Render recording** creates a 720p H264/AAC sequence in the selected orientation.
-   **Save MP4** uses a native save dialog. Re-render after edits. **Send to
-   transcript editor** copies the finished sequence into an interview project,
+5. **Preview sequence** and **Export MP4** are available beside the viewer and
+   your sequence. Each action saves your latest edits and prepares the current
+   trimmed order and timed cards automatically. Preview opens the finished
+   sequence in the viewer; Export MP4 asks where to save it. Both reuse an
+   already prepared current version. MP4 output is 1080p H264/AAC at 30 fps,
+   horizontal or vertical. Stop an active take before previewing or exporting.
+   **Send to transcript editor** copies the finished sequence into an interview project,
    transcribes it with Whisper, and optionally groups its topics with Claude.
    A microphone-enabled take is needed for transcription.
 
@@ -45,12 +49,20 @@ the explicit upload action, with Private selected by default.
 Rust tests cover gesture timing and delayed acknowledgements, draft preservation,
 clip validation, source preservation, stale revisions, device/path boundaries,
 overlay timing, local API authorization, and YouTube requests. Opt-in generated
-FFmpeg checks cover capture, JPEG preview, overlays, stop/finalize, portrait
+FFmpeg checks cover capture, continuous HD preview, overlays, stop/finalize, portrait
 rendering, interrupted-take recovery, and normalized imported media. Native tests
 use only an explicit debug synthetic source and refuse physical cameras.
 
-No webcam is exposed on the development host, so real camera/microphone device
-compatibility and lip-sync remain hardware acceptance checks. Linux uses V4L2
+The connected Logitech C922 and OBSBOT Tiny 2 advertise 1080p at 30 fps using
+MJPEG. Storyfold queries supported Linux frame intervals and prefers fluid HD
+(up to 1080p30) over slow uncompressed HD modes. Drivers without discrete mode
+enumeration retain their default mode. Source capture preserves up to 1080p;
+existing lower-resolution takes cannot gain missing detail. The live viewer
+receives a continuous, latest-frame MJPEG stream up to 1280×720 at 30 fps,
+without reloading snapshots or accumulating a delayed frame queue. Actual
+hardware capture quality and lip-sync still require a recording check.
+
+Linux uses V4L2
 and the default PulseAudio microphone; Windows uses DirectShow; macOS uses
 AVFoundation. Operating system device permissions still apply. Google consent
 and a real upload require the user's Desktop OAuth client and connected channel.
@@ -59,3 +71,7 @@ Linux discovery uses the per-node `device_caps` reported by
 [VIDIOC_QUERYCAP](https://docs.kernel.org/userspace-api/media/v4l/vidioc-querycap.html),
 rather than a physical device’s combined capabilities. This keeps USB metadata
 endpoints out of the camera selector.
+
+Capture mode selection follows the Linux
+[frame interval query](https://docs.kernel.org/userspace-api/media/v4l/vidioc-enum-frameintervals.html)
+and [FFmpeg V4L2 input options](https://ffmpeg.org/ffmpeg-devices.html#video4linux2_002c-v4l2).

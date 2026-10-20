@@ -1,8 +1,8 @@
 {
   "name": "Storyfold",
-  "milestone": "Camera discovery fixed \u2014 installed",
-  "updatedAt": "2026-10-20T04:04:15.672211+00:00",
-  "message": "The installed app detects OBSBOT Tiny 2 and Logitech C922 video inputs, excludes their metadata nodes and refreshes idle camera choices every three seconds. Selection, Microphone Off and unsaved drafts are preserved. Tests, lint and release passed; saved files were unchanged. No physical recording was started.",
+  "milestone": "Preview/export repaired; egui Record foundation in progress",
+  "updatedAt": "2026-10-20T04:31:09.873600+00:00",
+  "message": "Installed continuous HD preview, supported 1080p30 camera modes, visible Preview sequence and Export MP4, and nine sidebar slots. 59 tests, native generated playback/export and release passed; saved files unchanged. Building the confirmed egui Record studio with local AI in Catalyst Solo.",
   "tasks": [
     {
       "id": "foundation",
@@ -221,6 +221,41 @@
       "evidence": [
         "docs/RECORDING.md",
         "docs/validation/camera-detection.json"
+      ]
+    },
+    {
+      "id": "recording-quality",
+      "title": "Improve live recording quality",
+      "acceptance": "Supported HD camera mode, continuous 720p30 preview, new sources and MP4 exports at 1080p30, generated and native verification.",
+      "lane": "Now",
+      "status": "done",
+      "evidence": [
+        "docs/RECORDING.md",
+        "docs/validation/recording-preview-quality.json",
+        "docs/validation/recording-preview-native.json"
+      ]
+    },
+    {
+      "id": "recording-sequence-actions",
+      "title": "Make sequence preview and export clear",
+      "acceptance": "Visible Preview sequence and Export MP4 controls work before first render and after edits, automatically saving and preparing the current sequence.",
+      "lane": "Now",
+      "status": "done",
+      "evidence": [
+        "docs/RECORDING.md",
+        "docs/validation/recording-preview-quality.json",
+        "docs/validation/recording-preview-native.json"
+      ]
+    },
+    {
+      "id": "record-spec-foundation",
+      "title": "Apply the new Record section specification",
+      "acceptance": "Keep Storyfold branding; add the specified egui/eframe foundation and video-core to Catalyst Solo, preserve its code paths, record actual validation. Record overlay AI uses local models with no paid fallback.",
+      "lane": "Now",
+      "status": "doing",
+      "evidence": [
+        "docs/RECORDING-SPEC.md",
+        "docs/reference/recording-studio-build-brief.txt"
       ]
     }
   ]

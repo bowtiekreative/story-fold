@@ -39,10 +39,10 @@ checks and remaining acceptance work.
 Open **Record**, create a recording, and select your camera and microphone.
 Hold the record button and release to save a short take, or tap it to record
 until you press Stop. Original takes stay in the bin while you trim, split,
-reorder and remove clips from your sequence. Save changes before recording
-another take or exporting.
+reorder and remove clips from your sequence. Preview sequence or Export MP4 beside the viewer saves and prepares your latest
+edits automatically. Stop an active take before using those actions.
 
-Add up to six manual text cards and show/hide them while recording. Their
+Add up to nine manual text cards and show/hide them while recording. Their
 timing is saved with the take and burned into the rendered MP4. Horizontal and
 vertical exports are supported. **Send to transcript editor** sends the rendered
 sequence through automatic Whisper transcription and your chosen topic grouping.
@@ -50,7 +50,9 @@ sequence through automatic Whisper transcription and your chosen topic grouping.
 The studio also imports a selected interval from a YouTube URL and uploads
 finished exports to your channel. Uploads require explicit Google connection
 and review; visibility defaults to **Private**. See [recording details](docs/RECORDING.md)
-and [YouTube setup](docs/YOUTUBE.md).
+and [YouTube setup](docs/YOUTUBE.md). The newly supplied
+[Record specification and milestone status](docs/RECORDING-SPEC.md) records the
+next studio requirements separately from the current release.
 
 ### Previous web release
 

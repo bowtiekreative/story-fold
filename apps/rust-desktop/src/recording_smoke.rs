@@ -106,6 +106,76 @@ async fn pointer(kind: &str) -> Result<(), String> {
         Err("Native hold/tap control is unavailable.".into())
     }
 }
+async fn stream_frames(api: &Api, id: &str) -> Result<usize, String> {
+    let client = reqwest::Client::builder()
+        .no_proxy()
+        .redirect(reqwest::redirect::Policy::none())
+        .timeout(Duration::from_secs(5))
+        .build()
+        .map_err(|_| "Could not prepare the generated preview stream check.")?;
+    let mut response = client
+        .get(api.url(&format!("/recordings/{id}/media/preview.mjpeg")))
+        .send()
+        .await
+        .map_err(|_| "The live preview stream was unavailable.")?;
+    let content_type = response
+        .headers()
+        .get(reqwest::header::CONTENT_TYPE)
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or_default();
+    let boundary = content_type
+        .split("boundary=")
+        .nth(1)
+        .ok_or("The live preview did not return a multipart stream.")?
+        .trim()
+        .trim_matches('"')
+        .to_owned();
+    let marker = format!("--{boundary}").into_bytes();
+    let mut bytes = Vec::new();
+    while let Some(chunk) = response
+        .chunk()
+        .await
+        .map_err(|_| "The generated live preview stream stopped before three frames.")?
+    {
+        bytes.extend_from_slice(&chunk);
+        let frames = bytes
+            .windows(marker.len())
+            .filter(|part| *part == marker)
+            .count();
+        if frames >= 3 {
+            return Ok(frames);
+        }
+        if bytes.len() > 8_000_000 {
+            return Err("Generated preview stream framing was invalid.".into());
+        }
+    }
+    Err("Generated preview stream ended before three frames.".into())
+}
+async fn wait_prepared(
+    api: &Api,
+    id: &str,
+    previous: Option<&str>,
+) -> Result<RecordingSession, String> {
+    for _ in 0..900 {
+        let s = session(api, id).await?;
+        if let Some(job) = &s.export {
+            if job.status == "done"
+                && job.revision == s.revision
+                && previous != Some(job.id.as_str())
+            {
+                return Ok(s);
+            }
+            if job.status == "error" {
+                return Err(job
+                    .error
+                    .clone()
+                    .unwrap_or_else(|| "Native sequence preparation failed.".into()));
+            }
+        }
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+    Err("Native sequence preview did not become ready.".into())
+}
 async fn exercise() -> Result<Value, String> {
     let api = consume_context::<Api>();
     let devices: RecordingDevices = api.get("/recording-devices").await?;
@@ -121,7 +191,7 @@ async fn exercise() -> Result<Value, String> {
         50,
     )
     .await?;
-    wait("return Array.from(document.querySelectorAll('#record-camera option')).some(o=>o.value==='synthetic')||document.querySelector('.record-welcome');",100).await?;
+    wait("return Array.from(document.querySelectorAll('#record-camera option')).some(o=>o.value==='synthetic')||!!document.querySelector('.record-welcome');",100).await?;
     let before: Vec<RecordingSession> = api.get("/recordings").await?;
     click("Array.from(document.querySelectorAll('.record-session-picker button')).find(b=>b.textContent.trim()==='New recording')").await?;
     let mut created = false;
@@ -176,6 +246,18 @@ async fn exercise() -> Result<Value, String> {
         100,
     )
     .await?;
+    wait("const img=document.querySelector('.record-live-image');return !!img&&img.naturalWidth>=1280&&img.src.endsWith('/preview.mjpeg');",100).await?;
+    let live_width = dom::eval(
+        "return document.querySelector('.record-live-image').naturalWidth;",
+        None,
+    )
+    .await?
+    .as_u64()
+    .unwrap_or_default();
+    let streamed_frames = stream_frames(&api, &id).await?;
+    if streamed_frames < 3 {
+        return Err("Live preview did not deliver multiple frames on one stream.".into());
+    }
     click("document.querySelector('.record-overlay-show')").await?;
     wait(
         "return document.querySelector('.record-overlay-card').classList.contains('active');",
@@ -210,34 +292,79 @@ async fn exercise() -> Result<Value, String> {
     )
     .await?;
     click("Array.from(document.querySelectorAll('.record-clip-tools button')).find(b=>b.textContent.trim()==='Move left')").await?;
-    click("Array.from(document.querySelectorAll('.record-toolbar button')).find(b=>b.textContent.trim()==='Save changes')").await?;
-    wait("return !document.querySelector('.record-toolbar .save-status').classList.contains('dirty');",100).await?;
-    let edited = session(&api, &id).await?;
-    if edited.clips.len() != 3 || edited.takes.len() != 2 {
-        return Err("Native sequence split/reorder did not preserve its source takes.".into());
+    wait("return document.querySelector('.record-toolbar .save-status').classList.contains('dirty');",30).await?;
+    let before_preview = session(&api, &id).await?;
+    if before_preview.export.is_some() {
+        return Err(
+            "Native first Preview check requires an unprepared generated recording.".into(),
+        );
     }
-    click("document.getElementById('record-render')").await?;
-    let mut rendered = None;
-    for _ in 0..900 {
-        let s = session(&api, &id).await?;
-        if let Some(job) = &s.export {
-            if job.status == "done" {
-                rendered = Some(s);
-                break;
-            }
-            if job.status == "error" {
-                return Err(job
-                    .error
-                    .clone()
-                    .unwrap_or_else(|| "Native recording render failed.".into()));
-            }
+    click("document.getElementById('record-preview-sequence')").await?;
+    let rendered = wait_prepared(&api, &id, None).await?;
+    if rendered.clips.len() != 3
+        || rendered.takes.len() != 2
+        || rendered.revision <= before_preview.revision
+    {
+        return Err(
+            "Preview sequence did not automatically save dirty edits and preserve source takes."
+                .into(),
+        );
+    }
+    wait("const v=document.getElementById('record-sequence-preview');return !!v&&v.currentSrc.includes('/exports/')&&v.readyState>=2&&v.duration>0;",100).await?;
+    wait("const v=document.getElementById('record-sequence-preview');return !!v&&!v.paused&&v.currentTime>0.05;",100).await?;
+    let first_export = rendered.export.as_ref().unwrap().id.clone();
+    wait(
+        "return !document.getElementById('record-preview-sequence').disabled;",
+        100,
+    )
+    .await?;
+    click("document.getElementById('record-preview-sequence')").await?;
+    wait(
+        "return !document.getElementById('record-preview-sequence').disabled;",
+        100,
+    )
+    .await?;
+    let cached = session(&api, &id).await?;
+    if cached.export.as_ref().map(|j| &j.id) != Some(&first_export) {
+        return Err("An unchanged sequence was unnecessarily prepared again.".into());
+    }
+    if !js_bool("const label=Array.from(document.querySelectorAll('.record-clip-tools label')).find(l=>l.textContent.startsWith('Out (source seconds)'));const input=label?.querySelector('input');if(!input)return false;input.value=(Number(input.value)-0.12).toFixed(2);input.dispatchEvent(new Event('change',{bubbles:true}));return true;").await? {return Err("Native trim field is missing.".into());}
+    wait("return !document.getElementById('record-sequence-preview')&&document.querySelector('.record-toolbar .save-status').classList.contains('dirty');",50).await?;
+    click("document.getElementById('record-preview-sequence')").await?;
+    let rendered = wait_prepared(&api, &id, Some(&first_export)).await?;
+    wait("const v=document.getElementById('record-sequence-preview');return !!v&&v.readyState>=2&&v.currentSrc.includes('/exports/');",100).await?;
+    let duration: f64 = rendered.clips.iter().map(|c| c.out - c.r#in).sum();
+    let actual = dom::eval(
+        "return document.getElementById('record-sequence-preview')?.duration||0;",
+        None,
+    )
+    .await?
+    .as_f64()
+    .unwrap_or_default();
+    if (duration - actual).abs() > 0.15 {
+        return Err("The preview duration does not match the complete edited sequence.".into());
+    }
+    let mut export_covered = false;
+    if let Some(path) = std::env::var_os("STORYFOLD_RECORD_EXPORT_PATH") {
+        wait(
+            "return !document.getElementById('record-export-mp4').disabled;",
+            100,
+        )
+        .await?;
+        click("document.getElementById('record-export-mp4')").await?;
+        wait("return Array.from(document.querySelectorAll('.record-sequence-actions [role=status]')).some(e=>e.textContent.includes('MP4 exported'));",300).await?;
+        let bytes = tokio::fs::read(path)
+            .await
+            .map_err(|_| "Native Export MP4 did not write the supplied test destination.")?;
+        if bytes.len() < 12 || &bytes[4..8] != b"ftyp" {
+            return Err("Native Export MP4 did not save a valid MP4 file.".into());
         }
-        tokio::time::sleep(Duration::from_millis(100)).await;
+        let after = session(&api, &id).await?;
+        if after.export.as_ref().map(|j| &j.id) != rendered.export.as_ref().map(|j| &j.id) {
+            return Err("Export MP4 did not reuse the current prepared sequence.".into());
+        }
+        export_covered = true;
     }
-    let rendered = rendered.ok_or("Native recording render did not finish.")?;
-    wait("return Array.from(document.querySelectorAll('.record-export button')).some(b=>b.textContent.trim()==='Preview rendered video');",100).await?;
-    click("Array.from(document.querySelectorAll('.record-export button')).find(b=>b.textContent.trim()==='Preview rendered video')").await?;
-    wait("const v=document.querySelector('.record-clip-preview');return !!v&&v.currentSrc.includes('/exports/')&&v.readyState>=2&&v.duration>0;",100).await?;
     // Switching views preserves a studio draft and does not affect transcript/source state.
     input("#record-name", "Native draft preserved").await?;
     click("Array.from(document.querySelectorAll('.header nav button')).find(b=>b.textContent.trim()==='Your build')").await?;
@@ -249,6 +376,6 @@ async fn exercise() -> Result<Value, String> {
     }
     click("Array.from(document.querySelectorAll('.record-toolbar button')).find(b=>b.textContent.trim()==='Reload saved')").await?;
     Ok(
-        json!({"syntheticOnly":true,"sessionId":id,"nativeNavigation":true,"titleSaveReadback":true,"holdClip":true,"tapLongTake":true,"explicitStop":true,"overlayTimingMark":true,"captureNavigationGuard":true,"sequenceSplitReorder":true,"sourceTakesPreserved":true,"renderedMp4Ready":true,"draftSurvivesNavigation":true,"youtubeImportControls":true,"youtubePrivateDefault":true,"youtubeUploadGuard":true,"youtubeConnectSetupControls":true,"takes":rendered.takes.len(),"clips":rendered.clips.len()}),
+        json!({"syntheticOnly":true,"sessionId":id,"nativeNavigation":true,"titleSaveReadback":true,"holdClip":true,"tapLongTake":true,"explicitStop":true,"overlayTimingMark":true,"captureNavigationGuard":true,"sequenceSplitReorder":true,"sourceTakesPreserved":true,"renderedMp4Ready":true,"previewFirstUseAutoSave":true,"previewCachedCurrent":true,"stalePreviewInvalidated":true,"fullSequenceDuration":duration,"previewNaturalWidth":live_width,"streamFrames":streamed_frames,"exportButtonCovered":export_covered,"draftSurvivesNavigation":true,"youtubeImportControls":true,"youtubePrivateDefault":true,"youtubeUploadGuard":true,"youtubeConnectSetupControls":true,"takes":rendered.takes.len(),"clips":rendered.clips.len()}),
     )
 }

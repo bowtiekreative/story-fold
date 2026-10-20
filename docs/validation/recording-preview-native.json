@@ -1,0 +1,32 @@
+{
+  "checks": {
+    "captureNavigationGuard": true,
+    "clips": 3,
+    "draftSurvivesNavigation": true,
+    "explicitStop": true,
+    "exportButtonCovered": true,
+    "fullSequenceDuration": 16.26725,
+    "holdClip": true,
+    "nativeNavigation": true,
+    "overlayTimingMark": true,
+    "previewCachedCurrent": true,
+    "previewFirstUseAutoSave": true,
+    "previewNaturalWidth": 1280,
+    "renderedMp4Ready": true,
+    "sequenceSplitReorder": true,
+    "sessionId": "0fd58e64-5bc6-42af-9222-53901166fecf",
+    "sourceTakesPreserved": true,
+    "stalePreviewInvalidated": true,
+    "streamFrames": 3,
+    "syntheticOnly": true,
+    "takes": 2,
+    "tapLongTake": true,
+    "titleSaveReadback": true,
+    "youtubeConnectSetupControls": true,
+    "youtubeImportControls": true,
+    "youtubePrivateDefault": true,
+    "youtubeUploadGuard": true
+  },
+  "ok": true,
+  "runtime": "Rust/Dioxus desktop"
+}

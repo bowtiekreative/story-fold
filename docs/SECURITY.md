@@ -28,3 +28,20 @@ sample and manual-topic imports make no provider calls.
 Single-user local use is the v1 boundary. Authentication, quotas, resource
 isolation, encryption and upload scanning need a separate review before public
 or multi-user deployment.
+
+## New recording specification — 2026-10-19
+
+The [Record specification](RECORDING-SPEC.md) requires keychain-only provider keys
+and OAuth tokens, explicit timed/budgeted network actions, reviewed AI proposals,
+confined atomic project writes including hard-link rejection, and hardened local
+project Git commits with credential scans. These are acceptance requirements for
+the new implementation. The existing environment/private-file credential storage
+is not keychain storage and must be migrated before claiming that milestone.
+Do not silently submit camera frames/screenshots to providers or publish videos.
+Keep existing localhost Host/Origin/token guards during the transition. Doberman
+was removed at Ryan’s instruction and is not reinstalled by this reference.
+
+Ryan confirmed local AI for Record. The recording overlay builder must keep
+screenshots/prompts local and must not fall back to paid/cloud providers. Any
+web search or page screenshot still requires an explicit user action; local AI
+is not evidence that a page exists or a license to fetch arbitrary private URLs.

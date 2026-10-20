@@ -187,3 +187,27 @@ on video0 and Logitech C922 on video2, excluding metadata nodes video1/video3.
 Saved project and recording manifests were unchanged during the service upgrade.
 Capability queries did not start a physical video recording. See
 [camera detection evidence](camera-detection.json).
+
+## Live recording preview and sequence actions — 2026-10-19
+
+The live viewer previously used 640px/6fps JPEG generation and repeated snapshot
+requests; the Logitech defaulted to 640×480. Supported camera-mode queries now
+choose MJPEG 1080p30 on both connected cameras. A latest-frame MJPEG stream feeds
+the viewer at up to 720p30; new source takes and sequence exports support 1080p30.
+
+Preview sequence and Export MP4 remain visible before any preparation, save
+drafts automatically and prepare only when the saved revision lacks a current
+completed export. Changed edits invalidate stale playback. Native generated
+checks exercised playback, changed-sequence preview and the actual export button.
+The exported H264/AAC file probed as 1920×1080, 30 fps. Nine sidebar slots are
+shared by UI controls and runtime validation.
+
+All 59 normal Rust tests and warning-denied lint passed. Query-only real device
+checks and generated FFmpeg capture/preview/portrait-export/recovery passed.
+No physical capture or YouTube upload was started by these tests. Manual OS save
+dialogs and physical timing/drift remain unverified. See `recording-preview-native.json`,
+`recording-preview-quality.json`, and `../VALIDATION.md`.
+
+Ryan’s new Record specification is preserved and mapped in `../RECORDING-SPEC.md`;
+he confirmed egui/eframe and local AI. Its full feature set is not implied by
+this repair’s passing tests.

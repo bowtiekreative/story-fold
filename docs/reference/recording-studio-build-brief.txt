@@ -1,0 +1,49 @@
+You are the lead engineer building Sidebar Video, a native Rust desktop app, inside the business-catalyst-solo Cargo workspace. Read this whole prompt first. Then read README.md, docs/SECURITY.md, docs/DECISIONS.md, docs/ARCHITECTURE.md, docs/VALIDATION.md and the root Cargo.toml. Catalyst Solo's rules are the house rules: Sidebar Video follows them unless this prompt says otherwise. Record every assumption in docs/DECISIONS.md and keep going; stop only at the points marked STOP.
+A webcam video editor for one person who hates long-form editing. You edit while you record. Personal use, Ubuntu first. The app has no password or lock screen.
+- Hold the record button (or Space) and release: that take becomes one clip in the bin. Release in under 350 ms (a setting) = tap: starts a long take, tap again to stop.
+- Bin and sequence are one ordered list. Drag to reorder, plus Move left/right, Split at playhead, Trim (1 frame and 1 s nudges, both ends), Delete (moves to a Removed list, file kept), Undo/Redo.
+- Right sidebar: 9 overlay slots (keys 1 to 9). Tap a slot while talking and an animated overlay appears on the preview and is saved as a cue at that moment. Overlay types: lower third, stat, screenshot card, numbered list, photo, quote.
+- AI overlay builder: type a topic, the app finds real web pages, screenshots them, and the AI rebuilds the picked screenshot as an overlay in the design system, with the key line highlighted (marker sweep, underline draw, zoom to line, fade the rest). Also: drop your own screenshot.
+- Photos and video inserts with a zoom editor (start box, end box 100 to 250%, duration, Smooth/Steady/Snappy, full screen/beside me/behind me).
+- Horizontal 16:9 (1920x1080) or vertical 9:16 (1080x1920), switchable any time.
+- Export MP4 (H.264 + AAC) with overlays burned in. Upload to YouTube.
+Add two members to the workspace, next to Catalyst's:
+- apps/sidebar-video: the egui/eframe window (use the workspace's pinned eframe = "=0.33.0" with accesskit, wayland, x11, exactly as apps/desktop does).
+- packages/video-core: project model, timeline ops, capture, overlay renderer, export, AI and YouTube clients. All logic lives here and is unit tested; the app crate only draws and forwards events. Reuse what already exists: catalyst_core::check_secrets for credential scans, and Catalyst's path confinement and private-folder patterns. Do not copy them.
+- UI: egui/eframe + AccessKit. Bundle Inter 400/600 (SIL OFL, include the license).
+- Capture (Linux): one long-running system ffmpeg per Studio session, driven with the ffmpeg-sidecar crate. Inputs: V4L2 camera + PulseAudio/PipeWire mic. Outputs: (a) 1 s H.264/AAC segments into the project's buffer/, (b) a small rawvideo RGBA stream on stdout that becomes the egui preview texture. A hold only marks in/out times; the clip is cut from the segments (re-encode only the first and last segment). This means no camera start lag and nothing lost at the start of a hold. Prune unused buffer segments after 10 minutes. Starting point for flags, verify on Ryan's camera: -f v4l2 -input_format mjpeg -video_size 1920x1080 -framerate 30 -i /dev/video0 -f pulse -i default. Non-Linux builds compile a stub so CI passes.
+- One overlay renderer for both preview and export: tiny-skia + cosmic-text draw an overlay at time t into an RGBA pixmap. Preview uploads it as a texture; export writes the same frames. Photo zoom uses the same code path. Preview and export must match.
+- Export: ffmpeg concat of clip segments scaled/cropped to the frame size, then overlay each cue's frames with overlay=enable='between(t,a,b)'. Progress from -progress, cancellable.
+- Network: reqwest (blocking, rustls) on worker threads with channels back to the UI. No async runtime unless a crate forces one. Network only on an explicit user action, never in the background. Timeouts on every request.
+- Secrets: keyring crate (GNOME Keyring via Secret Service). Never in files, logs, project data or Git.
+- Web page screenshots: headless Chromium CLI (--headless --screenshot=<file> --window-size=1440,900 <url>), run as a separate process with a timeout. Check whether Ubuntu's snap Chromium can write to the output folder; if not, record the workaround in DECISIONS.md.
+- enum Provider { Claude, ChatGPT }, key in the keychain, model name as free text. Verify both request shapes against the providers' current docs at build time.
+- Find pages with the provider's web search tool; screenshot the top results; show 4 cards (setting 1 to 12).
+- Convert: send the picked screenshot with the design tokens. The AI returns a proposal, never writes files. Shape (validate with serde, deny unknown fields): {summary, kind, title, source_url, blocks:[{role, text}], highlights:[{block,start,end}]}. Text must be copied exactly from the screenshot.
+- Review before apply: screenshot and rebuilt card side by side; Ryan approves, edits or rejects. Nothing AI-made is saved silently.
+- "Export as HTML" writes a standalone HTML version of an approved overlay (a side output; the app itself renders natively).
+- Track tokens and cost per month; Settings shows usage and a monthly budget that blocks requests when reached. STOP: ask Ryan for the budget number.
+- A project is a folder the app creates: project.json, overlays/*.json, media/ (raw clips, imports), buffer/, exports/, .sidebar/private/.
+- Each project folder is a local Git repo the app initializes at creation (new folders only; never re-init an existing repo). Track project.json and overlays; ignore media/, buffer/, exports/, .sidebar/private/. Commit locally on every export and on "Save version". Never push.
+- App-owned Git commands disable hooks, fsmonitor, signing and global attributes, like Catalyst. No shell command is ever accepted from the UI.
+- Every write is atomic (temp file then rename) and confined to the project folder: reject traversal, symlinks and hard links. Run check_secrets on project.json and overlay text before every commit.
+- Undo/redo: last 100 project snapshots in memory.
+- Invariants (each needs a test): a cue stores clip id + ms into that clip, so moving a clip carries its overlays; split moves later cues to the right half with corrected offsets; trim clamps cues; delete keeps files and cues; sequence time = durations of earlier clips + offset; save then load round-trips exactly; a crash mid-save leaves the old file valid.
+Canvas #EDEFF4, cards #FFFFFF, surface #F8F9FC, ink #10131A, body #3B3F49, muted #6B6F79, one accent #3F6EE9 (hover #3259C4), hairline rgba(16,19,26,0.16). Inter 400/600 only. Radius 8 buttons, 16 cards, 24 panels. Motion: enter 600 ms, stagger 90 ms, ease cubic-bezier(0.16,1,0.3,1), fade up 24 px; respect reduced motion. Touch targets 44 px, 4.5:1 text contrast, full keyboard support, AccessKit labels on every control. Layout per the design canvas: header (name, Horizontal/Vertical switch, Export), bin left, camera stage center with an 88 px record button and the hint "Hold = clip · Tap = long take", overlay sidebar right, sequence and overlay track along the bottom. Record button blue unless Ryan says red.
+build --locked green on Ubuntu and Windows, as in .github/workflows/rust.yml)
+1. Workspace members, empty Studio window with the design tokens, docs updated (ARCHITECTURE, SECURITY, DECISIONS sections for Sidebar Video).
+2. video-core model and timeline ops with every invariant test from section 5.
+3. Studio UI: bin, sequence, drag reorder, clip tools, shape switch, undo/redo.
+4. Capture on Ubuntu. Done when: a hold's first frame is within 1 frame of the press; tap-tap makes one long take; 20 holds make 20 clips in order, nothing lost; audio drift under 1 frame over a 10 minute take; unplugging the camera keeps what was recorded and shows an error.
+5. Overlay renderer + the 6 types + 9 slots + cues while recording + playback. Done when slot 2 fired 4.0 s into take 3 still plays 4.0 s into take 3 after take 3 is moved to the front.
+6. AI overlay builder (section 4).
+7. Photo/video inserts and zoom. Done when preview and exported frames match at 0, 2.5 and 5 s.
+8. Export, both shapes. Warn that a vertical video over 180 s will not be a Short.
+9. YouTube: OAuth loopback + PKCE (scope youtube.upload), resumable upload, default Unlisted, token in the keychain. First re-read the videos.insert docs page (quota and verification rules changed recently). STOP: Ryan creates the Google Cloud Desktop OAuth client.
+10. Ubuntu .deb, icon, release review. Done when a fresh install records 3 clips, fires 2 overlays, exports and uploads.
+- Ponytail rules: skip what isn't needed, reuse what is here, std first, installed crates first, the smallest code that works. Never cut validation, data-loss handling, security or accessibility. Mark deliberate shortcuts // ponytail:.
+- Doberman guards your tool calls; if it blocks or asks, tell Ryan, never work around it.
+- docs/VALIDATION.md lists only checks you actually ran, with dates. Never claim a test, CI result or platform check that did not happen.
+- Do not touch Catalyst Solo's code paths except to reuse its public helpers.
+- Keep messages to Ryan short: what changed, test results, what's next.
+Start with milestone 1. First reply: the plan for milestone 1 in at most 8 lines.

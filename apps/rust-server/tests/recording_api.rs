@@ -122,6 +122,19 @@ async fn recording_routes_enforce_tokens_revisions_and_device_boundaries() {
         .0,
         StatusCode::FORBIDDEN
     );
+    assert_eq!(
+        call(
+            app.clone(),
+            "GET",
+            &format!("{path}/media/preview.mjpeg"),
+            Value::Null,
+            None,
+            Some("https://example.invalid")
+        )
+        .await
+        .0,
+        StatusCode::FORBIDDEN
+    );
     let folder = store.data.join("recordings").join(id);
     assert!(!std::fs::read_dir(folder).unwrap().any(|e| {
         e.unwrap()

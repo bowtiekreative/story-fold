@@ -61,6 +61,10 @@ pub fn routes() -> Router<AppState> {
         .route("/api/recordings/{id}/export", post(export))
         .route("/api/recordings/{id}/editor", post(editor))
         .route("/api/recordings/{id}/media/preview.jpg", get(preview))
+        .route(
+            "/api/recordings/{id}/media/preview.mjpeg",
+            get(preview_stream),
+        )
         .route("/api/recordings/{id}/media/takes/{take}", get(take_file))
         .route(
             "/api/recordings/{id}/media/exports/{export}",
@@ -215,9 +219,9 @@ fn validate_edit(old: &RecordingSession, input: &RecordingEdit) -> Result<()> {
             "Finish the current take or export before editing the sequence.",
         ));
     }
-    if input.clips.len() > 2000 || input.overlays.len() > 6 {
+    if input.clips.len() > 2000 || input.overlays.len() > OVERLAY_SLOTS {
         return Err(AppError::bad(
-            "Use up to 2,000 sequence clips and six sidebar overlays.",
+            "Use up to 2,000 sequence clips and nine sidebar overlays.",
         ));
     }
     let takes: HashMap<_, _> = old.takes.iter().map(|t| (t.id.as_str(), t)).collect();
@@ -536,6 +540,58 @@ async fn preview(State(s): State<AppState>, Path(id): Path<String>) -> Result<Re
     )
         .into_response())
 }
+fn camera_frames(live: Live) -> impl futures_util::Stream<Item = std::io::Result<Vec<u8>>> {
+    futures_util::stream::unfold((live, true), |(mut live, first)| async move {
+        let mut wait = !first;
+        loop {
+            if wait {
+                tokio::select! {
+                    result = live.frame.changed() => {if result.is_err() {return None;}}
+                    _ = live.cancel.cancelled() => {return None;}
+                    _ = live.done.changed() => {return None;}
+                }
+            }
+            if live.cancel.is_cancelled() || *live.done.borrow() {
+                return None;
+            }
+            // A slow viewer receives the latest frame, never an accumulating video backlog.
+            let jpeg = live.frame.borrow_and_update().clone();
+            if jpeg.is_empty() {
+                wait = true;
+                continue;
+            }
+            let mut part = format!(
+                "--storyfold-frame\r\nContent-Type: image/jpeg\r\nContent-Length: {}\r\n\r\n",
+                jpeg.len()
+            )
+            .into_bytes();
+            part.extend_from_slice(&jpeg);
+            part.extend_from_slice(b"\r\n");
+            return Some((Ok(part), (live, false)));
+        }
+    })
+}
+async fn preview_stream(State(s): State<AppState>, Path(id): Path<String>) -> Result<Response> {
+    let live = s
+        .recordings
+        .live
+        .lock()
+        .await
+        .clone()
+        .filter(|l| l.session == id)
+        .ok_or_else(|| AppError::bad("Camera is off."))?;
+    Ok((
+        [
+            (
+                header::CONTENT_TYPE,
+                "multipart/x-mixed-replace; boundary=storyfold-frame",
+            ),
+            (header::CACHE_CONTROL, "no-store"),
+        ],
+        Body::from_stream(camera_frames(live)),
+    )
+        .into_response())
+}
 async fn served(file: PathBuf, request: axum::extract::Request) -> Result<Response> {
     Ok(ServeFile::new(file)
         .oneshot(request)
@@ -823,6 +879,29 @@ mod tests {
         }
     }
     #[test]
+    fn nine_overlay_slots_round_trip_and_tenth_is_rejected() {
+        let original = fixture();
+        let mut input = editing(&original);
+        input.overlays = (0..OVERLAY_SLOTS)
+            .map(|i| RecordingOverlay {
+                id: format!("slot{i}"),
+                kind: "lowerThird".into(),
+                label: format!("Card {}", i + 1),
+                text: "Test card".into(),
+                ..Default::default()
+            })
+            .collect();
+        validate_edit(&original, &input).unwrap();
+        let encoded = serde_json::to_vec(&input).unwrap();
+        let decoded: RecordingEdit = serde_json::from_slice(&encoded).unwrap();
+        assert_eq!(input, decoded);
+        input.overlays.push(RecordingOverlay {
+            id: "extra".into(),
+            ..input.overlays[0].clone()
+        });
+        assert!(validate_edit(&original, &input).is_err());
+    }
+    #[test]
     fn edits_preserve_original_sources_and_reject_invalid_ranges_and_stale_revisions() {
         let s = fixture();
         let mut input = editing(&s);
@@ -870,6 +949,50 @@ mod tests {
             std::os::unix::fs::symlink(temp.path(), store.data.join("recordings/linked")).unwrap();
             assert!(asset(&store, "linked", "session.json").is_err());
         }
+    }
+    #[tokio::test]
+    async fn preview_stream_sends_latest_frame_and_closes_on_stop() {
+        use futures_util::StreamExt;
+        let (frames, frame) = watch::channel(Vec::new());
+        let (_finished, done) = watch::channel(false);
+        let cancel = CancellationToken::new();
+        let live = Live {
+            session: "test".into(),
+            take: "take".into(),
+            microphone: false,
+            cancel: cancel.clone(),
+            frame,
+            done,
+            micros: Arc::default(),
+            marks: Arc::default(),
+        };
+        let stream = camera_frames(live);
+        futures_util::pin_mut!(stream);
+        let first = {
+            let waiting = stream.next();
+            futures_util::pin_mut!(waiting);
+            assert!(
+                tokio::time::timeout(Duration::from_millis(10), waiting.as_mut())
+                    .await
+                    .is_err()
+            );
+            frames.send_replace(vec![0xff, 0xd8, 1, 0xff, 0xd9]);
+            waiting.await.unwrap().unwrap()
+        };
+        assert!(first.starts_with(
+            b"--storyfold-frame\r\nContent-Type: image/jpeg\r\nContent-Length: 5\r\n\r\n"
+        ));
+        frames.send_replace(vec![2]);
+        frames.send_replace(vec![3]);
+        let latest = stream.next().await.unwrap().unwrap();
+        assert!(latest.ends_with(b"\r\n\r\n\x03\r\n"));
+        cancel.cancel();
+        assert!(
+            tokio::time::timeout(Duration::from_millis(100), stream.next())
+                .await
+                .unwrap()
+                .is_none()
+        );
     }
     #[tokio::test]
     #[ignore = "Opt-in FFmpeg integration; run with STORYFOLD_CAPTURE_TEST=1, no physical camera is used"]
@@ -923,6 +1046,65 @@ mod tests {
                 .status(),
             StatusCode::OK
         );
+        use futures_util::StreamExt;
+        let response = preview_stream(State(state.clone()), Path(id.clone()))
+            .await
+            .unwrap();
+        assert_eq!(
+            response.headers()[header::CONTENT_TYPE],
+            "multipart/x-mixed-replace; boundary=storyfold-frame"
+        );
+        let mut stream = response.into_body().into_data_stream();
+        let first_frame = stream.next().await.unwrap().unwrap();
+        let jpeg_offset = first_frame
+            .windows(4)
+            .position(|b| b == b"\r\n\r\n")
+            .unwrap()
+            + 4;
+        let frame_path = temp.path().join("preview.jpg");
+        std::fs::write(
+            &frame_path,
+            &first_frame[jpeg_offset..first_frame.len() - 2],
+        )
+        .unwrap();
+        let metadata = tokio::process::Command::new("ffprobe")
+            .args([
+                "-v",
+                "error",
+                "-show_entries",
+                "stream=width,height",
+                "-of",
+                "json",
+            ])
+            .arg(&frame_path)
+            .output()
+            .await
+            .unwrap();
+        assert!(metadata.status.success());
+        let metadata: Value = serde_json::from_slice(&metadata.stdout).unwrap();
+        assert_eq!(
+            (
+                metadata["streams"][0]["width"].as_u64(),
+                metadata["streams"][0]["height"].as_u64()
+            ),
+            (Some(1280), Some(720))
+        );
+        tokio::time::sleep(Duration::from_secs(1)).await;
+        let _ = stream.next().await;
+        let mut frame_count = 0;
+        let mut changed = false;
+        let _ = tokio::time::timeout(Duration::from_secs(1), async {
+            while let Some(Ok(frame)) = stream.next().await {
+                changed |= frame != first_frame;
+                frame_count += 1;
+            }
+        })
+        .await;
+        assert!(
+            changed && frame_count >= 20,
+            "HD stream delivered {frame_count} frames in one second"
+        );
+        println!("Live preview: 1280x720, {frame_count} fresh frames in a one-second interval");
         assert!(
             start(
                 State(state.clone()),
@@ -962,6 +1144,12 @@ mod tests {
             asset(&store, &id, &format!("take-{}.mp4", finished.takes[0].id)).unwrap(),
         )
         .unwrap();
+        let source_info = media::probe(
+            &asset(&store, &id, &format!("take-{}.mp4", finished.takes[0].id)).unwrap(),
+        )
+        .await
+        .unwrap();
+        assert_eq!((source_info.width, source_info.height), (1920, 1080));
         let mut input = editing(&finished);
         input.clips[0].r#in = 0.2;
         input.clips[0].out = finished.takes[0].duration - 0.1;
@@ -995,7 +1183,7 @@ mod tests {
         let info = media::probe(&asset(&store, &id, &format!("export-{}.mp4", job.id)).unwrap())
             .await
             .unwrap();
-        assert_eq!((info.width, info.height), (720, 1280));
+        assert_eq!((info.width, info.height), (1080, 1920));
         assert_eq!(
             std::fs::read(
                 asset(&store, &id, &format!("take-{}.mp4", finished.takes[0].id)).unwrap()

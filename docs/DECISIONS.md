@@ -28,3 +28,33 @@
   user-wide hook is installed and default policy/configuration checks pass.
   The IDE's bundled Codex 0.162 is supported; the separate snap 0.114 is not.
   Host trust in a new session remains a required user action.
+
+## Record section specification — 2026-10-19
+
+- Ryan’s new recording brief applies to Storyfold Record; retain Storyfold
+  branding and existing interview data. Its original text and requirement/status
+  mapping are in `docs/reference/recording-studio-build-brief.txt` and
+  `docs/RECORDING-SPEC.md`.
+- Finish the reported live-preview and sequence-action repairs in the installed
+  Rust/Dioxus app while clarifying the requested egui recording architecture.
+  This repair is not the complete segmented-capture/overlay-renderer migration.
+- New takes negotiate supported Linux HD modes instead of accepting camera
+  defaults. Continuous 720p30 preview replaces 640px snapshot polling; sources
+  and exports support 1080p30. Existing low-resolution sources are preserved.
+- Preview and MP4 export automatically save/prepare the current sequence, reuse
+  only a current completed revision and invalidate previews after edits.
+- The new overlay AI feature requires Ryan’s explicit monthly budget/currency.
+  Keep it unavailable until configured; no budget amount is assumed.
+- The new spec’s keychain storage, Unlisted default, per-project Git and shared
+  native renderer are pending work, not properties of the current implementation.
+- Ryan explicitly removed Doberman. That later instruction supersedes its old
+  installation decision and the new reference’s historical Doberman sentence.
+
+- Ryan subsequently confirmed the specified egui/eframe Record studio. Add
+  `apps/sidebar-video` and `packages/video-core` alongside Catalyst Solo’s members;
+  preserve its existing control panel code paths. Keep the current recording
+  repair usable until the new native studio has feature parity.
+- Ryan chose local AI for the Record overlay builder. This supersedes the
+  reference’s paid-provider choice and monthly paid API budget STOP. No paid
+  fallback is enabled. Verify local runtime/model and a real search source at
+  the AI milestone; do not fabricate web results from a local language model.

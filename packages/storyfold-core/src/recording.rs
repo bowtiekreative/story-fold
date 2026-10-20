@@ -1,4 +1,7 @@
 //! Local recording studio models. Source takes are immutable; clips edit their ranges.
+/// Recording sidebar slots, shared by native controls and runtime validation.
+pub const OVERLAY_SLOTS: usize = 9;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]

@@ -87,3 +87,18 @@ use disposable projects/repositories for persistence, path boundaries, review,
 commit and undo. Browser acceptance covers the sample editor and control panel.
 An ffmpeg smoke test probes a rendered L-cut export. A supplied real interview is
 still required to measure transcription accuracy and multicamera alignment.
+
+## Rust runtime and Record specification — 2026-10-19
+
+The installed application now uses `apps/rust-desktop` (Rust/Dioxus),
+`apps/rust-server` (Axum/FFmpeg/local processing) and `packages/storyfold-core`.
+The earlier web release above remains for recovery. Record sessions live under
+`data/recordings`, independently of existing interview projects. Linux captures
+explicit takes; preview uses a bounded latest-JPEG watch channel and a continuous
+loopback MJPEG response. Export uses a saved sequence revision with trimmed source
+clips and ASS text cards. This differs from the newly requested segmented capture
+and shared RGBA overlay renderer; do not conflate them.
+
+The [recording specification](RECORDING-SPEC.md) defines the next studio milestones
+and outstanding egui/Dioxus decision. Keep UI/business logic boundaries explicit,
+reuse Catalyst’s public safety helpers, and preserve saved takes during migration.

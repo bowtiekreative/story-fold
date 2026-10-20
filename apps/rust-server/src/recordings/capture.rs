@@ -36,6 +36,103 @@ mod linux {
         device_caps: u32,
         reserved: [u32; 3],
     }
+    #[repr(C)]
+    #[derive(Default)]
+    struct FrameInterval {
+        index: u32,
+        pixel_format: u32,
+        width: u32,
+        height: u32,
+        kind: u32,
+        interval: [u32; 6],
+        reserved: [u32; 2],
+    }
+    #[derive(Debug, PartialEq)]
+    struct Mode {
+        format: &'static str,
+        width: u32,
+        height: u32,
+        numerator: u32,
+        denominator: u32,
+    }
+    impl Mode {
+        fn score(&self) -> (bool, u32, u32, bool) {
+            let fps = self.denominator as f64 / self.numerator as f64;
+            // Prefer fluid HD over a larger mode that can only deliver a slideshow.
+            (
+                fps >= 24.,
+                self.width * self.height,
+                (fps * 100.).round() as u32,
+                self.format == "mjpeg",
+            )
+        }
+        fn args(&self) -> Vec<String> {
+            vec![
+                "-input_format".into(),
+                self.format.into(),
+                "-video_size".into(),
+                format!("{}x{}", self.width, self.height),
+                "-framerate".into(),
+                format!("{}/{}", self.denominator, self.numerator),
+            ]
+        }
+    }
+    pub(super) fn input_args(path: &Path) -> io::Result<Vec<String>> {
+        let file = OpenOptions::new()
+            .read(true)
+            .custom_flags(libc::O_NONBLOCK)
+            .open(path)?;
+        let mut best: Option<Mode> = None;
+        for (format, fourcc) in [
+            ("mjpeg", *b"MJPG"),
+            ("yuyv422", *b"YUYV"),
+            ("nv12", *b"NV12"),
+        ] {
+            for (width, height) in [(1920, 1080), (1280, 720), (640, 480), (640, 360)] {
+                for index in 0..64 {
+                    let mut interval = FrameInterval {
+                        index,
+                        pixel_format: u32::from_le_bytes(fourcc),
+                        width,
+                        height,
+                        ..Default::default()
+                    };
+                    // ENUM_FRAMEINTERVALS queries supported modes without changing or streaming the camera.
+                    if unsafe {
+                        libc::ioctl(
+                            file.as_raw_fd(),
+                            libc::_IOWR::<FrameInterval>(b'V' as u32, 75),
+                            &mut interval,
+                        )
+                    } < 0
+                    {
+                        break;
+                    }
+                    let [numerator, denominator, ..] = interval.interval;
+                    if interval.kind == 1 && numerator > 0 && denominator > 0 {
+                        let fps = denominator as f64 / numerator as f64;
+                        if fps <= 30.01 {
+                            let mode = Mode {
+                                format,
+                                width,
+                                height,
+                                numerator,
+                                denominator,
+                            };
+                            if best.as_ref().is_none_or(|old| mode.score() > old.score()) {
+                                best = Some(mode);
+                            }
+                        }
+                    }
+                    if interval.kind != 1 {
+                        break;
+                    }
+                }
+            }
+        }
+        // Drivers without discrete mode enumeration retain their working default.
+        Ok(best.map(|mode| mode.args()).unwrap_or_default())
+    }
     fn captures_video(capabilities: u32, device_caps: u32) -> bool {
         let flags = if capabilities & 0x8000_0000 != 0 {
             device_caps
@@ -88,6 +185,64 @@ mod linux {
             assert!(!captures_video(0x8000_0002, 2));
             assert!(captures_video(1, 0));
             assert!(captures_video(0x8000_1000, 0x1000));
+        }
+        #[test]
+        fn fluid_modes_win_over_slow_raw_hd_and_keep_exact_rates() {
+            assert_eq!(std::mem::size_of::<FrameInterval>(), 52);
+            assert_eq!(std::mem::offset_of!(FrameInterval, interval), 20);
+            let hd = Mode {
+                format: "mjpeg",
+                width: 1920,
+                height: 1080,
+                numerator: 1001,
+                denominator: 30000,
+            };
+            let slow = Mode {
+                format: "yuyv422",
+                width: 1920,
+                height: 1080,
+                numerator: 1,
+                denominator: 5,
+            };
+            let sd = Mode {
+                format: "yuyv422",
+                width: 640,
+                height: 480,
+                numerator: 1,
+                denominator: 30,
+            };
+            assert!(hd.score() > sd.score());
+            assert!(sd.score() > slow.score());
+            assert_eq!(
+                hd.args(),
+                [
+                    "-input_format",
+                    "mjpeg",
+                    "-video_size",
+                    "1920x1080",
+                    "-framerate",
+                    "30000/1001"
+                ]
+            );
+        }
+        #[test]
+        #[ignore = "query connected camera modes without starting capture"]
+        fn connected_camera_modes() {
+            for path in ["/dev/video0", "/dev/video2"] {
+                let args = input_args(Path::new(path)).unwrap();
+                assert_eq!(
+                    args,
+                    [
+                        "-input_format",
+                        "mjpeg",
+                        "-video_size",
+                        "1920x1080",
+                        "-framerate",
+                        "30/1"
+                    ]
+                );
+                println!("{path}: {}", args.join(" "));
+            }
         }
     }
 }
@@ -252,7 +407,13 @@ pub(super) async fn input(camera: &str, microphone: Option<&str>) -> Result<Inpu
     let mut args = Vec::new();
     let mut audio_index = 0;
     if camera == "synthetic" && test_source() {
-        args = strings(&["-re", "-f", "lavfi", "-i", "testsrc2=size=640x360:rate=25"]);
+        args = strings(&[
+            "-re",
+            "-f",
+            "lavfi",
+            "-i",
+            "testsrc2=size=1920x1080:rate=30",
+        ]);
         if audio.is_some() {
             args.extend(strings(&[
                 "-re",
@@ -266,14 +427,13 @@ pub(super) async fn input(camera: &str, microphone: Option<&str>) -> Result<Inpu
     } else {
         #[cfg(target_os = "linux")]
         {
-            args.extend(strings(&[
-                "-thread_queue_size",
-                "512",
-                "-f",
-                "v4l2",
-                "-i",
-                video,
-            ]));
+            args.extend(strings(&["-thread_queue_size", "8", "-f", "v4l2"]));
+            args.extend(linux::input_args(std::path::Path::new(video)).map_err(|_| {
+                AppError::bad(
+                    "Could not query camera quality. Close other camera apps and refresh devices.",
+                )
+            })?);
+            args.extend(strings(&["-i", video]));
             if let Some(audio) = audio {
                 args.extend(strings(&[
                     "-thread_queue_size",
@@ -343,9 +503,9 @@ pub(super) async fn run(
     let mut cmd = Command::new("ffmpeg");
     cmd.args(["-hide_banner","-loglevel","error","-y","-filter_complex_threads","1","-stats_period","0.1","-progress","pipe:2"])
         .args(input.args)
-        .args(["-filter_complex","[0:v]scale=1280:720:force_original_aspect_ratio=decrease,setsar=1,split=2[recorded][p];[p]fps=6,scale=640:-2[preview]","-map","[recorded]","-map",&format!("{}:a:0",input.audio),"-c:v","libx264","-preset","veryfast","-crf","20","-pix_fmt","yuv420p","-r","25","-c:a","aac","-b:a","128k","-f","matroska"])
+        .args(["-filter_complex","[0:v]scale=w='min(iw,1920)':h='min(ih,1080)':force_original_aspect_ratio=decrease:force_divisible_by=2,setsar=1,split=2[recorded][p];[p]fps=30,scale=w='min(iw,1280)':h='min(ih,720)':force_original_aspect_ratio=decrease:force_divisible_by=2[preview]","-map","[recorded]","-map",&format!("{}:a:0",input.audio),"-c:v","libx264","-threads","2","-preset","veryfast","-tune","zerolatency","-crf","20","-pix_fmt","yuv420p","-r","30","-c:a","aac","-b:a","160k","-f","matroska"])
         .arg(&raw)
-        .args(["-map","[preview]","-an","-c:v","mjpeg","-threads","1","-q:v","6","-f","image2pipe","pipe:1"])
+        .args(["-map","[preview]","-an","-c:v","mjpeg","-threads","2","-q:v","3","-flush_packets","1","-f","image2pipe","pipe:1"])
         .stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::piped()).kill_on_drop(true);
     #[cfg(windows)]
     cmd.creation_flags(0x08000000);
