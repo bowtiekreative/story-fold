@@ -1,0 +1,161 @@
+{
+  "checked_at": "2026-10-20",
+  "version": "0.1.4",
+  "changes": [
+    "Temporarily prioritize selected30fps over dynamic exposure frame-rate reduction; restore original camera control after stream stops",
+    "No queued old camera snapshot in overlay rendering; latest completed frame replaces prior result without blocking renderer",
+    "Stable Record input identity across camera/error widgets; regression reproduced before repair and recording/preview check passes after repair",
+    "Give1080p live capture up to4encoding threads, bounded by available cores, while retaining encoding quality and timing normalization; actual Logitech preview measured30.05fps"
+  ],
+  "hardware_proof": "recording-camera-motion.json",
+  "software_profile": {
+    "opaque720p_camera_conversion_ms_mean": 1.927,
+    "opaque720p_camera_conversion_ms_p95": 2.424,
+    "three_text_card_worker_ms_mean": 14.52,
+    "gpu_transfer_not_measured": true
+  },
+  "generated_backpressure_investigation": {
+    "proof": [
+      {
+        "source": "mjpeg",
+        "variant": "baseline",
+        "frames": 180,
+        "pipe_interval_ms_p95": 56.73,
+        "attempted": 22,
+        "source_clock": {
+          "samples": 22,
+          "age_ms": {
+            "min": 510.35,
+            "median": 636.62,
+            "p95": 796.21,
+            "max": 817.18
+          }
+        },
+        "filter_clock": {
+          "samples": 22,
+          "age_ms": {
+            "min": 51.99,
+            "median": 62.42,
+            "p95": 98.95,
+            "max": 118.5
+          }
+        },
+        "source_to_filter_ms_median": 558.0,
+        "steady_fps": 27.1,
+        "recording_branch": true
+      },
+      {
+        "source": "mjpeg",
+        "variant": "decode-only",
+        "frames": 180,
+        "pipe_interval_ms_p95": 40.42,
+        "attempted": 22,
+        "source_clock": {
+          "samples": 22,
+          "age_ms": {
+            "min": 84.83,
+            "median": 92.39,
+            "p95": 102.58,
+            "max": 103.97
+          }
+        },
+        "filter_clock": {
+          "samples": 22,
+          "age_ms": {
+            "min": 6.83,
+            "median": 9.27,
+            "p95": 11.87,
+            "max": 11.97
+          }
+        },
+        "source_to_filter_ms_median": 83.5,
+        "steady_fps": 30.0,
+        "recording_branch": false
+      }
+    ],
+    "caveat": "Separate software MJPEG producer/pipe and competing encoder do not establish physical V4L2 or sensor-to-screen latency. Output reordering and removal of timing normalization were not adopted."
+  },
+  "tests": {
+    "studio_passed": 26,
+    "studio_opt_in_ignored": 3,
+    "core_passed": 89,
+    "core_opt_in_ignored": 19,
+    "sandbox_loopback_denials": 3,
+    "same_denied_tests_passed_with_loopback_access": true,
+    "generated_capture_save_preview_recovery_passed": true,
+    "generated_capture_flow_seconds": 11.34,
+    "core_initial_passed": 86,
+    "core_pass_count_is_union_of_initial_and_targeted_rerun": true,
+    "strict_app_core_clippy": true,
+    "four_thread_capture_frame_exact_av_recovery_passed": true,
+    "four_thread_capture_integration_seconds": 7.79,
+    "strict_app_core_clippy_after_encoding_change": true,
+    "real_os_record_controls": [
+      {
+        "isolated_xvfb": true,
+        "real_x11_xtest_events": true,
+        "matched_child_pid": true,
+        "size": "default1480x1000",
+        "generated_source_only": true,
+        "live_preview_present": true,
+        "record_pointer_down_received": true,
+        "held_release_outside_saved_clip": true,
+        "tap_started_long_take": true,
+        "second_tap_saved_long_take": true,
+        "normal_button_started_recording": true,
+        "normal_button_stopped_and_saved": true,
+        "normal_button_clicked_responses": 2,
+        "saved_clip_count": 3,
+        "first_clip_ready_ms": 2922
+      },
+      {
+        "isolated_xvfb": true,
+        "real_x11_xtest_events": true,
+        "matched_child_pid": true,
+        "size": "minimum1160x800",
+        "generated_source_only": true,
+        "live_preview_present": true,
+        "record_pointer_down_received": true,
+        "held_release_outside_saved_clip": true,
+        "tap_started_long_take": true,
+        "second_tap_saved_long_take": true,
+        "normal_button_started_recording": true,
+        "normal_button_stopped_and_saved": true,
+        "normal_button_clicked_responses": 2,
+        "saved_clip_count": 3,
+        "first_clip_ready_ms": 2799
+      }
+    ]
+  },
+  "remaining": [
+    "Sensor-to-screen timing not measured",
+    "OBSBOT disconnected during metadata check; runtime effect not verified",
+    "Desktop visual smoothness retest pending"
+  ],
+  "regression_caught_during_verification": "Record gesture identity changed when camera/error widgets changed. Existing generated capture test failed before stable ID, then passed in11.34s after repair.",
+  "recording_pipeline_before_thread_fix": {
+    "test": "Actual release C922 pipeline without repeated USB control queries",
+    "settled_preview_fps": 26.133591226580513,
+    "capture": "1920x1080 MJPEG30",
+    "preview": "1280x720 RGBA",
+    "encoding": "x264veryfast CRF20,2threads",
+    "camera_priority_guard": true,
+    "media_deleted": true,
+    "microphone": "off"
+  },
+  "actual_release_pipeline_after_thread_fix_fps": 30.050829732564974,
+  "workspace_commit": "6dc152b",
+  "package": "storyfold-record_0.1.4~preview.1_amd64.deb",
+  "package_sha256": "fe00c85129ee424314bb12a5db2a755d1a513ed880311306e760aa12a9bdfac7",
+  "binary_sha256": "9fa46f7eeab3bf90068cf4897e9c2f5a4bde3bcd333c56cc6e966555257f7571",
+  "test_features_enabled": false,
+  "startup_alive_for_8_seconds": true,
+  "startup_stderr": "",
+  "libraries_available": true,
+  "desktop_file_valid": true,
+  "fresh_os_install_tested": false,
+  "user_install": true,
+  "installed_binary_hash_matches": true,
+  "normal_release_launched_on_desktop": true,
+  "desktop_visual_acceptance": "Retest requested; no answer yet"
+}

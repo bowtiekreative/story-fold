@@ -1,0 +1,71 @@
+{
+  "camera": "Logitech C922",
+  "frames": 90,
+  "selected_fps": 30,
+  "motion_priority_actual_fps": 22.451706127852628,
+  "interval_ms": {
+    "median": 36.002,
+    "p95": 68.004
+  },
+  "kernel_to_dequeue_ms_median": 12.029,
+  "no_image_viewed_or_saved": true,
+  "microphone": "off",
+  "original_setting_restored": true,
+  "before": {
+    "actual_fps": 15.46,
+    "exposure_dynamic_framerate": 1,
+    "frame_interval_ms": "64\u201368"
+  },
+  "settled_motion_priority_check": {
+    "frames": 180,
+    "steady_actual_fps": 29.99944001045314,
+    "steady_interval_median_ms": 32.001,
+    "steady_interval_p95_ms": 36.008,
+    "first_sample": [
+      "cap dqbuf: 0 seq:      0 bytesused: 265900 ts: 489207.832181 delta now: +12.055 ms field: None (ts-monotonic, ts-src-soe)"
+    ],
+    "last_sample": [
+      "cap dqbuf: 2 seq:    179 bytesused: 266180 ts: 489213.800270 delta: 36.008 ms delta now: +12.071 ms fps: 29.99 field: None (ts-monotonic, ts-src-soe)"
+    ],
+    "controls": "exposure_dynamic_framerate: 0\nexposure_time_absolute: 250",
+    "original_setting_restored": true
+  },
+  "application_capture_guard": {
+    "camera": "/dev/video2",
+    "error": null,
+    "first_preview_ms": 538,
+    "last_frame": [
+      180,
+      1280,
+      720
+    ],
+    "microphone": "off",
+    "mode": {
+      "format": "mjpeg",
+      "fps": 30,
+      "height": 1080,
+      "width": 1920
+    },
+    "settled_preview_fps": 25.692488087129885,
+    "stopped": true,
+    "takes_created": 0,
+    "temporary_buffer_removed": true,
+    "priority_held_during_capture": true,
+    "observed_motion_priority_samples": 52,
+    "original_setting_restored": true,
+    "no_images_viewed": true
+  },
+  "application_capture_after_encode_thread_fix": {
+    "capture": "1920x1080 MJPEG30",
+    "preview": "1280x720 RGBA",
+    "encoding": "x264veryfast CRF20,4threads bounded by available logical CPUs",
+    "first_preview_ms": 548,
+    "last_sequence": 180,
+    "settled_preview_fps": 30.050829732564974,
+    "camera_control_restored": true,
+    "microphone": "off",
+    "takes_created": 0,
+    "temporary_media_removed": true,
+    "images_viewed": false
+  }
+}

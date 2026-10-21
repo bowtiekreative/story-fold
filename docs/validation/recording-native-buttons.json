@@ -60,9 +60,9 @@
     "project_menu_opens": true,
     "isolated_only": true
   },
-  "current_release_proof": "record-studio-0.1.3.json",
+  "current_release_proof": "recording-lag-0.1.4.json",
   "desktop_project_menu_accepted": true,
-  "latest_user_feedback": "Project and live camera work; original Record failure unresolved pending0.1.3 retest",
+  "latest_user_feedback": "Requested FIX video lag.0.1.4 installed and open after measured repair; visual retest pending.",
   "actual_native_player_os_input": {
     "isolated_xvfb": true,
     "real_x11_xtest": true,
@@ -78,5 +78,6 @@
     "tap_tap": true,
     "standard_start_stop": true,
     "saved_clips_per_size": 3
-  }
+  },
+  "stable_record_identity_regression_fixed": true
 }

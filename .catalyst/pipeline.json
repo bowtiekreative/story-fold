@@ -1,8 +1,8 @@
 {
   "name": "Storyfold",
-  "milestone": "Native0.1.3 installed; awaiting desktop Record retest",
-  "updatedAt": "2026-10-20T19:03:31.965165+00:00",
-  "message": "Version0.1.3 is installed and open. Standard Start recording/Stop & save and circular gestures pass real OS tests with generated video at both window sizes. Camera errors stay visible above video. Actual desktop Record acceptance remains open.",
+  "milestone": "Native0.1.4 installed: measured30fps capture; visual retest pending",
+  "updatedAt": "2026-10-21T05:41:15.425920+00:00",
+  "message": "Installed and opened0.1.4. Logitech capture improvedfrom15.46camera fps and26.13pipeline fps to30.05pipeline fps. Old overlay frame queues and lost Record identity repaired. Unit/lint, frame-exact capture/recovery, native mouse tests and package startup/hash passed. Visual smoothness and OBSBOT retest remain.",
   "tasks": [
     {
       "id": "foundation",
@@ -405,11 +405,13 @@
       "title": "Make native preview buttons responsive and reduce camera delay",
       "status": "doing",
       "owner": "Codex",
-      "description": "Ryan confirms Project opens in the actual Input check window. Probe recorded pointer events and a successful project-open transition; a whole-app input freeze is not established. Startup repair0.1.2 is installed. Remaining camera/record/sequence step is being localized; actual OS-player clicks are replacing IPC-only test input. Physical timing remains unverified.",
+      "description": "Installed and opened0.1.4. Logitech capture improvedfrom15.46camera fps and26.13pipeline fps to30.05pipeline fps. Old overlay frame queues and lost Record identity repaired. Unit/lint, frame-exact capture/recovery, native mouse tests and package startup/hash passed. Visual smoothness and OBSBOT retest remain.",
       "evidence": [
         "docs/validation/recording-preview-responsiveness.json",
         "docs/validation/recording-native-buttons.json",
-        "docs/validation/record-studio-0.1.2.json"
+        "docs/validation/record-studio-0.1.2.json",
+        "docs/validation/recording-camera-motion.json",
+        "docs/validation/recording-lag-0.1.4.json"
       ],
       "lane": "Now",
       "acceptance": "Actual pointer activation, visible stop/save/prepare while camera is on, Expand exit/Escape without playback interruption, measured generated frame age; retain source files and report physical-device limits."

@@ -181,3 +181,27 @@ third clip.25studio tests and strict app/core Clippy passed. The separate native
 player test now uses real OS Play/Pause/fullscreen/Escape/EOF/replay actions;
 local IPC only observes state. These checks do not establish the real-desktop
 Record result. [0.1.3 evidence](validation/record-studio-0.1.3.json).
+
+## Measured live-camera lag repair · 2026-10-20
+
+The Logitech C922 was set to30fps but delivered15.46fps with dynamic exposure
+frame rate enabled. Disabling that control settled the raw camera at29.999fps,
+with32ms median/36ms p95 frame intervals. The native capture engine now holds
+motion priority only while streaming and restores the previous control after
+the camera stops. The physical capture test verified restoration and removed
+all temporary buffers without viewing images or recording microphone audio.
+
+The two-thread1080p recording pipeline still delivered only26.13preview fps.
+Allowing up to four encoding threads, bounded by available logical CPUs,
+delivered30.05fps in the same actual camera-to-RGBA pipeline. Output resolution,
+CRF20, preset and timing normalization are retained. Overlay jobs no longer queue
+older camera snapshots, and completed frames replace older pending results.
+
+Verification also caught a Record input regression after an error message
+changed automatic widget identity. Its identity is now stable; the generated
+capture/save/MP4-preview/recovery check passes, as does the four-thread core test
+for exact clip counts, copied interior frames, A/V timing and recovery. Unit,
+strict lint, physical timing and remaining scope are recorded in the evidence.
+Sensor-to-screen delay and OBSBOT visual smoothness are still unmeasured.
+[Lag repair evidence](validation/recording-lag-0.1.4.json),
+[physical camera evidence](validation/recording-camera-motion.json).
