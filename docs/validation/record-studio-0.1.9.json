@@ -1,0 +1,113 @@
+{
+  "version": "0.1.9",
+  "verifiedAt": "2026-10-21T11:30:58.568713+00:00",
+  "features": [
+    "Linux Preview sequence plays source cuts/audio directly without full MP4 export, project save or version",
+    "Shared cards/photo/video inserts/placements/zoom composed during playback",
+    "Immutable preview snapshot; newer edits preserved",
+    "Bounded cancellable IPC with partial replies retained and commands sent once",
+    "Nonblocking clean-player-exit handoff; genuine live failures still reported",
+    "Explicit Export MP4 retains progress/local-version behavior"
+  ],
+  "checks": {
+    "nativeWorkspaceSuite": true,
+    "videoCoreUnitTests": 118,
+    "studioUnitTests": 57,
+    "otherWorkspaceTests": 17,
+    "coreOptInsIgnoredByDefault": 29,
+    "studioOptInsIgnoredByDefault": 4,
+    "strictWorkspaceClippy": true,
+    "format": true,
+    "threeIndependentRegressionsEach59Passes": true,
+    "bothShapeGeneratedCompositionFidelity": true,
+    "sourceAudioDecodeIntoNullSink": true,
+    "nativeDirectAndPreparedPlayerControls": true,
+    "nativeCleanQuit": true,
+    "generatedPreviewExportCancelAndNewerDraftPreservation": true,
+    "nativeRecordAndPreviewAtBothSizes": true,
+    "normalFeatureRelease": true,
+    "isolatedInstallerChecks": true,
+    "packageExtractHashLibrariesLauncherStartup": true
+  },
+  "startup": {
+    "units": "milliseconds",
+    "samplesPerScenario": 20,
+    "scenarios": {
+      "short": {
+        "clips": 2,
+        "durationMs": 2000,
+        "muted": false
+      },
+      "long": {
+        "clips": 1002,
+        "durationMs": 102000,
+        "muted": true
+      }
+    },
+    "uniqueSourceFiles": 2,
+    "statistics": {
+      "short_startup_ms": {
+        "bootstrap": {
+          "iterations": 2000,
+          "method": "deterministic percentile bootstrap; nearest-rank tail",
+          "seed": "0x51deba7"
+        },
+        "max": 1006.65692,
+        "median": 939.1408875,
+        "medianBootstrap95": [
+          921.197783,
+          948.0567325
+        ],
+        "min": 905.043114,
+        "n": 20,
+        "p95": 996.006429,
+        "p95Bootstrap95": [
+          951.259382,
+          1006.65692
+        ],
+        "units": "same as input"
+      },
+      "thousand_extra_cuts_startup_ms": {
+        "bootstrap": {
+          "iterations": 2000,
+          "method": "deterministic percentile bootstrap; nearest-rank tail",
+          "seed": "0x51deba7"
+        },
+        "max": 4263.3564289999995,
+        "median": 3851.496593,
+        "medianBootstrap95": [
+          3805.3275105000002,
+          3915.2673919999997
+        ],
+        "min": 3736.579757,
+        "n": 20,
+        "p95": 4011.425682,
+        "p95Bootstrap95": [
+          3945.902099,
+          4263.3564289999995
+        ],
+        "units": "same as input"
+      }
+    },
+    "exportsCreated": 0,
+    "projectSavesOrVersionsCreated": 0,
+    "method": "Generated160x90 inputs,1080 project, isolated Xvfb and test-only null audio. Descriptive startup observations for two workloads, not an isolated causal comparison; mute settings differ. Existing host workload not controlled. Decoder/player initialization included, test-data construction excluded. No competing build/encoding jobs."
+  },
+  "package": "catalyst-solo/boilerplate/dist/storyfold-record_0.1.9~preview.1_amd64.deb",
+  "packageSha256": "d2a56369618cb2856e4f37408fed643ae3e562bb9a6fef2be6f3043137f5e443",
+  "binarySha256": "d56ba3a4b016834e2eed42ae4f8331889a98b2a209056e10f8a5b1bad7a8546c",
+  "installed": true,
+  "windowTitle": "Storyfold \u00b7 Record studio (0.1.9)",
+  "limits": [
+    "Linux direct preview only; other platforms retain rendered compatibility preview.",
+    "Source validation/player initialization and finishing an active take still take time.",
+    "Large source lists over mpv0.37 EDL1MB limit explicitly reject; no hidden export fallback.",
+    "Direct source time and Export30fps rounding may differ by less than a frame at clip boundaries.",
+    "Dynamic visual composition still performs CPU work.",
+    "No physical camera/microphone/speaker test or audible/lip-sync claim; missing OBSBOT and distorted recordings remain separate.",
+    "Interview editor and Record studio remain separate; app unification not included.",
+    "Local uncommitted work; nothing pushed."
+  ],
+  "windowOpened": true,
+  "windowTitleVerified": true
+}

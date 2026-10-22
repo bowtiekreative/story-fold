@@ -1,0 +1,3 @@
+[submodule "catalyst-solo/boilerplate"]
+	path = catalyst-solo/boilerplate
+	url = https://github.com/bowtiekreative/business-catalyst-solo.git

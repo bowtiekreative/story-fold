@@ -1,0 +1,62 @@
+{
+  "checked_at": "2026-10-21T06:57:14.624727+00:00",
+  "version": "0.1.5",
+  "fixes": [
+    "Canceled video import outcomes are ignored, including imports queued for the project lock; recorded takes are retained",
+    "Canceled insert and manual card-image outcomes preserve the current draft and saved source files",
+    "Failed first insert import displays its error without requiring an existing source",
+    "Failed preview startup invalidates its in-memory cache so retry can rebuild",
+    "Playback accepts confined MP4 exports regardless of suffix case"
+  ],
+  "checks": {
+    "native_workspace_all_features": true,
+    "studio_unit_tests_passed": 32,
+    "video_core_unit_tests_passed": 90,
+    "strict_workspace_clippy_all_features": true,
+    "format": true,
+    "interview_workspace_tests": true,
+    "generated_capture_save_recovery": true,
+    "recorded_take_retained_when_imports_canceled_while_project_locked": true,
+    "generated_preview_export_cache_cancel_newer_drafts": true,
+    "encoded_sequences_both_shapes_exact_frames_audio_overlay": true,
+    "export_cancellation_and_version_failure_preservation": true,
+    "generated_insert_import_seek_cancel": true,
+    "native_mouse_play_pause_fullscreen_escape_replay_uppercase_mp4": true,
+    "native_record_pointer_hold_release_outside_tap_start_stop_both_window_sizes": true,
+    "isolated_installer_tests": true
+  },
+  "package": {
+    "version": "0.1.5",
+    "package": "dist/storyfold-record_0.1.5~preview.1_amd64.deb",
+    "package_sha256": "8845b8898ee016806d1557b15fd256512c4b952cb087ceeb6353854013211552",
+    "binary_sha256": "dab0a359ec63b408d7f30ea0f8c2f44a1c71264bb1fa0106c4c495997bfcb803",
+    "test_features_enabled": false,
+    "checks": {
+      "package_build": true,
+      "isolated_installer_tests": true,
+      "package_alive_for_8_seconds": true,
+      "extracted_binary_hash_matches": true,
+      "libraries_available": true,
+      "desktop_file_valid": true,
+      "private_workflow_absent": true
+    },
+    "startup_log_empty": true,
+    "user_install": {
+      "installed": true,
+      "binary_hash_matches": true,
+      "managed_prior_install_preserved_until_atomic_replacement": true,
+      "existing_windows_and_projects_not_modified": true
+    },
+    "normal_release_launch_started": true,
+    "launch_record": "installed-app-launch.json",
+    "desktop_visual_acceptance": "Not observed; no desktop control or camera activation by agent"
+  },
+  "remaining": [
+    "Physical sensor-to-screen latency and OBSBOT acceptance",
+    "Real file-picker and hardware end-to-end visual acceptance",
+    "Fresh-OS and Windows acceptance",
+    "Real Google consent/keychain/publishing acceptance"
+  ],
+  "source_commit_before_fixes": "6dc152bad0371ad3101f9442d3c2d494bb88c384",
+  "publication": "No push; private debugging files excluded from Git and package"
+}

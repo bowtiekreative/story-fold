@@ -1,0 +1,41 @@
+{
+  "version": "0.1.7",
+  "verifiedAt": "2026-10-21T08:31:18.886988+00:00",
+  "features": [
+    "preferred detected microphone initially selected; explicit Off retained",
+    "visible selected microphone or Mic off warning",
+    "Linux microphone discovery dependency installed and declared in package",
+    "local background source-relative clip waveforms through trims/splits/reordering/zoom",
+    "distinct loading/silent/no-track/error states and explicit retry",
+    "camera controls fit default and minimum sizes, including startup"
+  ],
+  "checks": {
+    "studioUnitTests": 51,
+    "videoCoreUnitTests": 96,
+    "studioOptInsIgnoredInDefaultRun": 4,
+    "coreOptInsIgnoredInDefaultRun": 24,
+    "nativeWorkspaceSuite": true,
+    "strictWorkspaceClippy": true,
+    "format": true,
+    "normalFeatureRelease": true,
+    "generatedSignalThroughTakeTrimJoinExport": true,
+    "generatedWaveformExtractionAndRealWorker": true,
+    "nativePlayerDecodedAACUnmutedIntoTestNullSink": true,
+    "nativeRecordAtBothSizes": true,
+    "packageExtractionAndStartup": true,
+    "installerChecks": true
+  },
+  "package": "catalyst-solo/boilerplate/dist/storyfold-record_0.1.7~preview.1_amd64.deb",
+  "packageSha256": "e45dff8cf39b9f04cd2e09089883b060efb04da015c53992dac97af85aa5b16f",
+  "binarySha256": "b14f27067465ec3f560f2b02269741c9a166df8a4dce86f37ee725fdd275fd4a",
+  "installed": true,
+  "windowTitle": "Storyfold \u00b7 Record studio (0.1.7)",
+  "limits": [
+    "Actual affected recording/source PCM not provided or inspected",
+    "A microphone-free/silent original take cannot gain missing audio",
+    "No physical camera/microphone, lip-sync or audible speaker verification in this pass",
+    "Source scrubbing is silent; full audio playback uses Preview sequence",
+    "Windows, physical latency and real Google consent/publishing acceptance remain separate",
+    "Local uncommitted changes; nothing pushed"
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "version": "0.1.8",
+  "verifiedAt": "2026-10-21T10:14:30.501335+00:00",
+  "features": [
+    "NVIDIA NVENC capture and sequence encoding preferred initially",
+    "Project menu CPU/GPU preference for subsequently started jobs",
+    "cancellable bounded background availability checks and preflight CPU fallback",
+    "saved capture backend retained through edge cuts and interrupted recovery; legacy sessions defaultCPU",
+    "actual backend named in capture and export progress",
+    "changing preference invalidates cached sequence artifact without stopping an existing player"
+  ],
+  "checks": {
+    "nativeWorkspaceSuite": true,
+    "videoCoreUnitTests": 105,
+    "studioUnitTests": 53,
+    "otherWorkspaceTests": 17,
+    "coreOptInsIgnoredInDefaultRun": 26,
+    "studioOptInsIgnoredInDefaultRun": 4,
+    "strictWorkspaceClippy": true,
+    "format": true,
+    "gpuRequiredGenerated1080pCaptureAndRecovery": true,
+    "gpuRequiredBothShapeExactFrameAudioOverlayExport": true,
+    "generatedMicrophoneSignalThroughTakeTrimJoinExport": true,
+    "generatedCancellationVersionAndSourcePreservation": true,
+    "nativeRecordHoldTapStartStopAtBothSizes": true,
+    "nativePlayerPlayPauseFullscreenReplayAndAACDecode": true,
+    "normalFeatureRelease": true,
+    "isolatedInstallerChecks": true,
+    "packageExtractHashLibrariesLauncherAndStartup": true
+  },
+  "benchmark": {
+    "workload": "Generated1080p30 video,300frames,three runs perencoder, FFmpeg nullmuxer",
+    "cpuProcessUserSeconds": [
+      "6.336",
+      "6.278",
+      "6.277"
+    ],
+    "nvidiaProcessUserSeconds": [
+      "0.734",
+      "0.722",
+      "0.725"
+    ],
+    "cpuElapsedSeconds": [
+      "2.385",
+      "2.545",
+      "2.359"
+    ],
+    "nvidiaElapsedSeconds": [
+      "0.670",
+      "0.611",
+      "0.614"
+    ],
+    "qualityLimits": "x264CRF20 and NVENCCQ20 are independent quality scales. Encode-only comparison excludes sensorUSB/display latency; does not establish real-camera performance."
+  },
+  "package": "catalyst-solo/boilerplate/dist/storyfold-record_0.1.8~preview.1_amd64.deb",
+  "packageSha256": "10a87651ddc80481e9ac547a3a4a7a06a72d3df42f0608e747e05182c41c08dd",
+  "binarySha256": "e5a70409dfde8f7902058f4caf0c6832f1cffbdff27698bf462937945de36016",
+  "installed": true,
+  "windowTitle": "Storyfold \u00b7 Record studio (0.1.8)",
+  "limits": [
+    "Audio, decoding, scaling and composition still perform CPU work.",
+    "Only NVIDIA hardware encoding added; no AMD/Intel backend.",
+    "Preflight CPU fallback; later GPU failures remain errors with existing recovery/source retention.",
+    "No physical camera or microphone opened in GPU tests; actual sensor/display timing and audible quality remain unverified.",
+    "Preference is process-local and enabled initially at each launch.",
+    "OBSBOT connection and distorted recorded audio remain separate investigations.",
+    "Windows/macOS, freshOS and Google account/publishing acceptance remain separate.",
+    "Local uncommitted changes; nothing pushed."
+  ]
+}

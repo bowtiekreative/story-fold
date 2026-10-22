@@ -36,6 +36,18 @@ checks and remaining acceptance work.
 
 ### Record a video
 
+The native egui **Record studio** is available in the
+[Rust workspace](catalyst-solo/boilerplate). Retrieve its pinned source after
+cloning Storyfold:
+
+```sh
+git submodule update --init --recursive
+```
+
+Follow its README for building and launching the native studio. On Linux,
+Preview sequence plays the current source cuts directly without rendering an
+MP4 first. The tab-based recorder described below remains available separately.
+
 Open **Record**, create a recording, and select your camera and microphone.
 Hold the record button and release to save a short take, or tap it to record
 until you press Stop. Original takes stay in the bin while you trim, split,

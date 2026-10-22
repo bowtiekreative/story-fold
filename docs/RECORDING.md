@@ -1,5 +1,14 @@
 # Recording studio
 
+For the native window titled **Storyfold · Record studio**, see the
+[native studio guide](../catalyst-solo/boilerplate/README.md#storyfold-record-studio--in-development).
+It includes microphone selection, clip waveforms and the native sequence player.
+On Linux, **Preview sequence** plays the current cuts, audio, cards and media
+inserts directly, without rendering an MP4 or saving a project version first.
+It opens a snapshot of the current edits; press Preview again after changing them.
+An active recording must finish saving its take before playback starts.
+The tab-based instructions below describe the original Storyfold recorder.
+
 The native Rust application's **Record** tab contains a separate studio for new
 videos. Existing interviews remain in **Interviews**. Each recording saves its
 own immutable source takes, editable sequence, text cards, and export metadata

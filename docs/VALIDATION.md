@@ -1,5 +1,38 @@
 # Actual validation
 
+## Native Record studio 0.1.9 — 2026-10-21
+
+Linux sequence preview plays source cuts and audio directly, with shared cards
+and media inserts, without first creating an MP4, project save or local version.
+The native workspace passed 192 ordinary tests, formatting and strict lint.
+Generated native controls, draft preservation, package checks and installation
+are recorded in [the release evidence](validation/record-studio-0.1.9.json).
+Physical camera latency, audible quality and OBSBOT detection remain separate.
+
+## Native Record studio0.1.6 — 2026-10-21
+
+Installed0.1.6 adds direct source trim grips, draggable clip units with an insertion
+marker, zoom/focus, ruler seeking, cutting and local source-frame previews. Each
+completed drag uses one core history step; source media and cue timing are
+preserved. The bottom editing actions fit at both supported window sizes.
+
+The live camera now requests repaint when a frame arrives; a slower fallback
+checks status after frames stop. Three generated measurements isolate a median
+8–9ms polling wait avoided by notifications. This is not sensor-to-screen timing
+and does not establish that the remaining physical camera delay is solved.
+
+39 studio and92 video-core unit tests, six timeline pointer checks, strict
+workspace lint, formatting and the normal-feature release pass. Eleven generated
+integration jobs cover recording/recovery, source scrubbing, sequence playback,
+MP4 encoding/cancellation and native input. The final layout was inspected and
+Record was rechecked at1480×1000 and1160×800. The final Debian package was
+extracted, checked and started; the verified managed user installation was
+atomically updated and opened.
+
+Package: `storyfold-record_0.1.6~preview.2_amd64.deb`. Physical camera latency,
+OBSBOT, fresh OS/Windows and real Google acceptance remain open. See
+`docs/validation/record-studio-0.1.6.json` in the parent Storyfold project.
+
 ## Record preview/export repair — 2026-10-19 (Edmonton)
 
 Verified on Ryan’s Linux workstation:
@@ -205,3 +238,31 @@ strict lint, physical timing and remaining scope are recorded in the evidence.
 Sensor-to-screen delay and OBSBOT visual smoothness are still unmeasured.
 [Lag repair evidence](validation/recording-lag-0.1.4.json),
 [physical camera evidence](validation/recording-camera-motion.json).
+
+
+## Native Record studio 0.1.5 — 2026-10-21
+
+Repaired late canceled video/insert/card-image results, imports queued for the
+project lock, invisible first-import errors, failed-preview startup cache reuse
+and uppercase MP4 playback. Recorded takes and saved source files are retained.
+
+The native workspace passed all-feature tests (32 studio and 90 video-core
+unit tests), formatting and strict all-target Clippy. Separate generated checks
+passed capture/save/recovery, preservation of a recorded take while the project
+lock blocks import processing, preview/export/cache/cancel and newer drafts,
+both encoded shapes with exact frames/audio/cards, and insert import/seek/cancel.
+Fresh owned Xvfb displays passed actual native Play/Pause/fullscreen/Escape/replay
+with an uppercase MP4, plus Record hold/tap and standard Start/Stop at default
+and minimum window sizes. The interview-editor/server workspace also passed.
+
+The normal-feature release was packaged as
+`storyfold-record_0.1.5~preview.1_amd64.deb`, extracted, hash/dependency/launcher
+checked and kept running for eight seconds without startup errors. The matching
+managed user app was atomically updated and started; existing windows and
+projects were preserved. Isolated installer checks passed.
+
+Physical sensor-to-screen timing, OBSBOT, real file-picker and desktop visual
+acceptance, fresh-OS/Windows and real Google/keychain/publishing checks remain
+separate. No physical device or paid AI was used and no video was published.
+
+Release evidence: [0.1.5 checks](validation/record-studio-0.1.5.json).

@@ -1,0 +1,52 @@
+{
+  "version": "0.1.6",
+  "verifiedAt": "2026-10-21T07:47:04.113944+00:00",
+  "features": [
+    "time-based clip track with source-bound trim grips",
+    "drag clip bodies to reorder with insertion marker",
+    "ruler/playhead seeking and cutting",
+    "one Undo step per gesture; Escape cancels draft",
+    "source-frame preview while seeking/trimming, including source revealed beyond current trim",
+    "frame-ready live camera repaint with status fallback",
+    "sequence buttons fit at1480x1000 and1160x800"
+  ],
+  "checks": {
+    "studioUnitTests": 39,
+    "videoCoreUnitTests": 92,
+    "studioOptInsIgnoredInDefaultRun": 3,
+    "coreOptInsIgnoredInDefaultRun": 21,
+    "timelinePointerAcceptanceTests": 6,
+    "strictWorkspaceClippy": true,
+    "format": true,
+    "normalFeatureRelease": true,
+    "generatedIntegrationJobs": 11,
+    "nativeRecordAtBothSizes": true,
+    "minimumLayoutBounds": true,
+    "packageExtractionAndStartup": true,
+    "installerChecks": true
+  },
+  "cameraWakeMeasurement": {
+    "scope": "Generated frame publication to notification, excludes sensor, USB, source pipeline and actual UI/GPU display",
+    "runs": 3,
+    "notificationMedianMsRange": [
+      0.0082,
+      0.0086
+    ],
+    "pollingMedianMsRange": [
+      8.0,
+      9.32
+    ]
+  },
+  "package": "dist/storyfold-record_0.1.6~preview.2_amd64.deb",
+  "packageSha256": "74cad182e07dc2ba238a94e3a88afb2851b319b9248ac35c4a3372c151aa489f",
+  "binarySha256": "fae96b348d29e5132cecbdef8aad6c9d8aa5be149944733966e0ffec29d4a87f",
+  "installed": true,
+  "windowTitle": "Storyfold \u00b7 Record studio (0.1.6)",
+  "limits": [
+    "Remaining physical live-camera delay is unverified; generated notification measurements do not establish camera-to-screen latency",
+    "No physical camera/microphone or OBSBOT verification in this pass",
+    "Fresh OS/Windows and real Google consent/publishing acceptance remain separate",
+    "Normal sequence playback and audio use the native Preview sequence player; source scrub is silent",
+    "Uncommitted local changes; nothing pushed"
+  ]
+}

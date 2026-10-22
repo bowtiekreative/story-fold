@@ -1,8 +1,8 @@
 {
   "name": "Storyfold",
-  "milestone": "Native0.1.4 installed: measured30fps capture; visual retest pending",
-  "updatedAt": "2026-10-21T05:41:15.425920+00:00",
-  "message": "Installed and opened0.1.4. Logitech capture improvedfrom15.46camera fps and26.13pipeline fps to30.05pipeline fps. Old overlay frame queues and lost Record identity repaired. Unit/lint, frame-exact capture/recovery, native mouse tests and package startup/hash passed. Visual smoothness and OBSBOT retest remain.",
+  "milestone": "Record studio0.1.9 installed: direct sequence preview",
+  "updatedAt": "2026-10-22T06:49:38.429542+00:00",
+  "message": "Installed0.1.9 plays source cuts/audio/cards/inserts directly for Linux Preview without first exporting or saving a version.192 ordinary tests, strict lint, native controls and package/install checks pass. Explicit Export retains rendering progress. Physical camera latency, audible quality, OBSBOT connection and app unification remain separate.",
   "tasks": [
     {
       "id": "foundation",
@@ -354,9 +354,11 @@
       "evidence": [
         "docs/RECORDING-SPEC.md",
         "docs/validation/record-studio-0.1.1.json",
-        "docs/validation/record-studio-0.1.2.json"
+        "docs/validation/record-studio-0.1.2.json",
+        "docs/validation/record-studio-0.1.5.json",
+        "docs/validation/record-studio-0.1.6.json"
       ],
-      "description": "Native0.1.2 production-feature build packaged, extracted and started on Ubuntu24.04, then user-installed with verified hashes, launcher, icon and pinned app-owned downloader/licenses. Actual desktop click acceptance remains open following0.1.1 user failure; fresh-OS/hardware/Windows acceptance also remain."
+      "description": "Installed and opened0.1.6 with draggable trim grips/clip units, source scrubbing, cutting and one-step Undo. Native tests, strict lint, generated recording/export and both-size input/layout checks pass. Frame-ready notifications remove the polling wake phase; remaining physical camera delay is unverified."
     },
     {
       "id": "project-navigation",
@@ -405,16 +407,56 @@
       "title": "Make native preview buttons responsive and reduce camera delay",
       "status": "doing",
       "owner": "Codex",
-      "description": "Installed and opened0.1.4. Logitech capture improvedfrom15.46camera fps and26.13pipeline fps to30.05pipeline fps. Old overlay frame queues and lost Record identity repaired. Unit/lint, frame-exact capture/recovery, native mouse tests and package startup/hash passed. Visual smoothness and OBSBOT retest remain.",
+      "description": "Installed and opened0.1.6 with draggable trim grips/clip units, source scrubbing, cutting and one-step Undo. Native tests, strict lint, generated recording/export and both-size input/layout checks pass. Frame-ready notifications remove the polling wake phase; remaining physical camera delay is unverified.",
       "evidence": [
         "docs/validation/recording-preview-responsiveness.json",
         "docs/validation/recording-native-buttons.json",
         "docs/validation/record-studio-0.1.2.json",
         "docs/validation/recording-camera-motion.json",
-        "docs/validation/recording-lag-0.1.4.json"
+        "docs/validation/recording-lag-0.1.4.json",
+        "docs/validation/record-studio-0.1.5.json",
+        "docs/validation/record-studio-0.1.6.json"
       ],
       "lane": "Now",
       "acceptance": "Actual pointer activation, visible stop/save/prepare while camera is on, Expand exit/Escape without playback interruption, measured generated frame age; retain source files and report physical-device limits."
+    },
+    {
+      "id": "native-record-timeline",
+      "title": "Trim and rearrange recorded clips visually",
+      "acceptance": "Direct left/right trim handles, draggable clip units and insertion marker, playhead cut and source-frame preview, one Undo step per gesture and retained source media.",
+      "lane": "Now",
+      "status": "done",
+      "evidence": [
+        "catalyst-solo/boilerplate/apps/sidebar-video/src/timeline.rs",
+        "catalyst-solo/boilerplate/packages/video-core/src/preview.rs",
+        "docs/validation/record-studio-0.1.6.json"
+      ],
+      "description": "Installed and opened0.1.6 with draggable trim grips/clip units, source scrubbing, cutting and one-step Undo. Native tests, strict lint, generated recording/export and both-size input/layout checks pass. Frame-ready notifications remove the polling wake phase; remaining physical camera delay is unverified."
+    },
+    {
+      "id": "record-audio",
+      "title": "Capture and preserve microphone audio",
+      "acceptance": "Microphones discoverable, visible selected input or explicit Mic off, default chosen before enable, actual nonzero audio survives take/trim/export and native player decode.",
+      "status": "done",
+      "lane": "Now",
+      "evidence": [
+        "catalyst-solo/boilerplate/packages/video-core/src/capture/devices.rs",
+        "docs/validation/record-studio-0.1.7.json"
+      ],
+      "description": "Installed and opened0.1.7. Linux microphone discovery restored; preferred input and explicit Off are visible. Clip waveforms track source audio across edits. Generated audio recording/export/playback, native controls at both sizes, strict lint and package checks pass. Physical microphone and affected original take remain unverified."
+    },
+    {
+      "id": "record-waveforms",
+      "title": "Show sound waves inside editable clips",
+      "acceptance": "Source-relative bounded waveform decoding, visible silence/no-track/loading/error, correct trim/split/reorder/zoom and original media retained.",
+      "status": "done",
+      "lane": "Now",
+      "evidence": [
+        "catalyst-solo/boilerplate/apps/sidebar-video/src/waveforms.rs",
+        "catalyst-solo/boilerplate/packages/video-core/src/waveform.rs",
+        "docs/validation/record-studio-0.1.7.json"
+      ],
+      "description": "Installed and opened0.1.7. Linux microphone discovery restored; preferred input and explicit Off are visible. Clip waveforms track source audio across edits. Generated audio recording/export/playback, native controls at both sizes, strict lint and package checks pass. Physical microphone and affected original take remain unverified."
     }
   ]
 }
